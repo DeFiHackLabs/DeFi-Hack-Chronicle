@@ -4,17 +4,25 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "node scripts/compile-hacks-index.mjs && next build",
+    "start": "npx serve@latest dist",
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.4",
+    "chart.js": "^4.5.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-zoom": "^2.2.0",
+    "framer-motion": "^12.38.0",
+    "hammerjs": "^2.0.8",
+    "jszip": "^3.10.1",
+    "next": "^16",
     "react": "19.2.4",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

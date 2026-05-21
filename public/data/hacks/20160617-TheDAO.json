@@ -1,0 +1,349 @@
+{
+  "id": "dao-2016",
+  "title": "The DAO Hack",
+  "protocol": "The DAO",
+  "blockchain": ["ethereum"],
+  "category": ["reentrancy"],
+  "ecosystem": "evm",
+  "language": "solidity",
+  "estimatedLoss": {
+    "totalUSD": "55700000",
+    "breakdown": [
+      {
+        "asset": "ETH",
+        "amount": "3600000",
+        "convertedUSD": "55700000"
+      }
+    ],
+    "note": "Approximately 3.6 million ETH stolen (~31% of The DAO's 11.5M ETH treasury). USD valuation based on real-time ETH/USD price of $15.49 at block 1718497 (CryptoCompare API, timestamp 1466134488). Widely cited range: $50M–$70M depending on price source and exact ETH amount."
+  },
+  "attackTime": {
+    "startTime": "2016-06-17T03:34:48Z",
+    "endTime": "2016-06-17T07:12:39Z",
+    "isRange": true,
+    "note": "First exploit transaction mined at block 1718497. Attacker EOA executed 39+ verified high-gas transactions to an intermediary exploit contract across ~3 hours 38 minutes, with values decreasing from ~137 ETH to ~107 ETH per tx as The DAO's balance drained. Copycat attackers may have continued beyond this window.",
+    "date": "2016-06-17"
+  },
+  "transactions": [
+    {
+      "txHash": "0x0ec3f2488a93839524add10ea229e773f6bc891b4eb4794c3337d4495263790b",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Initial exploit transaction at block 1718497 (2016-06-17 03:34:48 UTC). Sent 137.62 ETH to exploit contract. Gas used: 3,964,536. Receipt contains 31 logs including 10 repeated Transfer events (~258 ETH per iteration) confirming recursive reentrancy."
+    },
+    {
+      "txHash": "0x87612740c32f8a9aa079c278c3c397e8f6569952c7d84ac40fc92f4eb537f2d5",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Setup/trigger transaction at block 1718502 (2016-06-17 03:35:24 UTC). 0 ETH value, 28,010 gas used, 1 log. Low gas usage suggests an initialization or approval call prior to major exploit transactions."
+    },
+    {
+      "txHash": "0xfb6526b62f0a4627543cba59a24b9790d0f53ecd841b0adc6ba0026cadf77715",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Major exploit transaction at block 1718504 (2016-06-17 03:35:27 UTC). Sent 138.27 ETH to exploit contract. Gas used: 2,848,937. Receipt contains 88 logs indicating deep recursive splitDAO() calls."
+    },
+    {
+      "txHash": "0x2d7a9697fa50987ef202b24acff3b5e6ee9fd35d23ad986f08d8b13d8da6fbc9",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Major exploit transaction at block 1718513 (2016-06-17 03:36:03 UTC). Sent 138.20 ETH to exploit contract. Gas used: 2,848,937. Receipt contains 88 logs mirroring tx 0xfb65... pattern."
+    },
+    {
+      "txHash": "0x80a8654831fd87a18565bb2f13e0b39c4e50f65403d45d9f7ed6dc51e5cf9fa9",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Mid-attack transaction at block 1718784 (2016-06-17 04:41:00 UTC). Sent 131.35 ETH to exploit contract. Part of the automated draining sequence."
+    },
+    {
+      "txHash": "0x952c71e2a5840cc8fc1f7869acbb50fb91634f6d9bf92e37a72cef5d1688dafe",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Mid-attack transaction at block 1719094 (2016-06-17 05:54:14 UTC). Sent 123.76 ETH to exploit contract. Values continue to decrease as available DAO balance diminishes."
+    },
+    {
+      "txHash": "0x9a4f55eb24984b759324f88ea9d289eea04f409fae7d312f1dc63d1fda9691bd",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Late-attack transaction at block 1719595 (2016-06-17 07:10:59 UTC). Sent 111.07 ETH to exploit contract."
+    },
+    {
+      "txHash": "0x5d9a6b2c11da01ca27f4b9f4d84f89c42e3c1920a7f1846d41934f955c390c02",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Final verified attack transaction at block 1719720 (2016-06-17 07:12:39 UTC). Sent 107.81 ETH to exploit contract. No further transactions from this EOA detected through block 1720000."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x969837498944ae1dc0dcac2d0c65634c88729b2d",
+      "chain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Attacker externally owned account (EOA) that deployed and funded the intermediary exploit contract, then executed 39+ verified exploit transactions over ~3.5 hours. Confirmed EOA via eth_getCode (no contract code).",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Intermediary smart contract deployed by the attacker to perform recursive splitDAO() calls against The DAO. Confirmed contract via eth_getCode (4,286 bytes). Received a total of ~4,548 ETH in seed funding across the attack window.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x304a554a310c7e546dfe434669c62820b7d83490",
+      "chain": "ethereum",
+      "role": "child_dao",
+      "description": "Child DAO created by the exploit contract via repeated splitDAO() calls to hold stolen funds. Under attacker control during the mandatory 28-day creation window before withdrawal would have been possible. Current on-chain balance: 7 wei. Contract size: 21,678 bytes.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "The DAO main smart contract. Held ~12.7M ETH at peak (May 2016), ~11.5M ETH at time of attack. Open-source Solidity contract published under GNU LGPL v3+. Current balance: 0.0006 ETH.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "description": "On June 17, 2016, an unknown attacker exploited a reentrancy vulnerability in The DAO's splitDAO() function to recursively drain approximately 3.6 million ETH—roughly 31% of The DAO's total treasury—into a child DAO under their control. The attack was executed via an intermediary contract (0xc0ee9db1...) that made repeated recursive calls to splitDAO() before the parent contract could update its internal balance state. On-chain analysis of the first exploit transaction (0x0ec3f248...) reveals 31 event logs including 10 repeated Transfer events, each transferring ~258 ETH, providing direct blockchain evidence of recursive reentrancy within a single transaction. The attacker automated the exploit across dozens of high-gas transactions spanning approximately 3.5 hours. The stolen funds were locked in a child DAO subject to a 28-day creation window, giving the Ethereum community time to respond. Notably, the recursive call vulnerability had been publicly identified and blogged by Peter Vessenes on June 9, 2016, and warned by the Initiative for Cryptocurrencies & Contracts (IC3) on June 16—one day before the attack—but no patch had been implemented. In response, The DAO community manager Griff Green organized the White Hat Group, which used the same vulnerability to secure the remaining ~70% of funds into child DAOs under their control, preventing further losses. After heated debate, Ethereum executed a controversial hard fork at block 1,920,000 on July 20, 2016, moving the stolen funds to a recovery contract. The unforked chain continued as Ethereum Classic (ETC). On July 25, 2017, the U.S. Securities and Exchange Commission issued a Report of Investigation concluding that DAO tokens were securities under U.S. federal law. The incident is widely regarded as the most influential smart contract exploit in blockchain history and directly catalyzed the formalization of the Checks-Effects-Interactions security pattern, the development of reentrancy guards, and the professional smart contract audit industry.",
+  "rootCause": "The DAO contract's splitDAO() function transferred ETH to the recipient (via a low-level call.value()) BEFORE updating the caller's internal token balance mapping. This violated the Checks-Effects-Interactions pattern. When the recipient was a malicious contract, its fallback function re-entered splitDAO() recursively while the sender's balance still reflected the original unreduced amount. Each recursive iteration authorized another withdrawal of the same token balance, enabling geometric fund drainage within a single transaction. The vulnerability was compounded by The DAO's complex codebase (~1,000+ lines of Solidity) and the absence of a reentrancy guard or formal verification prior to deployment.",
+  "attackVector": "1. The attacker held a significant balance of DAO tokens, either from the April–May 2016 crowdsale (which raised ~$150M and attracted 18,000+ stakeholders) or via secondary acquisition. 2. The attacker deployed an intermediary smart contract at 0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89. 3. From EOA 0x969837498944ae1dc0dcac2d0c65634c88729b2d, the attacker sent seed ETH (decreasing from ~137 ETH to ~107 ETH per transaction) to the exploit contract across 39+ verified transactions. 4. The exploit contract called The DAO's splitDAO() function, specifying itself as the recipient of a new child DAO (0x304a554a310c7e546dfe434669c62820b7d83490). 5. During the ETH transfer step of splitDAO(), the intermediary contract's fallback function re-entered splitDAO() before the balance update occurred. 6. On-chain receipt analysis of tx 0x0ec3f248... shows 10 repeated Transfer event iterations within a single transaction, each moving ~258 ETH, demonstrating deep recursion. 7. The attacker automated this process, executing transactions every few blocks from block 1718497 through block 1719720 (~3.5 hours), ultimately draining ~3.6M ETH.",
+  "lessons": [
+    "Always follow the Checks-Effects-Interactions pattern: update all internal state variables (balances, allowances, flags) BEFORE making any external contract calls.",
+    "Use battle-tested reentrancy guards (e.g., OpenZeppelin's ReentrancyGuard with nonReentrant modifier) on any function that performs external ETH transfers or contract calls.",
+    "Prefer pull-over-push payment patterns for fund distribution, minimizing the attack surface of external calls within core business logic.",
+    "Conduct multiple independent professional security audits and formal verification before deploying contracts that hold material economic value.",
+    "Do not concentrate excessive value in a single unaudited smart contract; The DAO held ~14% of all ETH in existence at the time.",
+    "Publicly disclosed vulnerabilities must be patched with an emergency response timeline measured in hours, not days; the 8-day gap between public warning (June 9) and exploitation (June 17) was fatal.",
+    "Code is not law when catastrophic bugs threaten systemic stability; The DAO incident demonstrated that human social consensus can and will override immutable code via coordinated action (hard fork).",
+    "Hard forks as a recovery mechanism carry profound long-term ecosystem consequences, including permanent chain splits, community fragmentation, and dual-currency confusion (ETH/ETC).",
+    "Regulatory frameworks apply to decentralized organizations; the SEC's 2017 Report of Investigation established that DAO tokens were securities, creating precedent for token regulation under existing federal law.",
+    "Incident response in decentralized ecosystems requires pre-planned emergency procedures, including circuit breakers, upgrade mechanisms, and transparent governance voting pathways."
+  ],
+  "references": [
+    "https://blog.ethereum.org/2016/06/17/critical-update-re-dao-vulnerability",
+    "https://blog.ethereum.org/2016/07/20/hard-fork-completed",
+    "https://en.wikipedia.org/wiki/The_DAO",
+    "https://www.sec.gov/news/press-release/2017-131",
+    "https://www.sec.gov/litigation/investreport/34-81207.pdf",
+    "https://peter.vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal",
+    "https://medium.com/@VladZamfir/ic3-researchers-put-the-dao-attack-in-perspective-3e6e25065117",
+    "https://www.nytimes.com/2016/06/18/business/dealbook/hacker-may-have-removed-50-million-from-experimental-cybercurrency-project.html",
+    "https://www.wired.com/2017/07/coders-hacked-back-rescue-208-million-ethereum/",
+    "https://github.com/blockchainsllc/DAO",
+    "https://etherscan.io/address/0x969837498944ae1dc0dcac2d0c65634c88729b2d",
+    "https://etherscan.io/address/0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89",
+    "https://etherscan.io/address/0x304a554a310c7e546dfe434669c62820b7d83490",
+    "https://etherscan.io/address/0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+    "https://www.frontiersin.org/articles/10.3389/fbloc.2020.00025/full"
+  ],
+  "metadata": {
+    "dateAdded": "2025-01-15",
+    "lastUpdated": "2025-05-20",
+    "human_verified": false
+  },
+  "date": "2016-06-17",
+  "locales": {
+    "zh-TW": {
+      "title": "The DAO 重入攻擊事件",
+      "description": "2016 年 6 月 17 日，一名未知攻擊者利用 The DAO 合約 splitDAO() 函式中的重入漏洞，遞迴性地將約 360 萬枚 ETH（約佔 The DAO 總資金的 31%，當時價值約 5,570 萬美元） drained 至其控制的子 DAO 中。攻擊者透過中介合約對 splitDAO() 進行重複遞迴呼叫，在父合約更新內部餘額之前不斷提領資金。第一筆攻擊交易（0x0ec3f248...）的鏈上收據顯示 31 個事件日誌，包含 10 筆重複的 Transfer 事件，每筆轉移約 258 ETH，直接在單一交易中證明了遞迴重入行為。攻擊者自動化此流程，在約 3.5 小時內執行了 39 筆以上高 gas 交易。值得注意的是，遞迴呼叫漏洞早在 6 月 9 日就已被 Peter Vessenes 公開披露，IC3 也在 6 月 16 日發出警告，但修補未及時完成。為因應攻擊，The DAO 社群經理 Griff Green 組織了白帽小組（White Hat Group），利用相同漏洞將剩餘約 70% 的資金轉入其控制的子 DAO，防止進一步損失。經過激烈辯論，以太坊於 2016 年 7 月 20 日在區塊 1,920,000 執行了極具爭議的硬分叉，將被盜資金移入回收合約。未分叉的鏈則繼續作為以太坊經典（ETC）存在。2017 年 7 月 25 日，美國證券交易委員會（SEC）發布調查報告，認定 DAO 代幣屬於證券。此事件被公認為區塊鏈史上最具影響力的智能合約攻擊，直接催生了 Checks-Effects-Interactions 安全模式、重入鎖機制，以及專業智能合約安全稽核產業。",
+      "rootCause": "The DAO 合約的 splitDAO() 函式在更新呼叫者的內部代幣餘額映射之前，先透過低階呼叫（call.value()）將 ETH 轉移給接收方。這違反了 Checks-Effects-Interactions 模式。當接收方為惡意合約時，其 fallback 函式在餘額尚未扣除時就重新遞迴進入 splitDAO()，每次遞迴都以相同的原始餘額授權再次提款，得以在單筆交易中幾何級數地 drained 資金。此漏洞因 The DAO 複雜的程式碼基底（超過 1,000 行 Solidity）以及部署前缺乏重入鎖或形式驗證而更加嚴重。",
+      "attackVector": "1. 攻擊者持有大量 DAO 代幣，可能來自 2016 年 4 至 5 月的群眾募資（募得約 1.5 億美元，吸引超過 1.8 萬名投資人），或透過次級市場取得。2. 攻擊者部署中介合約於 0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89。3. 攻擊者從 EOA 0x969837498944ae1dc0dcac2d0c65634c88729b2d 發送種子 ETH（每筆交易從約 137 ETH 遞減至約 107 ETH）至中介合約，共執行了 39 筆以上已驗證交易。4. 中介合約呼叫 The DAO 的 splitDAO() 函式，指定自身為新子 DAO（0x304a554a310c7e546dfe434669c62820b7d83490）的接收方。5. 在 splitDAO() 的 ETH 轉帳步驟中，中介合約的 fallback 函式在餘額更新完成前重新遞迴進入 splitDAO()。6. 第一筆攻擊交易（0x0ec3f248...）的鏈上收據分析顯示，單筆交易內發生 10 次重複 Transfer 事件迭代，每次移動約 258 ETH，證明深度遞迴。7. 攻擊者自動化此流程，從區塊 1718497 至 1719720 每隔數個區塊執行交易（約 3.5 小時），最終 drained 約 360 萬枚 ETH。",
+      "transactions": [
+        {
+          "txHash": "0x0ec3f2488a93839524add10ea229e773f6bc891b4eb4794c3337d4495263790b",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "首筆攻擊交易，採掛於區塊 1718497（2016-06-17 03:34:48 UTC）。發送 137.62 ETH 至攻擊合約。Gas 使用量：3,964,536。交易收據包含 31 個日誌，其中有 10 筆重複的 Transfer 事件（每次迭代約 258 ETH），直接證實遞迴重入。"
+        },
+        {
+          "txHash": "0x87612740c32f8a9aa079c278c3c397e8f6569952c7d84ac40fc92f4eb537f2d5",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "設定／觸發交易，採掛於區塊 1718502（2016-06-17 03:35:24 UTC）。轉帳金額 0 ETH，Gas 使用量 28,010，1 個日誌。低 Gas 使用量表示這是一筆初始化或授權呼叫，發生在主要攻擊交易之前。"
+        },
+        {
+          "txHash": "0xfb6526b62f0a4627543cba59a24b9790d0f53ecd841b0adc6ba0026cadf77715",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "重要攻擊交易，採掛於區塊 1718504（2016-06-17 03:35:27 UTC）。發送 138.27 ETH 至攻擊合約。Gas 使用量：2,848,937。交易收據包含 88 個日誌，顯示深度遞迴的 splitDAO() 呼叫。"
+        },
+        {
+          "txHash": "0x2d7a9697fa50987ef202b24acff3b5e6ee9fd35d23ad986f08d8b13d8da6fbc9",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "重要攻擊交易，採掛於區塊 1718513（2016-06-17 03:36:03 UTC）。發送 138.20 ETH 至攻擊合約。Gas 使用量：2,848,937。交易收據包含 88 個日誌，與交易 0xfb65... 的模式完全一致。"
+        },
+        {
+          "txHash": "0x80a8654831fd87a18565bb2f13e0b39c4e50f65403d45d9f7ed6dc51e5cf9fa9",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻擊中期交易，採掛於區塊 1718784（2016-06-17 04:41:00 UTC）。發送 131.35 ETH 至攻擊合約，屬於自動化 drained 序列的一環。"
+        },
+        {
+          "txHash": "0x952c71e2a5840cc8fc1f7869acbb50fb91634f6d9bf92e37a72cef5d1688dafe",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻擊中期交易，採掛於區塊 1719094（2016-06-17 05:54:14 UTC）。發送 123.76 ETH 至攻擊合約。每筆交易的轉帳金額持續遞減，反映 The DAO 的可用餘額不斷降低。"
+        },
+        {
+          "txHash": "0x9a4f55eb24984b759324f88ea9d289eea04f409fae7d312f1dc63d1fda9691bd",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻擊後期交易，採掛於區塊 1719595（2016-06-17 07:10:59 UTC）。發送 111.07 ETH 至攻擊合約。"
+        },
+        {
+          "txHash": "0x5d9a6b2c11da01ca27f4b9f4d84f89c42e3c1920a7f1846d41934f955c390c02",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "最後一筆已驗證的攻擊交易，採掛於區塊 1719720（2016-06-17 07:12:39 UTC）。發送 107.81 ETH 至攻擊合約。從區塊 1720000 前未再偵測到來自此 EOA 的其他交易。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x969837498944ae1dc0dcac2d0c65634c88729b2d",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "攻擊者外部擁有帳戶（EOA）。該帳戶部署並資助中介攻擊合約，然後在約 3.5 小時內執行了 39 筆以上已驗證的攻擊交易。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的中介智能合約，用於對 The DAO 執行遞迴的 splitDAO() 呼叫。經由 eth_getCode 確認為合約（程式碼長度 4,286 字元）。在整個攻擊期間，該合約共收到約 4,548 ETH 的種子資金。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x304a554a310c7e546dfe434669c62820b7d83490",
+          "chain": "ethereum",
+          "role": "child_dao",
+          "description": "由攻擊合約透過反覆呼叫 splitDAO() 所創建的子 DAO，用於存放被盜資金。在必要的 28 天創建冷卻期內由攻擊者控制，冷卻期滿後才能提領。目前鏈上餘額：7 wei。合約大小：21,678 字元。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "The DAO 主要智能合約。在 2016 年 5 月峰值時持有約 1,270 萬 ETH，攻擊發生時約 1,150 萬 ETH。Solidity 開源合約，授權條款為 GNU LGPL v3+。目前餘額：0.0006 ETH。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "務必遵循 Checks-Effects-Interactions 模式：在進行任何外部合約呼叫之前，先更新所有內部狀態變數（餘額、授權額度、旗標）。",
+        "對任何執行外部 ETH 轉帳或合約呼叫的函式，使用經過實戰驗證的重入鎖（例如 OpenZeppelin 的 ReentrancyGuard nonReentrant 修飾符）。",
+        "優先採用 pull-over-push 付款模式進行資金分配，降低核心業務邏輯中外部呼叫的攻擊面。",
+        "在部署持有重大經濟價值的合約之前，進行多次獨立的專業安全稽核與形式驗證。",
+        "不要將過量價值集中在單一未經稽核的智能合約中；The DAO 在事件發生時持有當時約 14% 的流通 ETH。",
+        "公開披露的安全漏洞必須以小時為單位的緊急回應時間表進行修補，而非以天計算；6 月 9 日公開警告至 6 月 17 日遭受攻擊之間 8 天的延誤是致命的。",
+        "當災難性漏洞威脅系統穩定時，程式碼並非法律；The DAO 事件證明人類社會共識可以且將會透過協調行動（硬分叉）覆寫不可變的程式碼。",
+        "硬分叉作為恢復機制會帶來深遠的長期生態系後果，包括永久性的鏈分裂、社群碎片化，以及雙重貨幣混淆（ETH/ETC）。",
+        "監管框架適用於去中心化組織；SEC 2017 年的調查報告確立 DAO 代幣屬於證券，為代幣監管在現有聯邦法律下的適用開創了先例。",
+        "去中心化生態系系統中的事件回應需要預先規劃的緊急程序，包括斷路器、升級機制以及透明的治理投票途徑。"
+      ]
+    },
+    "ja": {
+      "title": "The DAO リエントランシー攻撃事件",
+      "description": "2016年6月17日、不明の攻撃者がThe DAOコントラクトのsplitDAO()関数にあるリエントランシー（再入）の脆弱性を利用し、約360万ETH（The DAO総資産の約31％、当時で約55.7億ドル）を攻撃者が管理する子DAOに再帰的に排出した。攻撃者は中介コントラクトを介してsplitDAO()を繰り返し呼び出し、親コントラクトが内部余額を更新する前に繰り返し資金を引き出した。最初の攻撃トランザクション（0x0ec3f248...）のオンチェーンレシートには31個のイベントログが含まれ、そのうち10回の重複Transferイベント（1回約258ETH）が記録されており、1つのトランザクション内にりえんトランシーが再現されたことを直接証明している。攻撃者はこのプロセスを自動化し、約3.5時間で39件以上の高gasトランザクションを実行した。なお、この再帰呼び出しの脆弱性は2016年6月9日にPeter Vessenesによって公開され、IC3も6月16日に警告を発していたが、パッチは間に合わなかった。攻撃を受けてThe DAOコミュニティマネージャーのGriff Greenは、ホワイトハットグループ（White Hat Group）を結成し、同じ脆弱性を利用して残り約70％の資金を自らが管理する子DAOに移し、さらなる損失を防いだ。激しい論争の末、イーサリアムは2016年7月20日にブロック1,920,000で硬分岐を実施し、盗まれた資金を回収コントラクトに移した。分岐されなかったチェーンはイーサリアムクラシック（ETC）として継続した。2017年7月25日、米国証券取引委員会（SEC）は調査報告書を発行し、DAOトークンは米国連邦法に基づく証券であると結論付けた。この事件はブロックチェーン史上最も影響力のあるスマートコントラクト攻撃として広く認められ、Checks-Effects-Interactionsセキュリティパターン、リエントランシーガード、そしてプロのスマートコントラクトセキュリティオーディト産業の誕生に直接つながっている。",
+      "rootCause": "The DAOコントラクトのsplitDAO()関数は、発信者の内部トークン余額マッピングを更新する前に、低レベルコードのcall.value()を使って受信者にETHを送金した。これはChecks-Effects-Interactionsパターンに反しており、受信者が悪意のあるコントラクトだった場合、そのfallback関数が余額が減らされる前にsplitDAO()に再帰的に呼び出される。各イテレーションで同じ初期余額が承認され、そのまま同じトークン量の引き出しが繰り返されるため、1つのトランザクション内で数値が幾何級数的に增大して資金が排出される。この脆弱性はThe DAOの複雑なコードベース（1,000行以上のSolidity）と、デプロイ前のリエントランシーガードや形式検証の欠如によって更に悪化した。",
+      "attackVector": "1. 攻撃者はDAOトークンを大量に保有しており、2016年4月〜5月のクラウドセール（約1.5億ドルを調達、1.8万人以上の投資家が参加）で購入したものか、二次市場で所有したものである。2. 攻撃者は中介スマートコントラクトを0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89にデプロイした。3. EOA 0x969837498944ae1dc0dcac2d0c65634c88729b2dから、攻撃者は種ETH（トランザクション毎に約137ETHから約107ETHへと減少）を攻撃コントラクトに送金し、39件以上のトランザクションを実行した。4. 攻撃コントラクトはThe DAOのsplitDAO()を呼び出し、自身を新しい子DAO（0x304a554a310c7e546dfe434669c62820b7d83490）の受信者として指定した。5. splitDAO()内のETH送金処理中に、中介コントラクトのfallback関数が余額更新が完了する前にsplitDAO()に再帰的に呼び出された。6. 最初の攻撃トランザクション（0x0ec3f248...）のレシート分析によると、1つのトランザクション内で10回の重複Transferイベントが発生しており、1回約258ETHが移動されていることから、深い再帰が確認される。7. 攻撃者はこのプロセスを自動化し、ブロック1718497〜1719720の間で数ブロックごとにトランザクションを実行（約3.5時間）し、最終的に約360万ETHを排出した。",
+      "transactions": [
+        {
+          "txHash": "0x0ec3f2488a93839524add10ea229e773f6bc891b4eb4794c3337d4495263790b",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "最初の攻撃トランザクション。ブロック1718497（2016-06-17 03:34:48 UTC）に採掛。137.62 ETHを攻撃コントラクトに送金。Gas使用量：3,964,536。レシートには31個のログが含まれ、10回の重複Transferイベント（1回約258ETH）がりえんトランシーを直接証明している。"
+        },
+        {
+          "txHash": "0x87612740c32f8a9aa079c278c3c397e8f6569952c7d84ac40fc92f4eb537f2d5",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "設定／トリガー交易。ブロック1718502（2016-06-17 03:35:24 UTC）に採掛。0 ETHの転送、Gas使用量28,010、1個のログ。低いGas使用量から、主な攻撃交易の前に行われた初期化または承認呼び出しと推定される。"
+        },
+        {
+          "txHash": "0xfb6526b62f0a4627543cba59a24b9790d0f53ecd841b0adc6ba0026cadf77715",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "大規模な攻撃トランザクション。ブロック1718504（2016-06-17 03:35:27 UTC）に採掛。138.27 ETHを攻撃コントラクトに送金。Gas使用量：2,848,937。レシートには88個のログが含まれ、深い再帰的splitDAO()呼び出しが示されている。"
+        },
+        {
+          "txHash": "0x2d7a9697fa50987ef202b24acff3b5e6ee9fd35d23ad986f08d8b13d8da6fbc9",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "大規模な攻撃トランザクション。ブロック1718513（2016-06-17 03:36:03 UTC）に採掛。138.20 ETHを攻撃コントラクトに送金。Gas使用量：2,848,937。レシートには88個のログが含まれ、トランザクション0xfb65...と同じパターンを示している。"
+        },
+        {
+          "txHash": "0x80a8654831fd87a18565bb2f13e0b39c4e50f65403d45d9f7ed6dc51e5cf9fa9",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻撃中期のトランザクション。ブロック1718784（2016-06-17 04:41:00 UTC）に採掛。131.35 ETHを攻撃コントラクトに送金。自動化された排出シーケンスの一環。"
+        },
+        {
+          "txHash": "0x952c71e2a5840cc8fc1f7869acbb50fb91634f6d9bf92e37a72cef5d1688dafe",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻撃中期のトランザクション。ブロック1719094（2016-06-17 05:54:14 UTC）に採掛。123.76 ETHを攻撃コントラクトに送金。トランザクション毎の金額が減少しており、The DAOの可用余額が低下していることを反映している。"
+        },
+        {
+          "txHash": "0x9a4f55eb24984b759324f88ea9d289eea04f409fae7d312f1dc63d1fda9691bd",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "攻撃後期のトランザクション。ブロック1719595（2016-06-17 07:10:59 UTC）に採掛。111.07 ETHを攻撃コントラクトに送金。"
+        },
+        {
+          "txHash": "0x5d9a6b2c11da01ca27f4b9f4d84f89c42e3c1920a7f1846d41934f955c390c02",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "最後に検証された攻撃トランザクション。ブロック1719720（2016-06-17 07:12:39 UTC）に採掛。107.81 ETHを攻撃コントラクトに送金。ブロック1720000まで、このEOAからの追加交易は検出されなかった。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x969837498944ae1dc0dcac2d0c65634c88729b2d",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "攻撃者の外部所有アカウント（EOA）。中介攻撃コントラクトをデプロイし資金を供給し、約3.5時間で39件以上の攻撃トランザクションを実行した。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xc0ee9db1a9e07ca63e4ff0d5fb6f86bf68d47b89",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者がデプロイした中介スマートコントラクト。The DAOに対して再帰的なsplitDAO()呼び出しを実行するためのもの。eth_getCodeによりコントラクトと確認（コード長 4,286バイト）。攻撃期間中に約 4,548 ETHの種資金を受け取った。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x304a554a310c7e546dfe434669c62820b7d83490",
+          "chain": "ethereum",
+          "role": "child_dao",
+          "description": "攻撃コントラクトが反復してsplitDAO()を呼び出して作成した子DAO。盗まれた資金を保管するためのもの。必須の28日間の作成ウィンドウ期間中は攻撃者によって管理され、期間終了後に引き出しが可能になる設計だった。現在のオンチェーン余額：7 wei。コントラクトサイズ：21,678バイト。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "The DAOのメインスマートコントラクト。2016年5月のピーク時に約1,270万ETHを保有、攻撃発生時には約1,150万ETH。Solidityで書かれたオープンソースコントラクトで、GNU LGPL v3+でライセンスされている。現在の余額：0.0006 ETH。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "Checks-Effects-Interactionsパターンを守る：外部コントラクト呼び出しを行う前に、全ての内部状態変数（余額、承認額、フラグ）を更新しておく。",
+        "外部ETH送金またはコントラクト呼び出しを行う関数には、実践で験証されたリエントランシーガード（例：OpenZeppelinのReentrancyGuard nonReentrant修飾子）を使用する。",
+        "資金配布のpull-over-pushパターンを優先的に採用し、コアビジネスロジック内の外部呼び出しによる攻撃面を最小化する。",
+        "重大な経済的価値を持つコントラクトをデプロイする前に、複数の独立したプロセキュリティオーディトと形式検証を実施する。",
+        "アンダウン済みでない単一のスマートコントラクトに過度な価値を集中させない。The DAOは発生時に当時流通していたETHの約14％を保有していた。",
+        "公開された脆弱性は時間単位での緊急対応タイムラインでパッチされなければならない。6月9日の警告から6月17日の攻撃まで8日間の遅延は致命的だった。",
+        "災難的なバグがシステムの稳定性を威胁する場合、コードは法律ではない。The DAO事件は、人類のソーシャルコンセンサスが協調された行動（硬分岐）によって変更不可能なコードを上書きすることができることを示した。",
+        "硬分岐は恢復メカニズムとして深刻な長期的エコシステム影響を与える。永久的なチェーン分裂、コミュニティの分裂、二重通貨の混同（ETH/ETC）などが含まれる。",
+        "監管框組は分散型組織にも適用される。SECの2017年調査報告書はDAOトークンを証券として確定し、現行の連邦法に基づくトークン監管の先例を創出した。",
+        "分散型エコシステムにおけるインシデントレスポンスには、サーキットブレーカー、アップグレードメカニズム、透明性のあるガバナンス投票パスなど、事前に計画された緊急手順が必要だ。"
+      ]
+    }
+  }
+}

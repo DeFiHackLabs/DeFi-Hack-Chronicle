@@ -1,0 +1,202 @@
+{
+  "pins": [
+    {
+      "date": "2016-06-17",
+      "tag": "Reentrancy Attack",
+      "protocol": "The DAO",
+      "description": "歷史上最著名的重入攻擊，攻擊者利用智能合約的重入漏洞，重複提領 ETH，導致以太坊硬分叉為 ETH 和 ETC。",
+      "tagColor": "#EF4444",
+      "estimatedLoss": "$60M",
+      "link": "/?event=dao-2016"
+    },
+    {
+      "date": "2016-07-09",
+      "tag": "BTC Halving",
+      "protocol": "Bitcoin",
+      "description": "Bitcoin’s 2nd halving, the block reward was cut from 25 BTC to 12.5 BTC",
+      "tagColor": "#F7931A",
+      "estimatedLoss": "N/A",
+      "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
+    },
+    {
+      "date": "2020-05-11",
+      "tag": "BTC Halving",
+      "protocol": "Bitcoin",
+      "description": "Bitcoin’s 3rd halving, the block reward was cut from 12.5 BTC to 6.25 BTC",
+      "tagColor": "#F7931A",
+      "estimatedLoss": "N/A",
+      "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
+    },
+    {
+      "date": "2020-06-15",
+      "tag": "DeFi Summer",
+      "protocol": "Multiple Protocols",
+      "description": "The launch of the Compound token (COMP) is considered the start of DeFi Summer, when on-chain finance rapidly scaled and security concerns gradually shifted from isolated smart contract bugs to systemic and economic risks.",
+      "tagColor": "#f43f5e",
+      "estimatedLoss": "N/A",
+      "link": ""
+    },
+    {
+      "date": "2022-02-02",
+      "tag": "Bridge Hack",
+      "protocol": "Wormhole",
+      "description": "Solana 與以太坊之間的跨鏈橋，因為簽署驗證漏洞被攻擊，Jump Crypto 後來補償資金。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$320M",
+      "link": "/?event=wormhole-2022"
+    },
+    {
+      "date": "2022-03-23",
+      "tag": "Bridge Hack",
+      "protocol": "Ronin (Axie Infinity)",
+      "description": "Axie Infinity 的側鏈被攻擊，日本北韓的 Lazarus 黑客組織被指識為主謀。通過釣魚攻擊獲取驗證者密鑰。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$622M",
+      "link": "/?event=ronin-2022"
+    },
+    {
+      "date": "2022-06-23",
+      "tag": "Bridge Hack",
+      "protocol": "Harmony Horizon Bridge",
+      "description": "Harmony 的跨鏈橋因為多簽錨密鑰被洩漏而被攻擊，Lazarus 組織同樣被指識。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$100M",
+      "link": "/?event=harmony-2022"
+    },
+    {
+      "date": "2022-11-11",
+      "tag": "Rug Pull",
+      "protocol": "FTX",
+      "description": "CEX 史上最大的破產案件，涵蓋費用者資金遭到盜用。SBF 被判處 25 年監禁。",
+      "tagColor": "#ec4899",
+      "estimatedLoss": "$8000M",
+      "link": "/?event=ftx-2022"
+    },
+    {
+      "date": "2021-12-02",
+      "tag": "Massive Phishing Campaign",
+      "protocol": "BadgerDAO",
+      "description": "攻擊者透過攻擊 Cloudflare API 密鑰，在前端注入惡意授權。",
+      "tagColor": "#f43f5e",
+      "estimatedLoss": "$120M",
+      "link": "/?event=badger-2021"
+    },
+    {
+      "date": "2023-07-30",
+      "tag": "Reentrancy Attack",
+      "protocol": "Curve Finance",
+      "description": "Vyper 編譯器 0.2.15 版本的 reentrancy 鎖存在 bug，多個池遭到攻擊。",
+      "tagColor": "#ef4444",
+      "estimatedLoss": "$70M",
+      "link": "/?event=curve-2023"
+    },
+    {
+      "date": "2023-11-22",
+      "tag": "Flashloan Attack",
+      "protocol": "KyberSwap",
+      "description": "複雜的數學計算錯誤導致價格計算異常。",
+      "tagColor": "#eab308",
+      "estimatedLoss": "$47M",
+      "link": "/?event=kyber-2023"
+    },
+    {
+      "date": "2023-03-13",
+      "tag": "Flashloan Attack",
+      "protocol": "Euler Finance",
+      "description": "通過複雜的閃電貸攻擊鏈，利用未檢查的贈與函數。資金後來被全額歸還。",
+      "tagColor": "#eab308",
+      "estimatedLoss": "$200M",
+      "link": "/?event=eurv-2023"
+    },
+    {
+      "date": "2021-08-10",
+      "tag": "Bridge Hack",
+      "protocol": "Poly Network",
+      "description": "史上最大的 DeFi 黑客事件，攻擊者利用跨鏈橋合約中 keeper 私鑰管理的漏洞。大部分資金後來被歸還。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$610M",
+      "link": "/?event=poly-2021"
+    },
+    {
+      "date": "2024-01-02",
+      "tag": "Access Control",
+      "protocol": "Radiant Capital",
+      "description": "開發者被社工攻擊，多簽錨授權被篩改。",
+      "tagColor": "#06b6d4",
+      "estimatedLoss": "$4M",
+      "link": "/?event=radiant-2024"
+    },
+    {
+      "date": "2024-03-16",
+      "tag": "Access Control",
+      "protocol": "Radiant Capital",
+      "description": "第二次被攻擊，開發者機器被入侵，交易被簽署。",
+      "tagColor": "#06b6d4",
+      "estimatedLoss": "$50M",
+      "link": "/?event=radiant-2024-2"
+    },
+    {
+      "date": "2024-04-20",
+      "tag": "BTC Halving",
+      "protocol": "Bitcoin",
+      "description": "Bitcoin’s 4th halving, the block reward was cut from 6.25 BTC to 3.125 BTC",
+      "tagColor": "#F7931A",
+      "estimatedLoss": "N/A",
+      "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
+    },
+    {
+      "date": "2024-05-31",
+      "tag": "Massive Phishing Campaign",
+      "protocol": "DMM Bitcoin",
+      "description": "日本加密貨幣交易所 DMM Bitcoin 的熱錨包私鑰被盜。",
+      "tagColor": "#f43f5e",
+      "estimatedLoss": "$305M",
+      "link": "/?event=dmm-2024"
+    },
+    {
+      "date": "2024-07-16",
+      "tag": "Bridge Hack",
+      "protocol": "LI.FI",
+      "description": "跨鏈交易汇聚協議的合約被攻擊，用戶授權被溢用。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$10M",
+      "link": "/?event=liqui-2024"
+    },
+    {
+      "date": "2024-09-03",
+      "tag": "Flashloan Attack",
+      "protocol": "Penpie",
+      "description": "攻擊者透過 market 模塊的漏洞誘導 Pendle 獎勵。",
+      "tagColor": "#eab308",
+      "estimatedLoss": "$27M",
+      "link": "/?event=penpie-2024"
+    },
+    {
+      "date": "2026-01-29",
+      "tag": "AI Impact",
+      "protocol": "OpenClaw Released",
+      "description": "OpenClaw was officially released/renamed, marking a shift from chat-based AI toward agentic task execution. Its release signaled to the ICT industry that AI agents were becoming a practical software layer for browser control, tool orchestration, and cross-system operations.",
+      "tagColor": "#C5312F",
+      "estimatedLoss": "N/A",
+      "link": ""
+    },
+    {
+      "date": "2026-04-01",
+      "tag": "Bloody April",
+      "protocol": "Multiple Protocols",
+      "description": "A total of 61 DeFi incidents occurred within a single month, marking the highest monthly level since October 2022. Meanwhile, the releases of Opus 4.7 and GPT 5.5 in the middle of the month further highlighted the trend of AI significantly lowering the cost of executing DeFi attacks.",
+      "tagColor": "#f43f5e",
+      "estimatedLoss": "$644.7M",
+      "link": ""
+    },
+    {
+      "date": "2025-06-15",
+      "tag": "Bridge Hack",
+      "protocol": "Example Protocol",
+      "description": "這是一個範例事件描述，說明攻擊是如何發生的。",
+      "tagColor": "#8b5cf6",
+      "estimatedLoss": "$50M",
+      "link": "/?event=example-2025"
+    }
+  ]
+}

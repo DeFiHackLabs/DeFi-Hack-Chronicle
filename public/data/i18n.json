@@ -1,0 +1,245 @@
+{
+  "en": {
+    "app": {
+      "title": "DeFi Hack History",
+      "subtitle": "Historical Calendar",
+      "totalLoss": "Total Loss",
+      "searchPlaceholder": "Search events...",
+      "today": "Today",
+      "goBack": "Go Back"
+    },
+    "nav": {
+      "month": "Month",
+      "week": "Week",
+      "year": "Year",
+      "today": "Today"
+    },
+    "filters": {
+      "eventType": "Event Type",
+      "eventTypeTooltip": "A single attack may involve multiple event types.\nFor example: An attack could be both a Reentrancy + Oracle Manipulation attack.",
+      "blockchain": "Blockchain",
+      "ecosystem": "Ecosystem",
+      "language": "Language",
+      "timeRange": "Time Range",
+      "allTime": "All Time",
+      "last90Days": "Last 90 Days",
+      "last180Days": "Last 180 Days",
+      "last365Days": "Last 365 Days",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectAll": "select all",
+      "deselectAll": "deselect all"
+    },
+    "panel": {
+      "collapse": "Collapse panel",
+      "expand": "Expand panel"
+    },
+    "detail": {
+      "emptyTitle": "Another peaceful day — thanks to the white-hat hackers!",
+      "protocol": "Protocol",
+      "blockchain": "Chain",
+      "loss": "Loss",
+      "lossTooltip": "Estimated maximum economic loss at attack completion (USD), not exact amount. E.g. $100M loss ≠ attacker profited $100M (laundering not counted), ≠ protocol lost $100M (recovered/frozen funds not deducted).",
+      "description": "Description",
+      "rootCause": "Root Cause",
+      "attackVector": "Attack Vector",
+      "lessons": "Lessons Learned",
+      "references": "References",
+      "multipleEventsHeader": "Oh no, multiple attacks occurred during this time:",
+      "transactions": "Transactions",
+      "attackers": "Attackers",
+      "victims": "Victims",
+      "backToList": "Back to list"
+    },
+    "modal": {
+      "eventsOn": "Events on",
+      "close": "Close"
+    },
+    "github": "GitHub",
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "zh-TW": {
+    "app": {
+      "title": "DeFi Hack History",
+      "subtitle": "歷史行事曆",
+      "totalLoss": "累計損失",
+      "searchPlaceholder": "搜尋事件...",
+      "today": "今天",
+      "goBack": "返回"
+    },
+    "nav": {
+      "month": "月",
+      "week": "週",
+      "year": "年",
+      "today": "今天"
+    },
+    "filters": {
+      "eventType": "事件類型",
+      "eventTypeTooltip": "一個攻擊事件可能涉及多個event type\n例如: 某攻擊事件同時是 Reentracny + Oracle 攻擊",
+      "blockchain": "鏈",
+      "ecosystem": "生態系",
+      "language": "語言",
+      "timeRange": "時間範圍",
+      "allTime": "全部時間",
+      "last90Days": "最近 90 天",
+      "last180Days": "最近 180 天",
+      "last365Days": "最近 365 天",
+      "startDate": "起始日期",
+      "endDate": "結束日期",
+      "selectAll": "全選",
+      "deselectAll": "全不選"
+    },
+    "panel": {
+      "collapse": "收合面板",
+      "expand": "展開面板"
+    },
+    "detail": {
+      "emptyTitle": "一天又平安的過去了，感謝白帽駭客們的努力！",
+      "protocol": "協議",
+      "blockchain": "區塊鏈",
+      "loss": "損失",
+      "lossTooltip": "攻擊完成時的估計最大經濟損失（美元），非精確數字。例如損失 $100M ≠ 攻擊者獲利 $100M（未計洗錢），也不代表項目方最終損失 $100M（未計追回與凍結資產）。",
+      "description": "事件描述",
+      "rootCause": "根本原因",
+      "attackVector": "攻擊手法",
+      "lessons": "經驗教訓",
+      "references": "參考資料",
+      "multipleEventsHeader": "噢不, 這段時間發生了多起攻擊事件:",
+      "transactions": "交易ID",
+      "attackers": "攻擊者地址",
+      "victims": "受害者地址",
+      "backToList": "返回列表"
+    },
+    "modal": {
+      "eventsOn": "事件列表",
+      "close": "關閉"
+    },
+    "github": "GitHub",
+    "weekdays": [
+      "日",
+      "一",
+      "二",
+      "三",
+      "四",
+      "五",
+      "六"
+    ],
+    "months": [
+      "一月",
+      "二月",
+      "三月",
+      "四月",
+      "五月",
+      "六月",
+      "七月",
+      "八月",
+      "九月",
+      "十月",
+      "十一月",
+      "十二月"
+    ]
+  },
+  "ja": {
+    "app": {
+      "title": "DeFi Hack History",
+      "subtitle": "歴史カレンダー",
+      "totalLoss": "累計損失",
+      "searchPlaceholder": "イベントを検索...",
+      "today": "今日",
+      "goBack": "戻る"
+    },
+    "nav": {
+      "month": "月",
+      "week": "週",
+      "year": "年",
+      "today": "今日"
+    },
+    "filters": {
+      "eventType": "イベント種別",
+      "eventTypeTooltip": "1件の攻撃が複数のイベント種別を含む場合があります。\n例：再入攻撃とオラクル操作攻撃の両方が該当する場合があります。",
+      "blockchain": "ブロックチェーン",
+      "ecosystem": "エコシステム",
+      "language": "言語",
+      "timeRange": "期間",
+      "allTime": "全期間",
+      "last90Days": "過去90日間",
+      "last180Days": "過去180日間",
+      "last365Days": "過去365日間",
+      "startDate": "開始日",
+      "endDate": "終了日",
+      "selectAll": "すべて選択",
+      "deselectAll": "選択解除"
+    },
+    "panel": {
+      "collapse": "パネルを閉じる",
+      "expand": "パネルを開く"
+    },
+    "detail": {
+      "emptyTitle": "平穏な1日でした — ホワイトハットハッカーに感謝！",
+      "protocol": "プロトコル",
+      "blockchain": "チェーン",
+      "loss": "損失",
+      "lossTooltip": "攻撃完了時の推定最大経済損失（USD）。正確な数値ではありません。例：損失1億ドル ≠ 攻撃者の利益1億ドル（マネーロンダリングは含まれず）、≠ プロジェクトの最終損失1億ドル（回収・凍結資産は控除されていません）。",
+      "description": "説明",
+      "rootCause": "根本原因",
+      "attackVector": "攻撃手法",
+      "lessons": "学んだ教訓",
+      "references": "参考資料",
+      "multipleEventsHeader": "この期間に複数の攻撃が発生しました：",
+      "transactions": "トランザクション",
+      "attackers": "攻撃者",
+      "victims": "被害者",
+      "backToList": "一覧に戻る"
+    },
+    "modal": {
+      "eventsOn": "イベント一覧",
+      "close": "閉じる"
+    },
+    "github": "GitHub",
+    "weekdays": [
+      "日",
+      "月",
+      "火",
+      "水",
+      "木",
+      "金",
+      "土"
+    ],
+    "months": [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月"
+    ]
+  }
+}
