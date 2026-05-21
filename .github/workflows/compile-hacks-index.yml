@@ -1,0 +1,36 @@
+name: Compile Hacks Index
+
+on:
+  push:
+    paths:
+      - 'public/data/hacks/**.json'
+    paths-ignore:
+      - 'public/data/hacks/index.json'
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compile index
+        run: node scripts/compile-hacks-index.mjs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/hacks/index.json
+          if git diff --staged --quiet; then
+            echo "No changes to index.json"
+          else
+            git commit -m "chore: update hacks index [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
