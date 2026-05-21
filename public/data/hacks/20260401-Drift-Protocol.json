@@ -1,0 +1,612 @@
+{
+  "id": "drift-protocol-2026",
+  "title": "Drift Protocol Social Engineering Exploit",
+  "protocol": "Drift Protocol",
+  "blockchain": [
+    "solana",
+    "ethereum"
+  ],
+  "category": [
+    "social_engineering",
+    "access_control"
+  ],
+  "ecosystem": "solana",
+  "language": "rust",
+  "estimatedLoss": {
+    "totalUSD": "285260000",
+    "breakdown": [
+      {
+        "asset": "JLP",
+        "amount": "42720000",
+        "convertedUSD": "159350000"
+      },
+      {
+        "asset": "USDC",
+        "amount": "71420000",
+        "convertedUSD": "71420000"
+      },
+      {
+        "asset": "cbBTC",
+        "amount": "164.35",
+        "convertedUSD": "11290000"
+      },
+      {
+        "asset": "USDT",
+        "amount": "5650000",
+        "convertedUSD": "5650000"
+      },
+      {
+        "asset": "USDS",
+        "amount": "5250000",
+        "convertedUSD": "5250000"
+      },
+      {
+        "asset": "WETH",
+        "amount": "2200.59",
+        "convertedUSD": "4690000"
+      },
+      {
+        "asset": "dSOL",
+        "amount": "45292.21",
+        "convertedUSD": "4470000"
+      },
+      {
+        "asset": "WBTC",
+        "amount": "63.47",
+        "convertedUSD": "4360000"
+      },
+      {
+        "asset": "Fartcoin",
+        "amount": "23370000",
+        "convertedUSD": "4110000"
+      },
+      {
+        "asset": "JitoSOL",
+        "amount": "33976.51",
+        "convertedUSD": "3600000"
+      },
+      {
+        "asset": "syrupUSDC",
+        "amount": "2870000",
+        "convertedUSD": "3320000"
+      },
+      {
+        "asset": "INF",
+        "amount": "21241.62",
+        "convertedUSD": "2500000"
+      },
+      {
+        "asset": "mSOL",
+        "amount": "17418.92",
+        "convertedUSD": "1990000"
+      },
+      {
+        "asset": "bSOL",
+        "amount": "9474.33",
+        "convertedUSD": "1020000"
+      },
+      {
+        "asset": "EURC",
+        "amount": "583980.69",
+        "convertedUSD": "677420"
+      },
+      {
+        "asset": "zBTC",
+        "amount": "8.61",
+        "convertedUSD": "586790"
+      },
+      {
+        "asset": "USDY",
+        "amount": "477375.42",
+        "convertedUSD": "539430"
+      },
+      {
+        "asset": "JUP",
+        "amount": "2620000",
+        "convertedUSD": "431440"
+      },
+      {
+        "asset": "WSOL",
+        "amount": "0.03",
+        "convertedUSD": "2740"
+      }
+    ],
+    "note": "Total confirmed loss: $285.26M drained across 18 tokens in 128 seconds. JLP was the largest single position at $159.35M (55.9% of total). Funds were bridged to Ethereum via Circle CCTP (100+ transactions over 6 hours) and Chainflip, consolidated into ETH across four attacker EOAs. Largest DeFi hack of 2026, second-largest in Solana history after Wormhole."
+  },
+  "attackTime": {
+    "startTime": "2026-04-01T16:05:18Z",
+    "endTime": "2026-04-01T16:07:26Z",
+    "isRange": true,
+    "note": "Exploit execution: 128 seconds (16:05:18 to 16:07:26 UTC, block 410344005 to ~410344017). Social engineering preparation began October 2025 (~6 months). On-chain setup (durable nonce creation) began March 23, 2026. CVT token created March 12, 2026. Attacker funded operation via 10 ETH from Tornado Cash bridged to Solana.",
+    "date": "2026-04-01"
+  },
+  "transactions": [
+    {
+      "txHash": "2HvMSgDEfKhNryYZKhjowrBY55rUx5MWtcWkG9hqxZCFBaTiahPwfynP1dxBSRk9s5UTVc8LFeS4Btvkm9pc2C4H",
+      "chain": "solana",
+      "role": "exploit",
+      "description": "First admin takeover transaction at block 410344005 (2026-04-01 16:05:18 UTC). Created malicious proposal to transfer Drift State account ownership and recorded the first multisig approval using a pre-signed durable nonce."
+    },
+    {
+      "txHash": "4BKBmAJn6TdsENij7CsVbyMVLJU1tX27nfrMM1zgKv1bs2KJy6Am2NqdA3nJm4g9C6eC64UAf5sNs974ygB9RsN1",
+      "chain": "solana",
+      "role": "exploit",
+      "description": "Second admin takeover transaction at block 410344009 (2026-04-01 16:05:19 UTC), submitted one second after the first. Carried the second multisig approval and executed the admin transfer in the same atomic transaction. No timelock. Drift State account ownership transferred to attacker-controlled address 5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN."
+    },
+    {
+      "txHash": "4a5962Rdqd9pkXtk9DMQ9ZYhdGb2k9gPw71GvukJgELhxbCY5gm1c1hhKdwuGefyqJ3XMvihUTDNDn3qbXnst82X",
+      "chain": "solana",
+      "role": "exploit",
+      "description": "Attacker called updateWithdrawGuardThreshold() across five markets, raising withdrawal caps to 500,000,000,000,000, effectively disabling all safety limits."
+    },
+    {
+      "txHash": "5V72ZK1WejP5Mh3uryEy6BZCV6ukSAnZBFSvHTqfD4NS38xKJUuh4RV5F8D4tDbgMsB2dcTJyZf7hLxH34nCRHRE",
+      "chain": "solana",
+      "role": "exploit",
+      "description": "Attacker deposited 500 million CVT tokens into spot market index 63 (the malicious collateral market created moments earlier). CVT had negligible real market value but permissive collateral weights allowed borrowing against it as if it were worth far more."
+    },
+    {
+      "txHash": "BkUZ8nss1api3b4sFUDZAU81k2R2Y6SB4J77GF14UPrCeYGfRFaay1StPpwGTL86d1kJArWhiNi8xdAfR1AeVb6",
+      "chain": "solana",
+      "role": "setup",
+      "description": "Drift's routine test withdrawal from its own insurance fund, executed approximately one minute before the attack transactions fired. May have served as a trigger signal."
+    },
+    {
+      "txHash": "0x14cd918f2c1ffcd9a96f9d2ccd1988469fd246a3ed4e3565d2fa5b5b91238ba1",
+      "chain": "ethereum",
+      "role": "funding",
+      "description": "Origin funding transaction: 10 ETH withdrawn from Tornado Cash, bridged to Solana via LiFi and NEAR intents. This funded the entire $285M operation. ~$501.19 initial seed money on Solana."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "55udxhScWQxM7cC9d1NPBQoEDC7B38w81EWKPZsM7ZCW",
+      "chain": "solana",
+      "role": "executor",
+      "description": "Executor wallet on Solana that performed the CVT deposit and 33 borrow-loop withdrawal cascade draining 18 tokens over 128 seconds.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "HkGz4KmoZ7Zmk7HN6ndJ31UJ1qZ2qgwQxgVqQwovpZES",
+      "chain": "solana",
+      "role": "primary_receiver",
+      "description": "Primary receiving wallet for all stolen tokens on Solana. Funds were consolidated here before being swapped via Jupiter and bridged to Ethereum.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "8ubo4HbWJHKyFJYJc2Gh74dxCP7bN7Fu2Pi13KZ9rGxw",
+      "chain": "solana",
+      "role": "consolidation",
+      "description": "Secondary consolidation wallet used for fund layering on Solana.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+      "chain": "solana",
+      "role": "admin_takeover",
+      "description": "Drift State account after attacker took ownership. Controlled by attacker after the two durable-nonce multisig transactions at 16:05:18-19 UTC. From here, attacker created fake CVT market, disabled circuit breakers, and raised withdrawal caps.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7",
+      "chain": "ethereum",
+      "role": "fund_consolidation",
+      "description": "One of four Ethereum EOAs where stolen funds were consolidated into ETH after bridging via CCTP and Chainflip.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xAa843eD65C1f061F111B5289169731351c5e57C1",
+      "chain": "ethereum",
+      "role": "fund_consolidation",
+      "description": "Second Ethereum EOA for stolen fund consolidation.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xbDdAE987FEe930910fCC5aa403D5688fB440561B",
+      "chain": "ethereum",
+      "role": "fund_consolidation",
+      "description": "Third Ethereum EOA for stolen fund consolidation.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x0FE3b6908318B1F630daa5B31B49a15fC5F6B674",
+      "chain": "ethereum",
+      "role": "fund_consolidation",
+      "description": "Fourth Ethereum EOA for stolen fund consolidation.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xd91a122b585bc588c9a48d0995ee0d7b4f8ab7dd",
+      "chain": "ethereum",
+      "role": "chainflip_destination",
+      "description": "Chainflip bridge destination address on Ethereum for SOL portion of stolen funds.",
+      "accountType": "eoa"
+    }
+  ],
+  "victims": [
+    {
+      "address": "JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBeXXJfrw",
+      "chain": "solana",
+      "role": "protocol_vault",
+      "description": "Drift Protocol vault. Balance collapsed from $309M to ~$8M. Held user deposits across 18 token markets before the attack.",
+      "accountType": "contract_open_source"
+    },
+    {
+      "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+      "chain": "solana",
+      "role": "protocol_state",
+      "description": "Drift Vault State account. Admin ownership transferred from legitimate Security Council to attacker during exploit.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+      "chain": "solana",
+      "role": "protocol_program",
+      "description": "Drift V2 Program (Solana program ID). Core protocol program handling perpetual futures, spot markets, and vault operations.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "description": "On April 1, 2026, Drift Protocol — one of Solana's largest perpetual futures DEXs with over $550M TVL — suffered a $285.26M exploit orchestrated by DPRK-linked threat actors (UNC4736, tracked as AppleJeus or Citrine Sleet). This was not a smart contract bug; it was a six-month social engineering campaign that compromised protocol governance. Beginning around October 2025, attackers posing as a quantitative trading firm approached Drift contributors at crypto conferences, built professional relationships over six months, deposited $1M+ into the protocol, and eventually delivered malware (via a shared VSCode/Cursor repository exploiting a zero-click vulnerability and/or a TestFlight application) that gave them access to multisig signing workflows. Between March 23-30, 2026, the attacker created durable nonce accounts tied to at least two of five Security Council multisig signers, tricking them into pre-signing what appeared to be routine transactions but were actually admin transfer payloads. On April 1 at 16:05:18 UTC, two pre-signed transactions (four slots apart, executed one second apart with no timelock) transferred full admin control of Drift's State account to the attacker. Within the same slot, the attacker created a new spot market for a worthless CVT token (CarbonVote Token, created March 12 with $501.19 seed and wash-traded to $1), set permissive collateral weights, disabled circuit breakers, and raised withdrawal caps. At the 25-second mark, the attacker deposited 500 million CVT into the malicious market. From the 30-second mark, 33 borrow-loop transactions drained 18 tokens across 128 seconds. JLP ($159.35M) was the largest position, followed by USDC ($71.42M) and cbBTC ($11.29M). Stolen assets were swapped via Jupiter into USDC, WSOL, WBTC, WETH, then bridged to Ethereum via Circle's CCTP (100+ transactions over 6 hours) and Chainflip. Circle did not freeze any funds despite $230M+ in stolen USDC moving through their infrastructure during US business hours. Drift had previously lost $1B in TVL since its October 2025 peak. No compensation plan has been published as of the last update. The attack is attributed to DPRK by Elliptic, TRM Labs, and Drift's own investigation — the 18th such operation tracked by Elliptic in 2026 alone.",
+  "rootCause": "The root cause was an operational security failure, not a code vulnerability. Drift's Security Council operated on a Squads V4 multisig with a dangerously low 2-of-5 signing threshold and zero timelock, meaning any two signers could authorize instant, irreversible admin-level changes. Attackers exploited Solana's durable nonce feature — a legitimate tool for multisig workflows and offline signing that bypasses the standard ~60 second blockhash expiry — to collect pre-signed transactions days before execution. The six-month social engineering campaign involved in-person conference meetings, Telegram group formation, legitimate capital deposits ($1M+), and eventual device compromise via zero-click VSCode/Cursor vulnerability and/or malicious TestFlight app. Once signers' devices were compromised, attackers obtained multisig pre-approvals for admin transfers. The Neodyme 2024 security audit had reviewed Drift's authority structure (admin's ability to initialize markets and update parameters) but classified it as acceptable within the protocol's trust model — no audit catches a compromised private key. The combination of weak multisig threshold, no timelock, durable nonce abuse, and social engineering gave attackers everything needed without breaking a single line of code.",
+  "attackVector": "1. RECONNAISSANCE (Oct 2025 - Mar 2026): DPRK-linked actors (UNC4736) posed as a quantitative trading firm, approached Drift contributors at crypto conferences, built professional relationships over 6 months, set up a Telegram group, and maintained consistent presence across multiple countries and industry events. 2. INFILTRATION (Dec 2025 - Jan 2026): Group onboarded an Ecosystem Vault on Drift, deposited $1M+ of their own capital, participated in working sessions, asked detailed product questions. 3. DEVICE COMPROMISE (Feb - Mar 2026): Group shared links, repositories, and applications described as frontend deployments and wallet products. At least one contributor cloned a shared repository (exploiting a known zero-click VSCode/Cursor vulnerability where simply opening a file/folder silently executes arbitrary code) and/or downloaded a TestFlight application. This gave attackers access to signing workflows. 4. DURABLE NONCE SETUP (Mar 23-30, 2026): Attackers created multiple durable nonce accounts linked to at least 2 of 5 multisig signers, tricking them into pre-signing admin transfer transactions. Nonce accounts: 45cZ5Fj97Va5Abipr6NN8Zf1BqZqWneSek1hU5cQRvhw, 39JyWrdbVdRqjzw9yyEjxNtTbTKcTPLdtdCgbz7C7Aq8 (multisig members), CZRBcHAvXU6TzzjGuG4rT98UuTR7PBUeSGPZRDW5mfYW, 48cV6Mw5Y5afT8ofukvtFaMtrsCohHhsv8MfbdW8agh3 (attacker-controlled). 5. MULTISIG MIGRATION EXPLOITATION (Mar 27, 2026): Drift migrated Security Council, replacing 4 of 5 signers, lowering threshold from 3/5 to 2/5. Within 3 days, attacker obtained pre-signed nonce from a replacement signer (6UJbu9ut5VAsFYQFgPEa5xPfoyF5bB5oi4EknFPvu924). 6. CVT TOKEN PREPARATION (Mar 12, 2026): Attacker created CarbonVote Token (CVT), minted 750M units for $1.19, seeded Raydium LP with $500, wash-traded to $1/token over weeks to build credible price history for oracle manipulation. 7. ADMIN TAKEOVER (Apr 1, 2026, 16:05:18-19 UTC): Two pre-signed nonce transactions executed one second apart at blocks 410344005/410344009, transferring Drift State account ownership to attacker (5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN). 8. MARKET MANIPULATION (16:05:19 UTC): Attacker created CVT spot market with maximal permissive parameters, called updateWithdrawGuardThreshold() across 5 markets raising caps to 500 trillion. 9. DRAIN (16:05:43 - 16:07:26 UTC): Attacker deposited 500M CVT at 25-second mark, then executed 33 borrow-loop transactions over 103 seconds, draining 18 tokens totaling $285.26M. 10. FUND EXIT (Apr 1, 16:07+ UTC): Stolen assets swapped via Jupiter into USDC/WSOL/WBTC/WETH, bridged to Ethereum via Circle CCTP (100+ txs over 6 hours) and Chainflip, consolidated into ETH across 4 EOAs.",
+  "lessons": [
+    "Never operate a 2-of-5 multisig with zero timelock for a protocol managing hundreds of millions. A minimum threshold of 3-of-5 or 4-of-7 with at least a 12-hour timelock is essential to provide a reaction window for admin changes.",
+    "Durable nonces are a legitimate Solana feature but enable time-delayed attacks. Protocols must monitor for unusual nonce account creation tied to privileged addresses and implement alerts for pre-signed transaction patterns.",
+    "Social engineering is now the primary attack vector in DeFi. Six months of patient, in-person relationship building, legitimate capital deposits, and professional rapport can bypass any code-level security. No audit catches a compromised human.",
+    "Zero-click vulnerabilities in development tools (VSCode, Cursor) are critical infrastructure risks. Simply opening a file or folder from an untrusted source can silently execute arbitrary code. Implement strict sandboxing and file origin verification for all shared repositories.",
+    "Circle's capability to freeze USDC without obligation created a $230M gap during the Drift exploit. Stablecoin issuers must establish clear incident response protocols; capability without obligation is a systemic risk for DeFi.",
+    "Multisig migration events are high-risk windows. When Drift replaced 4 of 5 signers, the attacker re-established nonce access within 3 days. Implement enhanced monitoring and temporary elevated security during governance transitions.",
+    "Real-time on-chain monitoring for admin changes, withdrawal velocity anomalies, and fake market creation is no longer optional. The 128-second drain window could have been interrupted with automated circuit breakers triggered by unusual patterns.",
+    "Meeting someone in person at a conference is no longer sufficient due diligence for trust establishment. DPRK operations deploy third-party intermediaries with constructed identities, employment histories, and professional networks.",
+    "Private key compromises accounted for 88% of all stolen crypto in Q1 2025. The industry must move beyond per-incident shock cycles to systemic operational security standards for all protocols managing user funds.",
+    "The gap between audit scope and real-world attack surface must be closed. Neodyme's 2024 audit reviewed Drift's authority structure but classified admin market creation as acceptable trust model assumption. Audits must model realistic attack vectors including governance compromise, not just code bugs."
+  ],
+  "references": [
+    "https://rekt.news/drift-protocol-rekt",
+    "https://www.quillaudits.com/blog/hack-analysis/drift-protocol-multisig-exploit",
+    "https://github.com/DK27ss/Drift-480M-PoC",
+    "https://gist.github.com/andrewhong5297/512c55864505f0c6caaece9e9b07b7c3",
+    "https://x.com/DriftProtocol/status/2039564444510846997",
+    "https://x.com/DriftProtocol/status/2040611161121370409",
+    "https://x.com/DriftProtocol/status/2041574840524493091",
+    "https://x.com/DriftProtocol/status/2042093972500177305",
+    "https://x.com/officer_secret/status/2039436523112710509",
+    "https://x.com/officer_secret/status/2039405837144445183",
+    "https://x.com/officer_secret/status/2039418752228548828",
+    "https://x.com/zachxbt/status/2039566991858794981",
+    "https://x.com/zachxbt/status/2039602706797801726",
+    "https://x.com/zachxbt/status/2039496650906034602",
+    "https://x.com/zachxbt/status/2040666565503524932",
+    "https://x.com/omeragoldberg/status/2039455317201707100",
+    "https://x.com/haydenzadams/status/2039560830862164329",
+    "https://x.com/tayvano_/status/2040664577168547920",
+    "https://x.com/fabianosolana/status/2039657017825017970",
+    "https://x.com/molusol/status/2039454934823800839",
+    "https://www.theblock.co/post/396361/drift-links-280-million-exploit-to-six-month-social-engineering-op-run-by-suspected-north-korean-actors",
+    "https://www.theblock.co/post/396183/drift-280m-exploit-zachxbt-circle",
+    "https://www.coindesk.com/markets/2026/04/05/drift-says-usd270-million-exploit-was-a-six-month-north-korean-intelligence-operation",
+    "https://www.coindesk.com/business/2026/04/02/north-koreans-hackers-likely-behind-the-usd286-million-drift-protocol-exploit-elliptic",
+    "https://cointelegraph.com/news/drift-protocol-exploit-preparation-preliminary-findings",
+    "https://www.bleepingcomputer.com/news/security/drift-280m-crypto-theft-linked-to-6-month-in-person-operation/",
+    "https://www.chainalysis.com/blog/lessons-from-the-drift-hack/",
+    "https://www.cube.exchange/blog/newsletter/security-briefing/security-briefing/2026-04-01--drift-hack",
+    "https://www.halborn.com/blog/post/explained-the-radiant-capital-hack-october-2024",
+    "https://www.trmlabs.com/resources/blog/the-bybit-hack-following-north-koreas-largest-exploit",
+    "https://www.youtube.com/watch?v=qjJN5S7PSoE",
+    "https://defillama.com/protocol/drift",
+    "https://solscan.io/tx/2HvMSgDEfKhNryYZKhjowrBY55rUx5MWtcWkG9hqxZCFBaTiahPwfynP1dxBSRk9s5UTVc8LFeS4Btvkm9pc2C4H",
+    "https://solscan.io/tx/4BKBmAJn6TdsENij7CsVbyMVLJU1tX27nfrMM1zgKv1bs2KJy6Am2NqdA3nJm4g9C6eC64UAf5sNs974ygB9RsN1",
+    "https://solscan.io/tx/5V72ZK1WejP5Mh3uryEy6BZCV6ukSAnZBFSvHTqfD4NS38xKJUuh4RV5F8D4tDbgMsB2dcTJyZf7hLxH34nCRHRE",
+    "https://solscan.io/account/JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBeXXJfrw",
+    "https://solscan.io/account/HkGz4KmoZ7Zmk7HN6ndJ31UJ1qZ2qgwQxgVqQwovpZES",
+    "https://etherscan.io/tx/0x14cd918f2c1ffcd9a96f9d2ccd1988469fd246a3ed4e3565d2fa5b5b91238ba1"
+  ],
+  "metadata": {
+    "dateAdded": "2026-05-21",
+    "lastUpdated": "2026-05-21",
+    "human_verified": false
+  },
+  "date": "2026-04-01",
+  "locales": {
+    "zh-TW": {
+      "title": "Drift Protocol 社交工程攻擊事件",
+      "description": "2026 年 4 月 1 日，Drift Protocol — Solana 生態系統中最大的永續合約 DEX 之一，TVL 超過 5.5 億美元 — 遭受了 2.8526 億美元的攻擊，由與北韓有關聯的威脅組織（UNC4736，也被追蹤為 AppleJeus 或 Citrine Sleet）策劃。這不是一次智能合約漏洞攻擊，而是一場長達六個月的社交工程行動，成功破壞了協議的治理機制。從 2025 年 10 月開始，攻擊者偽裝成量化交易公司，在加密貨幣會議上接觸 Drift 的貢獻者，在六個月內建立專業關係，向協議存入超過 100 萬美元，最終透過惡意軟體（共享的 VSCode/Cursor 儲存庫利用零點擊漏洞，或惡意的 TestFlight 應用程式）取得了多重簽章簽署流程的存取權。2026 年 3 月 23 日至 30 日期間，攻擊者創建了與五個安全理事會多重簽章簽署者中至少兩人綁定的持久化 Nonce 帳戶，誘騙他們預簽名了看似常規的交易，實際上是管理權轉移的惡意交易。4 月 1 日 16:05:18 UTC，兩筆預簽名交易（間隔四個 slot，一秒內執行，無時間鎖）將 Drift State 帳戶的完全管理權轉移給了攻擊者。在同一 slot 內，攻擊者為毫無價值的 CVT 代幣（CarbonVote Token，3 月 12 日創建，僅 501.19 美元種子資金，經洗盤交易推升至 1 美元）建立了新的現貨市場，設定了寬鬆的抵押品權重，關閉了斷路器，並提高了提款上限。第 25 秒，攻擊者將 5 億枚 CVT 存入惡意市場。從第 30 秒開始，33 筆借款循環交易在 128 秒內清空了 18 種代幣。JLP（1.5935 億美元）是最大的持倉，其次是 USDC（7142 萬美元）和 cbBTC（1129 萬美元）。被盜資產透過 Jupiter 轉換為 USDC、WSOL、WBTC、WETH，然後透過 Circle 的 CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊。Circle 在美東工作時間內未凍結任何資金，儘管超過 2.3 億美元的被盜 USDC 透過其基礎設施流動。截至最新更新，尚未發布補償計劃。此攻擊已被 Elliptic、TRM Labs 和 Drift 自身的調查歸因於北韓——這是 Elliptic 在 2026 年追蹤的第 18 次此類行動。",
+      "rootCause": "根本原因是一次營運安全失誤，而非程式碼漏洞。Drift 的安全理事會運行在 Squads V4 多重簽章上，簽章門檻低至危險的 2/5 且無時間鎖，這意味著任何兩個簽署者都可以授權即時、不可逆的管理級別變更。攻擊者利用了 Solana 的持久化 Nonce 功能——一種用於多重簽章工作流程和離線簽署的合法工具，可以繞過標準的約 60 秒 blockhash 過期機制——在實際執行前數天就收集了預簽名交易。這場六個月的社交工程行動包括面對面會議、Telegram 群組的建立、合法資金存入（超過 100 萬美元），以及最終透過零點擊 VSCode/Cursor 漏洞或惡意 TestFlight 應用程式進行的設備入侵。一旦簽署者的設備被入侵，攻擊者就能取得多重簽章的預批准權。Neodyme 2024 年的安全審計曾審查 Drift 的權限結構（管理員創建市場和更新參數的能力），但將其分類為協議信任模型中的可接受假設——任何審計都無法捕捉到被入侵的私鑰。薄弱多重簽章門檻、無時間鎖、持久化 Nonce 濫用和社交工程的結合，使攻擊者在沒有破壞任何一行程式碼的情況下取得了所需的一切。",
+      "attackVector": "1. 偵察（2025 年 10 月至 2026 年 3 月）：北韓關聯組織（UNC4736）偽裝成量化交易公司，在加密貨幣會議上接觸 Drift 貢獻者，在六個月內建立專業關係，創建 Telegram 群組，在多國和行業活動中保持持續存在。2. 滲透（2025 年 12 月至 2026 年 1 月）：該組織在 Drift 上開設了生態系統金庫，存入超過 100 萬美元自有資金，參與工作會議，提出詳細的產品問題。3. 設備入侵（2026 年 2 月至 3 月）：該組織分享了被描述為前端部署和錢包產品的連結、儲存庫和應用程式。至少一名貢獻者克隆了共享儲存庫（利用了已知的零點擊 VSCode/Cursor 漏洞，僅打開檔案或資料夾即可靜默執行任意程式碼）及/或下載了 TestFlight 應用程式。這使攻擊者獲得了簽署工作流程的存取權。4. 持久化 Nonce 設定（2026 年 3 月 23-30 日）：攻擊者創建了與 5 個多重簽章簽署者中至少 2 人綁定的多個持久化 Nonce 帳戶，誘騙他們預簽名管理權轉移交易。5. 多重簽章遷移利用（2026 年 3 月 27 日）：Drift 遷移安全理事會，替換了 5 個簽署者中的 4 個，將門檻從 3/5 降至 2/5。3 天內，攻擊者從替換簽署者處獲得了預簽名 Nonce。6. CVT 代幣準備（2026 年 3 月 12 日）：攻擊者創建了 CarbonVote Token (CVT)，鑄造 7.5 億枚（成本 1.19 美元），在 Raydium 流動性池中投入 500 美元種子資金，經數週洗盤交易推升至 1 美元/枚，為預言機操縱建立可信的價格歷史。7. 管理權接管（2026 年 4 月 1 日 16:05:18-19 UTC）：兩筆預簽名 Nonce 交易在區塊 410344005/410344009 一秒間隔內執行，將 Drift State 帳戶所有權轉移給攻擊者。8. 市場操縱（16:05:19 UTC）：攻擊者創建了具有最大寬鬆參數的 CVT 現貨市場，在 5 個市場上調用 updateWithdrawGuardThreshold() 將上限提高到 500 兆。9. 清空（16:05:43 - 16:07:26 UTC）：攻擊者在第 25 秒存入 5 億 CVT，然後在 103 秒內執行 33 筆借款循環交易，清空了價值 2.8526 億美元的 18 種代幣。10. 資金退出（4 月 1 日 16:07+ UTC）：被盜資產透過 Jupiter 轉換為 USDC/WSOL/WBTC/WETH，透過 Circle CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊，在 4 個 EOA 中合併為 ETH。",
+      "estimatedLoss": {
+        "note": "已確認損失總計 2.8526 億美元，於 128 秒內清空 18 種代幣。JLP 為最大單一持倉，達 1.5935 億美元（佔總額 55.9%）。資金經 Circle CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊，在四個攻擊者 EOA 中合併為 ETH。這是 2026 年最大的 DeFi 攻擊事件，也是 Solana 歷史上第二大攻擊，僅次於 Wormhole。"
+      },
+      "attackTime": {
+        "note": "攻擊執行：128 秒（UTC 16:05:18 至 16:07:26，區塊 410344005 至約 410344017）。社交工程準備始於 2025 年 10 月（約 6 個月）。鏈上設定（持久化 Nonce 創建）始於 2026 年 3 月 23 日。CVT 代幣創建於 2026 年 3 月 12 日。攻擊者資金來自 Tornado Cash 的 10 ETH，經跨鏈至 Solana。"
+      },
+      "transactions": [
+        {
+          "txHash": "2HvMSgDEfKhNryYZKhjowrBY55rUx5MWtcWkG9hqxZCFBaTiahPwfynP1dxBSRk9s5UTVc8LFeS4Btvkm9pc2C4H",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "首次管理權接管交易，採掛於區塊 410344005（2026-04-01 16:05:18 UTC）。創建惡意提案以轉移 Drift State 帳戶所有權，並使用預簽名的持久化 Nonce 記錄了第一個多重簽章批准。"
+        },
+        {
+          "txHash": "4BKBmAJn6TdsENij7CsVbyMVLJU1tX27nfrMM1zgKv1bs2KJy6Am2NqdA3nJm4g9C6eC64UAf5sNs974ygB9RsN1",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "第二次管理權接管交易，採掛於區塊 410344009（2026-04-01 16:05:19 UTC），在第一筆交易後一秒提交。攜帶第二個多重簽章批准並在同一原子交易中執行管理權轉移。無時間鎖。Drift State 帳戶所有權轉移至攻擊者控制的位址 5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN。"
+        },
+        {
+          "txHash": "4a5962Rdqd9pkXtk9DMQ9ZYhdGb2k9gPw71GvukJgELhxbCY5gm1c1hhKdwuGefyqJ3XMvihUTDNDn3qbXnst82X",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "攻擊者在五個市場上調用 updateWithdrawGuardThreshold()，將提款上限提高到 500,000,000,000,000，實際上禁用了所有安全限制。"
+        },
+        {
+          "txHash": "5V72ZK1WejP5Mh3uryEy6BZCV6ukSAnZBFSvHTqfD4NS38xKJUuh4RV5F8D4tDbgMsB2dcTJyZf7hLxH34nCRHRE",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "攻擊者將 5 億枚 CVT 代幣存入現貨市場指數 63（攻擊者片刻前創建的惡意抵押品市場）。CVT 實際市場價值可忽略不計，但攻擊者設定的寬鬆抵押品權重允許他們以遠高於實際價值的額度進行借款。"
+        },
+        {
+          "txHash": "BkUZ8nss1api3b4sFUDZAU81k2R2Y6SB4J77GF14UPrCeYGfRFaay1StPpwGTL86d1kJArWhiNi8xdAfR1AeVb6",
+          "chain": "solana",
+          "role": "setup",
+          "description": "Drift 從自身保險基金執行的常規測試提款，在攻擊交易觸發前約一分鐘執行。可能作為觸發信號。"
+        },
+        {
+          "txHash": "0x14cd918f2c1ffcd9a96f9d2ccd1988469fd246a3ed4e3565d2fa5b5b91238ba1",
+          "chain": "ethereum",
+          "role": "funding",
+          "description": "資金來源交易：10 ETH 從 Tornado Cash 提取，經 LiFi 和 NEAR intents 跨鏈至 Solana。這筆資金資助了整場 2.85 億美元的攻擊行動。Solana 上初始種子資金約 501.19 美元。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "55udxhScWQxM7cC9d1NPBQoEDC7B38w81EWKPZsM7ZCW",
+          "chain": "solana",
+          "role": "executor",
+          "description": "Solana 上的執行者錢包，執行了 CVT 存款和 33 筆借款循環提款序列，在 128 秒內清空了 18 種代幣。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "HkGz4KmoZ7Zmk7HN6ndJ31UJ1qZ2qgwQxgVqQwovpZES",
+          "chain": "solana",
+          "role": "primary_receiver",
+          "description": "Solana 上所有被盜代幣的主要接收錢包。資金在此整合後經 Jupiter 兌換並跨鏈至以太坊。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "8ubo4HbWJHKyFJYJc2Gh74dxCP7bN7Fu2Pi13KZ9rGxw",
+          "chain": "solana",
+          "role": "consolidation",
+          "description": "Solana 上的次要整合錢包，用於資金分層操作。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+          "chain": "solana",
+          "role": "admin_takeover",
+          "description": "攻擊者接管後的 Drift State 帳戶。在兩筆持久化 Nonce 多重簽章交易（UTC 16:05:18-19）後由攻擊者控制。攻擊者從此處創建了虛假 CVT 市場、關閉了斷路器並提高了提款上限。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "四個以太坊 EOA 之一，被盜資金經 CCTP 和 Chainflip 跨鏈後在此整合為 ETH。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xAa843eD65C1f061F111B5289169731351c5e57C1",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "第二個被盜資金整合以太坊 EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xbDdAE987FEe930910fCC5aa403D5688fB440561B",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "第三個被盜資金整合以太坊 EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x0FE3b6908318B1F630daa5B31B49a15fC5F6B674",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "第四個被盜資金整合以太坊 EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xd91a122b585bc588c9a48d0995ee0d7b4f8ab7dd",
+          "chain": "ethereum",
+          "role": "chainflip_destination",
+          "description": "Chainflip 跨鏈目的地以太坊位址，用於被盜 SOL 部分的跨鏈。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBeXXJfrw",
+          "chain": "solana",
+          "role": "protocol_vault",
+          "description": "Drift Protocol 金庫。餘額從 3.09 億美元崩跌至約 800 萬美元。攻擊前持有 18 種代幣市場的用戶存款。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+          "chain": "solana",
+          "role": "protocol_state",
+          "description": "Drift 金庫狀態帳戶。管理權所有權從合法安全理事會轉移至攻擊者。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+          "chain": "solana",
+          "role": "protocol_program",
+          "description": "Drift V2 程式（Solana 程式 ID）。核心協議程式，處理永續合約、現貨市場和金庫操作。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "絕不要在管理數億資金的協議上使用 2/5 多重簽章且無時間鎖。至少需要 3/5 或 4/7 門檻，搭配至少 12 小時的時間鎖，才能為管理變更提供反應窗口。",
+        "持久化 Nonce 是合法的 Solana 功能，但會啟用延時攻擊。協議必須監控與特權位址相關聯的異常 Nonce 帳戶創建，並對預簽名交易模式實施警報。",
+        "社交工程已成為 DeFi 的主要攻擊向量。六個月的耐心、面對面關係建立、合法資金存入和專業信任可以繞過任何程式碼級別的安全。任何審計都無法捕捉被入侵的人類。",
+        "開發工具中的零點擊漏洞（VSCode、Cursor）是關鍵基礎設施風險。簡單地從不可信來源打開檔案或資料夾就可能靜默執行任意程式碼。對所有共享儲存庫實施嚴格的沙盒和檔案來源驗證。",
+        "Circle 能夠凍結 USDC 但無義務，在 Drift 攻擊中造成了 2.3 億美元的缺口。穩定幣發行商必須建立明確的事件回應協議；有能力但無義務對 DeFi 而言是系統性風險。",
+        "多重簽章遷移事件是高風險窗口。當 Drift 替換 5 個簽署者中的 4 個時，攻擊者在 3 天內重新建立了 Nonce 存取權。在治理過渡期間實施增強監控和臨時提升的安全措施。",
+        "針對管理變更、提款速度異常和虛假市場創建的即時鏈上監控不再是可選項。128 秒的清空窗口本可以透過由異常模式觸發的自動斷路器來中斷。",
+        "在會議上親自見面已不再是建立信任的足夠盡職調查。北韓行動部署具有建構身分、就業歷史和專業網路的第三方中介。",
+        "2025 年第一季私鑰入侵佔所有被盜加密貨幣的 88%。業界必須超越每次事件後的震驚循環，為所有管理用戶資金的協議建立系統性營運安全標準。",
+        "審計範圍與實際攻擊面之間的差距必須縮小。Neodyme 2024 年的審計審查了 Drift 的權限結構，但將管理員市場創建分類為可接受的信任模型假設。審計必須模擬現實攻擊向量，包括治理入侵，而不僅僅是程式碼漏洞。"
+      ]
+    },
+    "ja": {
+      "title": "Drift Protocol ソーシャルエンジニアリング攻撃事件",
+      "description": "2026年4月1日、Solanaエコシステム最大の Perp DEX の一つである Drift Protocol（TVL 5.5億ドル超）が、北朝鮮に関連する脅威グループ（UNC4736、AppleJeusまたはCitrine Sleetとして追跡）による2億8526万ドルのエクスプロイトを受けた。これはスマートコントラクトのバグではなく、6ヶ月にわたるソーシャルエンジニアリングキャンペーンであり、プロトコルのガバナンスを侵害した。2025年10月頃から、攻撃者は定量取引会社を装い、暗号通貨カンファレンスでDriftのコントリビューターに接触し、6ヶ月間にわたって専門的な関係を築き、プロトコルに100万ドル以上を預け入れ、最終的にマルウェア（ゼロクリック脆弱性を悪用した共有VSCode/Cursorリポジトリまたは悪質なTestFlightアプリ）を通じてマルチシグ署名ワークフローへのアクセスを取得した。2026年3月23日から30日の間に、攻撃者はセキュリティカウンシルのマルチシグ署名者5名のうち少なくとも2名に紐づくダーラブルノンシーアカウントを作成し、一見通常の取引に見えるが実際には管理者転送の悪意のあるトランザクションを事前署名するよう欺いた。4月1日16:05:18 UTC、2つの事前署名トランザクション（4スロット間隔、1秒以内に実行、タイムロックなし）がDrift Stateアカウントの完全な管理権限を攻撃者に転送した。同じスロット内で、攻撃者は価値のないCVTトークン（CarbonVote Token、3月12日作成、501.19ドルのシード、1ドルまでウォッシュトレード）のための新しいスポット市場を開設し、寛容な collateral ウェイトを設定し、サーキットブレーカーを無効化し、引き出し制限を引き上げた。25秒目に攻撃者が5億CVTを悪意ある市場に預け入れた後、30秒目から始まる33回のborrow-loopトランザクションが128秒間で18種類のトークンを枯渇させた。JLP（1億5935万ドル）が最大のポジション、次いでUSDC（7142万ドル）、cbBTC（1129万ドル）。盗まれた資産はJupiter経由でUSDC、WSOL、WBTC、WETHにスワップされ、CircleのCCTP（6時間以上で100回以上のトランザクション）とChainflipを介してEthereumにブリッジされた。Circleは米国営業時間中に$2.3億以上の盗まれたUSDCが自社のインフラを通過したにもかかわらず、1ドルも凍結しなかった。补偿計画は発表されていない。この攻撃はElliptic、TRM Labs、およびDrift自身の調査により北朝鮮に帰属されている。",
+      "rootCause": "根本原因はコードの脆弱性ではなく、運用セキュリティの失敗だった。DriftのセキュリティカウンシルはSquads V4マルチシグで運用されており、危険なまでに低い2/5の署名閾値とゼロタイムロックが設定されていたため、署名者2名が即座に不可逆的な管理者レベルの変更を承認できた。攻撃者はSolanaのダーラブルノンシー機能（マルチシグワークフローとオフライン署名のための正当なツールで、標準の約60秒のブロックハッシュ有効期限をバイパス）を悪用し、実行の数日前に事前署名トランザクションを収集した。6ヶ月にわたるソーシャルエンジニアリングキャンペーンには、対面カンファレンス、Telegramグループの設立、正当な資金の預入（100万ドル超）、ゼロクリックVSCode/Cursor脆弱性または悪質なTestFlightアプリを介した最終的なデバイス侵害が含まれていた。署名者のデバイスが侵害されると、攻撃者はマルチシグの事前承認を取得できた。Neodymeの2024年セキュリティ監査はDriftの権限構造をレビューしたが、管理者の市場作成機能をプロトコルの信頼モデル内で許容可能な仮定として分類した。弱いマルチシグ閾値、タイムロックの欠如、ダーラブルノンシーの悪用、ソーシャルエンジニアリングの組み合わせにより、攻撃者はコードの1行も壊すことなく必要なすべてを取得した。",
+      "attackVector": "1. 偵察（2025年10月〜2026年3月）：北朝鮮関連グループ（UNC4736）が定量取引会社を装い、暗号通貨カンファレンスでDriftコントリビューターに接触、6ヶ月間で専門的関係を構築、Telegramグループを設立。2. 侵入（2025年12月〜2026年1月）：Drift上でエコシステムVaultを開設、100万ドル以上の自己資金を預入、作業セッションに参加。3. デバイス侵害（2026年2月〜3月）：共有VSCode/Cursorリポジトリのゼロクリック脆弱性および/または悪質なTestFlightアプリを介して署名ワークフローへのアクセスを取得。4. ダーラブルノンシー設定（2026年3月23-30日）：5名の署名者のうち少なくとも2名に紐づくノンシーアカウントを作成、管理者転送トランザクションを事前署名させるよう欺いた。5. マルチシグ移行の悪用（2026年3月27日）：Driftがセキュリティカウンシルを移行（5名中4名を置換、閾値を3/5から2/5に引き下げ）。3日以内に攻撃者は置換署名者から事前署名ノンシーを取得。6. CVTトークン準備（2026年3月12日）：CarbonVote Token（CVT）を作成、7.5億枚を1.19ドルで鋳造、Raydium LPに500ドルをシード、数週間のウォッシュトレードで1ドル/トークンまで価格を構築。7. 管理者乗っ取り（2026年4月1日 16:05:18-19 UTC）：ブロック410344005/410344009で1秒間隔で2つの事前署名ノンシートランザクションを実行、Drift Stateアカウントの所有権を攻撃者に転送。8. 市場操作（16:05:19 UTC）：寛容なパラメータでCVTスポット市場を開設、5つの市場でupdateWithdrawGuardThreshold()を呼び出し上限を500兆に引き上げ。9. 枯渇（16:05:43〜16:07:26 UTC）：25秒目に5億CVTを預入、その後103秒間で33回のborrow-loopトランザクションを実行、18種類のトークン合計2億8526万ドルを枯渇。10. 資金出口（4月1日 16:07+ UTC）：Jupiter経由でUSDC/WSOL/WBTC/WETHにスワップ、Circle CCTP（6時間で100回以上のトランザクション）とChainflipを介してEthereumにブリッジ、4つのEOAでETHに統合。",
+      "estimatedLoss": {
+        "note": "確認済み損失合計：2億8526万ドル、128秒間で18種類のトークンが枯渇。JLPは最大の単一ポジションで1億5935万ドル（全体の55.9％）。資金はCircle CCTP（6時間で100回以上のトランザクション）とChainflipを介してEthereumにブリッジされ、4つの攻撃者EOAでETHに統合。2026年最大のDeFiハッキング、Wormholeに次ぐSolana史上2番目に大規模な攻撃。"
+      },
+      "attackTime": {
+        "note": "エクスプロイト実行：128秒（UTC 16:05:18〜16:07:26、ブロック410344005〜約410344017）。ソーシャルエンジニアリング準備は2025年10月開始（約6ヶ月）。オンチェーン設定（ダーラブルノンシー作成）は2026年3月23日開始。CVTトークンは2026年3月12日作成。攻撃資金はTornado Cashからの10 ETHをSolanaにブリッジ。"
+      },
+      "transactions": [
+        {
+          "txHash": "2HvMSgDEfKhNryYZKhjowrBY55rUx5MWtcWkG9hqxZCFBaTiahPwfynP1dxBSRk9s5UTVc8LFeS4Btvkm9pc2C4H",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "最初の管理者乗っ取りトランザクション、ブロック410344005（2026-04-01 16:05:18 UTC）。Drift Stateアカウントの所有権転送のための悪意のある提案を作成し、事前署名されたダーラブルノンシーを使用して最初のマルチシグ承認を記録。"
+        },
+        {
+          "txHash": "4BKBmAJn6TdsENij7CsVbyMVLJU1tX27nfrMM1zgKv1bs2KJy6Am2NqdA3nJm4g9C6eC64UAf5sNs974ygB9RsN1",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "2回目の管理者乗っ取りトランザクション、ブロック410344009（2026-04-01 16:05:19 UTC）、最初のトランザクションの1秒後に送信。2回目のマルチシグ承認を運び、同じアトミクトランザクション内で管理者転送を実行。タイムロックなし。Drift Stateアカウントの所有権が攻撃者制御アドレス 5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN に転送。"
+        },
+        {
+          "txHash": "4a5962Rdqd9pkXtk9DMQ9ZYhdGb2k9gPw71GvukJgELhxbCY5gm1c1hhKdwuGefyqJ3XMvihUTDNDn3qbXnst82X",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "攻撃者が5つの市場でupdateWithdrawGuardThreshold()を呼び出し、引き出し上限を500,000,000,000,000に引き上げ、事実上すべての安全制限を無効化。"
+        },
+        {
+          "txHash": "5V72ZK1WejP5Mh3uryEy6BZCV6ukSAnZBFSvHTqfD4NS38xKJUuh4RV5F8D4tDbgMsB2dcTJyZf7hLxH34nCRHRE",
+          "chain": "solana",
+          "role": "exploit",
+          "description": "攻撃者が5億CVTトークンをスポットマーケットインデックス63（攻撃者が直前に作成した悪意のある collateral マーケット）に預け入れた。CVTの実質的な市場価値は無視できるものだったが、攻撃者が設定した寛容な collateral 重みにより、実際よりもはるかに高い価値で借り入れることが可能になった。"
+        },
+        {
+          "txHash": "BkUZ8nss1api3b4sFUDZAU81k2R2Y6SB4J77GF14UPrCeYGfRFaay1StPpwGTL86d1kJArWhiNi8xdAfR1AeVb6",
+          "chain": "solana",
+          "role": "setup",
+          "description": "Driftが自社の保険基金から実行したルーチンテスト引き出し、攻撃トランザクションが発火する約1分前に実行。トリガー信号として機能した可能性がある。"
+        },
+        {
+          "txHash": "0x14cd918f2c1ffcd9a96f9d2ccd1988469fd246a3ed4e3565d2fa5b5b91238ba1",
+          "chain": "ethereum",
+          "role": "funding",
+          "description": "資金源トランザクション：10 ETHをTornado Cashから引き出し、LiFiとNEAR intentsを介してSolanaにブリッジ。この資金が2億8500万ドルの攻撃全体を資金調達。Solana上の初期シード資金は約501.19ドル。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "55udxhScWQxM7cC9d1NPBQoEDC7B38w81EWKPZsM7ZCW",
+          "chain": "solana",
+          "role": "executor",
+          "description": "Solana上のエグゼキューターウォレット。CVT預入と33回のborrow-loop引き出しカスケードを実行、128秒間で18種類のトークンを枯渇。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "HkGz4KmoZ7Zmk7HN6ndJ31UJ1qZ2qgwQxgVqQwovpZES",
+          "chain": "solana",
+          "role": "primary_receiver",
+          "description": "Solana上のすべての盗まれたトークンの主要受信ウォレット。資金はここで統合され、Jupiter経由でスワップされてEthereumにブリッジされた。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "8ubo4HbWJHKyFJYJc2Gh74dxCP7bN7Fu2Pi13KZ9rGxw",
+          "chain": "solana",
+          "role": "consolidation",
+          "description": "Solana上の二次統合ウォレット、資金のレイヤリングに使用。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+          "chain": "solana",
+          "role": "admin_takeover",
+          "description": "攻撃者が所有権を取得した後のDrift Stateアカウント。2つのダーラブルノンシーマルチシグトランザクション（UTC 16:05:18-19）後に攻撃者により制御。ここから攻撃者は偽のCVT市場を作成し、サーキットブレーカーを無効化し、引き出し制限を引き上げた。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "盗まれた資金がCCTPとChainflip経由でブリッジされた後、ETHに統合された4つのEthereum EOAの1つ。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xAa843eD65C1f061F111B5289169731351c5e57C1",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "2番目の盗まれた資金統合Ethereum EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xbDdAE987FEe930910fCC5aa403D5688fB440561B",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "3番目の盗まれた資金統合Ethereum EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x0FE3b6908318B1F630daa5B31B49a15fC5F6B674",
+          "chain": "ethereum",
+          "role": "fund_consolidation",
+          "description": "4番目の盗まれた資金統合Ethereum EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xd91a122b585bc588c9a48d0995ee0d7b4f8ab7dd",
+          "chain": "ethereum",
+          "role": "chainflip_destination",
+          "description": "ChainflipブリッジのEthereum宛先アドレス、盗まれたSOL部分のブリッジ用。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "JCNCMFXo5M5qwUPg2Utu1u6YWp3MbygxqBsBeXXJfrw",
+          "chain": "solana",
+          "role": "protocol_vault",
+          "description": "Drift Protocolのボールト。残高が3億900万ドルから約800万ドルに崩落。攻撃前には18種類のトークン市場にユーザー預金を保有。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "5zpq7DvB6UdFFvpmBPspGPNfUGoBRRCE2HHg5u3gxcsN",
+          "chain": "solana",
+          "role": "protocol_state",
+          "description": "Driftボールトステートアカウント。管理者所有権が正当なセキュリティカウンシルから攻撃者に転送。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+          "chain": "solana",
+          "role": "protocol_program",
+          "description": "Drift V2プログラム（SolanaプログラムID）。パーペチュアルフューチャーズ、スポットマーケット、ボールト操作を処理するコアプロトコルプログラム。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "数億ドルの資金を管理するプロトコルで2/5マルチシグをタイムロックなしで運用してはならない。最低でも3/5または4/7の閾値と12時間以上のタイムロックが必要であり、管理者変更に対応する反応ウィンドウを提供する。",
+        "ダーラブルノンシーは正当なSolana機能だが、時間差攻撃を可能にする。プロトコルは特権アドレスに紐づく異常なノンシーアカウント作成を監視し、事前署名トランザクションパターンに対するアラートを実装する必要がある。",
+        "ソーシャルエンジニアリングは現在DeFiの主要攻撃ベクトルである。6ヶ月にわたる対面関係構築、正当な資金の預入、専門的な信頼は、コードレベルのセキュリティをすべて回避できる。監査は侵害された人間を捕捉できない。",
+        "開発ツール（VSCode、Cursor）のゼロクリック脆弱性は重要なインフラリスク。信頼できないソースからファイルやフォルダを開くだけで任意のコードがサイレント実行される可能性がある。共有リポジトリに対して厳格なサンドボックス化とファイル出典検証を実装する。",
+        "CircleのUSDC凍結能力と義務のギャップがDriftエクスプロイト中に2億3000万ドルの隙間を生んだ。ステーブルコイン発行元は明確なインシデントレスポンスプロトコルを確立する必要がある。能力があっても義務がなければDeFiにとってシステムリスクである。",
+        "マルチシグ移行イベントは高リスクウィンドウである。Driftが5名の署名者のうち4名を置換した際、攻撃者は3日以内にノンシーアクセスを再確立した。ガバナンス移行中に監視を強化し、一時的にセキュリティを elevated する。",
+        "管理者変更、引き出し速度異常、偽市場作成のためのリアルタイムオンチェーン監視はもはやオプションではない。128秒の枯渇ウィンドウは、異常パターンによってトリガーされる自動サーキットブレーカーで中断できた可能性がある。",
+        "カンファレンスで直接会うことは、信頼確立のための十分なデューデリジェンスではなくなった。北朝鮮作戦は構築されたアイデンティティ、雇用履歴、専門ネットワークを持つ第三者仲介者を配備する。",
+        "2025年第1四半期、プライベートキー侵害が盗まれた全暗号資産の88％を占めた。業界はインシデントごとのショックサイクルを超え、ユーザー資金を管理するすべてのプロトコルに対するシステマティックな運用セキュリティ基準に移行する必要がある。",
+        "監査範囲と現実世界の攻撃面のギャップを埋める必要がある。Neodymeの2024年監査はDriftの権限構造をレビューしたが、管理者市場作成を許容可能な信頼モデル仮定として分類した。監査はコードのバグだけでなく、ガバナンス侵害を含む現実的な攻撃ベクトルをモデル化する必要がある。"
+      ]
+    }
+  }
+}
