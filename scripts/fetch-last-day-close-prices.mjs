@@ -150,4 +150,7 @@ async function main() {
   console.log(`\n✅ Done. ${added} new entries. Total: ${total} prices across ${Object.keys(priceData.coins).length} coins`);
 }
 
-main();
+main().catch((err) => {
+  console.error('Fatal:', err.message);
+  process.exit(1);
+});
