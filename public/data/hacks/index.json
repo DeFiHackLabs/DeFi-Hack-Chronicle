@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "title": "DeFi Hack History",
+    "description": "Historical record of major DeFi security incidents",
+    "lastUpdated": "2026-05-21"
+  },
+  "files": [
+    {
+      "id": "dao-2016",
+      "date": "2016-06-17",
+      "protocol": "The DAO",
+      "file": "20160617-TheDAO.json"
+    },
+    {
+      "id": "paritymultisig-2017",
+      "date": "2017-07-19",
+      "protocol": "Parity Multisig Wallet",
+      "file": "20170719-ParityMultisig.json"
+    }
+  ]
+}
