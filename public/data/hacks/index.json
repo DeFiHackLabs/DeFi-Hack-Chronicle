@@ -16,6 +16,12 @@
       "date": "2017-07-19",
       "protocol": "Parity Multisig Wallet",
       "file": "20170719-ParityMultisig.json"
+    },
+    {
+      "id": "parity-2017",
+      "date": "2017-11-06",
+      "protocol": "Parity Multisig Wallet",
+      "file": "20171106-Parity.json"
     }
   ]
 }
