@@ -22,6 +22,18 @@
       "date": "2017-11-06",
       "protocol": "Parity Multisig Wallet",
       "file": "20171106-Parity.json"
+    },
+    {
+      "id": "drift-protocol-2026",
+      "date": "2026-04-01",
+      "protocol": "Drift Protocol",
+      "file": "20260401-Drift-Protocol.json"
+    },
+    {
+      "id": "echo-protocol-2026",
+      "date": "2026-05-18",
+      "protocol": "Echo Protocol",
+      "file": "20260518-EchoProtocol.json"
     }
   ]
 }
