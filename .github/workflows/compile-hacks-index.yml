@@ -4,8 +4,6 @@ on:
   push:
     paths:
       - 'public/data/hacks/**.json'
-    paths-ignore:
-      - 'public/data/hacks/index.json'
 
 permissions:
   contents: write
