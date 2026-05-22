@@ -23,6 +23,7 @@
       { "id": "vyper", "name": "Vyper", "color": "#8b5cf6", "description": "Python-like smart contract language" },
       { "id": "rust", "name": "Rust", "color": "#f74c00", "description": "Solana and Polkadot smart contract language" },
       { "id": "move", "name": "Move", "color": "#22c55e", "description": "Aptos and Sui smart contract language" },
+      { "id": "huff", "name": "Huff", "color": "#d946ef", "description": "Low-level EVM assembly-like smart contract language" },
       { "id": "default", "name": "Other", "color": "#6b7280", "description": "Other, unknown or unclassified language" }
     ],
     "ecosystems": [
@@ -39,6 +40,8 @@
       { "id": "bridge", "name": "Cross-chain Bridge", "color": "#8b5cf6", "description": "Cross-chain Bridge Attack" },
       { "id": "rugpull", "name": "Rug Pull", "color": "#ec4899", "description": "Rug Pull / Exit Scam" },
       { "id": "access_control", "name": "Access Control", "color": "#06b6d4", "description": "Access Control Issue" },
+      { "id": "business_logic", "name": "Business Logic", "color": "#10b981", "description": "Logic errors, parsing bugs, calculation flaws, or incorrect state transitions" },
+      { "id": "arithmetic_error", "name": "Arithmetic Error", "color": "#f59e0b", "description": "Integer overflow, underflow, division by zero, or precision loss in calculations" },
       { "id": "social_engineering", "name": "Social Engineering", "color": "#f43f5e", "description": "Attacks exploiting human psychology or trust" },
       { "id": "default", "name": "Unclassified", "color": "#6b7280", "description": "Unclassified category" }
     ],
@@ -53,7 +56,11 @@
       { "id": "solana", "name": "Solana", "color": "#14f195", "description": "Solana" },
       { "id": "ronin", "name": "Ronin", "color": "#0a6bff", "description": "Ronin sidechain (Axie Infinity)" },
       { "id": "harmony", "name": "Harmony", "color": "#00eaf0", "description": "Harmony blockchain" },
+      { "id": "monad", "name": "Monad", "color": "#836ef9", "description": "Monad EVM-compatible Layer 1 blockchain" },
       { "id": "bitcoin", "name": "Bitcoin", "color": "#f7931a", "description": "Bitcoin network" },
+      { "id": "sui", "name": "Sui", "color": "#4da2ff", "description": "Sui Network, MoveVM-based Layer 1 blockchain" },
+      { "id": "hyperevm", "name": "HyperEVM", "color": "#00d1ff", "description": "Hyperliquid EVM-compatible Layer 1 blockchain" },
+      { "id": "megaeth", "name": "MegaETH", "color": "#00e676", "description": "MegaETH EVM-compatible Layer 1 blockchain" },
       { "id": "default", "name": "Unclassified", "color": "#6b7280", "description": "Unclassified blockchain" }
     ],
     "accountTypes": [
