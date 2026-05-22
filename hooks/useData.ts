@@ -261,8 +261,28 @@ export function useData() {
   }, [currentDate, viewMode, canNavigateNext]);
 
   const goToday = useCallback(() => {
-    setCurrentDate(new Date());
-  }, []);
+    const today = new Date();
+    setCurrentDate(today);
+    setSelectedDate(today);
+
+    const dayEvents = getEventsForDate(today);
+    if (dayEvents.length === 1) {
+      setSelectedEvent(dayEvents[0]);
+      setPanelViewMode('detail');
+      setPanelListEvents([]);
+      setPanelListDate(null);
+    } else if (dayEvents.length > 1) {
+      setPanelListEvents(dayEvents);
+      setPanelListDate(today);
+      setPanelViewMode('list');
+      setSelectedEvent(null);
+    } else {
+      setSelectedEvent(null);
+      setPanelViewMode('empty');
+      setPanelListEvents([]);
+      setPanelListDate(null);
+    }
+  }, [getEventsForDate]);
 
   // ── Toggle helpers (generated per dimension) ──────────────────────
 

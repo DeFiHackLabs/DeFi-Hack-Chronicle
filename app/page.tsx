@@ -30,6 +30,8 @@ export default function HomePage() {
     if (!eventId) return;
     const target = data.events.find((e) => e.id === eventId);
     if (!target) return;
+    data.setViewMode('year');
+    data.setCurrentDate(target.dateObj);
     data.setSelectedDate(target.dateObj);
     data.setSelectedEvent(target);
     data.setPanelViewMode('detail');

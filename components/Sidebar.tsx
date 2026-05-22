@@ -72,7 +72,7 @@ export default function Sidebar(props: SidebarProps) {
       <div className="sidebar-header">
         <div className="logo">
           <span className="logo-icon">🔒</span>
-          <span className="logo-text">DeFi Hack</span>
+          <span className="logo-text">DeFi Hacking Chronicle</span>
         </div>
         <div className="total-loss">
           <span className="loss-label">{t('app.totalLoss')}</span>

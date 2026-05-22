@@ -58,6 +58,8 @@ interface LivePrice {
 export default function ChartPage() {
   const router = useRouter();
   const chartRef = useRef<ChartJS<'line'>>(null);
+  const userZoomed = useRef(false);
+  const zoomedRangeRef = useRef<{ min: number | string; max: number | string } | null>(null);
 
   // --- State ---
   const [prices, setPrices] = useState<PricesData | null>(null);
@@ -66,7 +68,6 @@ export default function ChartPage() {
   const [livePrices, setLivePrices] = useState<Record<string, LivePrice>>({});
   const [ready, setReady] = useState(false);
   const [activeRange, setActiveRange] = useState('ALL');
-  const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>({});
   const [hiddenTags, setHiddenTags] = useState<Set<string>>(new Set());
 
   const toggleTag = useCallback((tag: string) => {
@@ -166,38 +167,41 @@ export default function ChartPage() {
   // Time range switching
   const setRange = useCallback((range: string) => {
     setActiveRange(range);
+    userZoomed.current = false;
+    zoomedRangeRef.current = null;
+    const chart = chartRef.current;
+    if (!chart) return;
     if (!coinData) return;
     const priceList = coinData.prices;
     if (priceList.length === 0) return;
     const last = priceList[priceList.length - 1].date;
 
+    let minDate: string;
+    let maxDate = last + 'T23:59:59Z';
+
     if (range === 'ALL') {
-      setDateRange({});
+      minDate = priceList[0].date + 'T00:00:00Z';
     } else if (range === 'YTD') {
       const d = new Date(last + 'T00:00:00Z');
-      const start = `${d.getUTCFullYear()}-01-01`;
-      setDateRange({ start, end: last });
+      minDate = `${d.getUTCFullYear()}-01-01T00:00:00Z`;
     } else {
       const days = range === '1W' ? 7 : range === '1M' ? 30 : 365;
       const endTs = new Date(last + 'T00:00:00Z').getTime();
       const startTs = endTs - days * 86400000;
-      const start = new Date(startTs).toISOString().slice(0, 10);
-      setDateRange({ start, end: last });
+      minDate = new Date(startTs).toISOString();
     }
+
+    chart.resetZoom('none');
+    zoomedRangeRef.current = { min: minDate, max: maxDate };
+    chart.zoomScale('x', { min: minDate as any, max: maxDate as any }, 'default');
   }, [coinData]);
 
   // Chart data assembly
   const chartData = useMemo(() => {
     if (!coinData) return null;
     const allPrices = coinData.prices;
-    const start = dateRange.start;
-    const end = dateRange.end;
 
-    const filteredPrices = start && end
-      ? allPrices.filter((p) => p.date >= start && p.date <= end)
-      : allPrices;
-
-    const pricePoints = filteredPrices.map((p) => ({ x: p.date, y: p.price }));
+    const pricePoints = allPrices.map((p) => ({ x: p.date, y: p.price }));
 
     // Pin markers — only where pin date matches a price date
     const pinPoints: Array<{
@@ -208,17 +212,27 @@ export default function ChartPage() {
     }> = [];
 
     if (pinsData) {
-      const pinMap = new Map(pinsData.pins.map((p) => [p.date, p]));
-      for (const p of filteredPrices) {
-        const pin = pinMap.get(p.date);
-        if (pin) {
-          const hidden = hiddenTags.has(pin.tag);
-          pinPoints.push({
-            x: p.date,
-            y: hidden ? null : p.price,
-            pin: hidden ? null : pin,
-            tagColor: hidden ? null : pin.tagColor,
-          });
+      const pinsByDate = new Map<string, ChartPin[]>();
+      for (const pin of pinsData.pins) {
+        const list = pinsByDate.get(pin.date) || [];
+        list.push(pin);
+        pinsByDate.set(pin.date, list);
+      }
+
+      for (const p of allPrices) {
+        const pinsForDate = pinsByDate.get(p.date);
+        if (pinsForDate) {
+          const activePin = [...pinsForDate].reverse().find((pin) => !hiddenTags.has(pin.tag));
+          if (activePin) {
+            pinPoints.push({
+              x: p.date,
+              y: p.price,
+              pin: activePin,
+              tagColor: activePin.tagColor,
+            });
+          } else {
+            pinPoints.push({ x: p.date, y: null, pin: null, tagColor: null });
+          }
         } else {
           pinPoints.push({ x: p.date, y: null, pin: null, tagColor: null });
         }
@@ -252,7 +266,7 @@ export default function ChartPage() {
         },
       ],
     };
-  }, [coinData, currentCoin, colors, pinsData, dateRange, hiddenTags]);
+  }, [coinData, currentCoin, colors, pinsData, hiddenTags]);
 
   // Stats
   const stats = useMemo(() => {
@@ -435,6 +449,11 @@ export default function ChartPage() {
                     },
                     onZoomComplete: ({ chart }: any) => {
                       chart.options.plugins.zoom.pan.enabled = true;
+                      userZoomed.current = true;
+                      zoomedRangeRef.current = {
+                        min: chart.scales.x.min,
+                        max: chart.scales.x.max,
+                      };
                     },
                   } as any,
                   limits: dataBounds ? {
@@ -442,14 +461,14 @@ export default function ChartPage() {
                   } : undefined,
                 },
               },
-              scales: {
-                x: {
-                  type: 'time',
-                  grid: { color: '#2a2a3a' },
-                  ticks: { color: '#6b6b85' },
-                  min: dateRange.start ? dateRange.start + 'T00:00:00Z' : undefined,
-                  max: dateRange.end ? dateRange.end + 'T00:00:00Z' : undefined,
-                },
+                scales: {
+                  x: {
+                    type: 'time',
+                    grid: { color: '#2a2a3a' },
+                    ticks: { color: '#6b6b85' },
+                    min: zoomedRangeRef.current?.min,
+                    max: zoomedRangeRef.current?.max,
+                  },
                 y: {
                   grid: { color: '#2a2a3a' },
                   ticks: {
