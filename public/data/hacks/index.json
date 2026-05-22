@@ -30,6 +30,36 @@
       "file": "20260401-Drift-Protocol.json"
     },
     {
+      "id": "purrlend-2026",
+      "date": "2026-04-25",
+      "protocol": "Purrlend",
+      "file": "20260425-Purrlend.json"
+    },
+    {
+      "id": "aftermathfi-2026",
+      "date": "2026-04-29",
+      "protocol": "AftermathFi",
+      "file": "20260429-AftermathFi.json"
+    },
+    {
+      "id": "ekubo-2026",
+      "date": "2026-05-05",
+      "protocol": "Ekubo Protocol",
+      "file": "20260505-EkuboProtocol.json"
+    },
+    {
+      "id": "huma-finance-2026",
+      "date": "2026-05-11",
+      "protocol": "Huma Finance",
+      "file": "20260511-HumaFinance.json"
+    },
+    {
+      "id": "inkfinance-2026",
+      "date": "2026-05-11",
+      "protocol": "INK Finance",
+      "file": "20260511-INKFinance.json"
+    },
+    {
       "id": "echo-protocol-2026",
       "date": "2026-05-18",
       "protocol": "Echo Protocol",
