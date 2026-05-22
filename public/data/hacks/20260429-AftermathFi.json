@@ -1,0 +1,234 @@
+{
+  "id": "aftermathfi-2026",
+  "title": "AftermathFi Perpetuals Negative Fee Exploit",
+  "protocol": "AftermathFi",
+  "blockchain": [
+    "sui"
+  ],
+  "category": [
+    "business_logic",
+    "arithmetic_error"
+  ],
+  "ecosystem": "move",
+  "language": "move",
+  "estimatedLoss": {
+    "totalUSD": "1141052",
+    "breakdown": [
+      {
+        "asset": "USDC",
+        "amount": "1141052",
+        "convertedUSD": "1141052"
+      }
+    ],
+    "note": "On-chain analysis of 14 WithdrewCollateral events from AftermathFi Perpetuals clearing house vaults confirms 1,141,052.06 USDC drained between 08:55:50 and 09:31:49 UTC on April 29, 2026. Media reports cite ~$1.1M–$1.14M. The attacker seeded the exploit with a swap of 300 SUI for 278.73 USDC approximately 34 minutes before the first exploit transaction. Post-exploit, the attacker swapped portions of stolen USDC back to SUI through AftermathFi's own router. Remaining attacker balance at time of investigation: ~930 USDC + ~3,443 SUI on Sui address."
+  },
+  "attackTime": {
+    "startTime": "2026-04-29T08:55:50Z",
+    "endTime": "2026-04-29T09:31:49Z",
+    "isRange": true,
+    "note": "First exploit transaction (digest 531W14...) executed at 08:55:50 UTC. Last exploit transaction (digest 4pGQd...) executed at 09:31:49 UTC. Total duration: ~36 minutes across 14 ProgrammableTransaction blocks. A setup swap of 300 SUI → 278.73 USDC occurred at 08:21:48 UTC (~34 minutes before the first exploit). Post-exploit swap/laundering transactions continued until 10:45:22 UTC.",
+    "date": "2026-04-29"
+  },
+  "transactions": [
+    {
+      "txHash": "p7pi9jYCfutVr3SPzQ3NF9P6WbFqWB84o3mka2iWmFt",
+      "chain": "sui",
+      "role": "setup",
+      "description": "Attacker swapped 300 SUI for 278.73 USDC via AftermathFi's smart-order router (0xcad1bc93...) to fund the initial collateral deposit. Executed at 08:21:48 UTC, ~34 minutes before the first exploit transaction."
+    },
+    {
+      "txHash": "531W14qrdyoD8tZrA34CzSU8pe4Dz1bNEAEcq2mC7E7u",
+      "chain": "sui",
+      "role": "exploit",
+      "description": "First exploit transaction at 08:55:50 UTC. Created Perpetuals positions 1201 and 1202, deposited 100 USDC collateral, triggered negative integrator fee underflow in clearing house fee accounting, deallocated ~7.7M USDC worth of phantom collateral, and withdrew 261,752.22 USDC from the protocol vault."
+    },
+    {
+      "txHash": "FQALUkZD1NnY9cDYoah2Zus6Z4TSp6voj1k2XKuA863Y",
+      "chain": "sui",
+      "role": "exploit",
+      "description": "Exploit transaction at 08:55:54 UTC. Created positions 1203/1204, deposited 100 USDC, triggered fee underflow, deallocated ~232.5M USDC worth of phantom collateral, and withdrew 199,664.41 USDC."
+    },
+    {
+      "txHash": "4pGQdfFG96Ghqj1xqkaeeAgMQCpttivdkgSRUGc6wVD8",
+      "chain": "sui",
+      "role": "exploit",
+      "description": "Final exploit transaction at 09:31:49 UTC. Created positions 1227/1228, deposited 100 USDC, triggered fee underflow, deallocated ~349.8M USDC worth of phantom collateral, and withdrew 79,710.45 USDC. No further Perpetuals interactions from this address."
+    },
+    {
+      "txHash": "FE2ug1H58q2AUjfMx57BM5BmTV8x91L4djA5F3GL2Fxq",
+      "chain": "sui",
+      "role": "laundering",
+      "description": "Post-exploit swap at 10:24:29 UTC. Attacker converted 50,000 USDC to ~53,335 SUI via AftermathFi's smart-order router, dispersing stolen funds into the Sui ecosystem."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x1a65086c85114c1a3f8dc74140115c6e18438d48d33a21fd112311561112d41e",
+      "chain": "sui",
+      "role": "primary_attacker",
+      "description": "Attacker externally owned account (EOA) that executed the exploit. Flagged as 'Known Malicious' on Suiscan. Deployed no smart contracts; all exploit logic was executed directly via ProgrammableTransaction blocks. Current balance at investigation time: ~3,443 SUI + ~930 USDC.",
+      "accountType": "eoa"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x21d001e8b07da2e3facb3e2d636bbaef43ba3c978bd84810368840b7d57c5068",
+      "chain": "sui",
+      "role": "protocol_contract",
+      "description": "AftermathFi Perpetuals core smart contract package on Sui Network. This contract contained the clearing house fee accounting bug that allowed negative integrator fees to underflow in unsigned u256 arithmetic, inflating collateral balances and enabling unauthorized withdrawals from protocol vaults.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "description": "On April 29, 2026, an attacker exploited a business logic bug in AftermathFi's Perpetuals trading module on Sui Network to drain approximately $1.14 million USDC from protocol vaults. The exploit targeted a flaw in the clearing house fee accounting logic: when certain order conditions triggered a negative integrator fee calculation, the unsigned u256 arithmetic underflowed to a value near the maximum representable number (~1.15×10^77). The protocol's collateral accounting system interpreted this underflowed 'fee' as a massive credit, inflating the attacker's collateral balance by orders of magnitude beyond their actual 100 USDC deposit per position. The attacker repeated this pattern across 14 transactions in approximately 36 minutes, withdrawing a total of 1,141,052.06 USDC. On-chain event analysis reveals the precise mechanism: each exploit transaction emitted `CreatedPosition` (two positions), `DepositedCollateral` (100 USDC), `AllocatedCollateral` (small allocation), `UpdatedOpenInterestAndFeesAccrued`, `PaidIntegratorFees` (with u256 near-maximum value indicating underflow), `DeallocatedCollateral` (hundreds of millions of USDC worth in protocol precision), and finally `WithdrewCollateral` (tens of thousands to hundreds of thousands of USDC). The attack required no privileged access, no flash loans, and no reentrancy — only the ability to deposit minimal collateral and trigger the fee calculation path. AftermathFi paused the protocol immediately upon detection and coordinated with zeroShadow, Seal, Blockaid, and OtterSec on tracing and recovery. A patch was developed, law enforcement was engaged, and full refunds to affected users were processed by May 5, 2026. Post-exploit, the attacker swapped portions of stolen USDC back to SUI through AftermathFi's own router, dispersing funds. At the time of investigation, the attacker address still held ~930 USDC and ~3,443 SUI.",
+  "rootCause": "A bug in the AftermathFi Perpetuals clearing house fee accounting logic allowed the calculation of negative integrator fees under certain order conditions. In Move's unsigned integer arithmetic (u256), a negative fee result underflowed to a value near u256::MAX (~1.15×10^77). The protocol's `PaidIntegratorFees` event recorded this underflowed value, but the collateral deallocation logic interpreted the magnitude as a massive positive credit, inflating the attacker's withdrawable balance. The root cause was a missing validation step that should have ensured fee outputs were non-negative before applying them to collateral accounting. This is a business logic / calculation error, not an access control bypass.",
+  "attackVector": "1. Setup (08:21:48 UTC): The attacker swapped 300 SUI for 278.73 USDC via AftermathFi's smart-order router to acquire seed capital. 2. Position creation: In each of 14 exploit transactions, the attacker created two Perpetuals positions (account IDs incrementing from 1201 upward). 3. Collateral deposit: The attacker deposited 100 USDC into each position via `DepositedCollateral`. 4. Fee trigger: By constructing orders that caused the clearing house fee formula to evaluate to a negative number, the unsigned u256 fee calculation underflowed. 5. Synthetic collateral inflation: The underflowed fee (~1.15×10^77) was processed by the collateral system as a credit, enabling `DeallocatedCollateral` events showing hundreds of millions of USDC worth in protocol precision. 6. Withdrawal: The attacker called withdrawal functions, producing `WithdrewCollateral` events totaling 1,141,052.06 USDC across 14 transactions. 7. Laundering: Post-exploit, the attacker swapped stolen USDC back to SUI via AftermathFi's router in multiple transactions (e.g., 50,000 USDC → ~53,335 SUI at 10:24:29 UTC).",
+  "lessons": [
+    "Unsigned integer arithmetic in fee calculations is dangerous: always validate that fee outputs are non-negative and within expected bounds before applying them to collateral or balance accounting.",
+    "Business logic bugs in clearing house fee accounting can be as devastating as access control exploits. Rigorous unit testing, fuzz testing, and edge-case analysis of all fee formulas are essential.",
+    "Protocol routers used for swapping can inadvertently facilitate both the seeding and laundering of attack funds. Consider circuit breakers or rate limits on large outbound vault transfers.",
+    "MoveVM's object model and type system do not prevent business logic errors in package code. Formal verification of critical financial calculations (fee, collateral, liquidation) should be prioritized for DeFi protocols holding material value.",
+    "Rapid incident response — protocol pause, security firm engagement, law enforcement coordination, and transparent refund processing — is critical for maintaining user trust and minimizing systemic damage."
+  ],
+  "references": [
+    "https://x.com/blockaid_/status/2049446321686237558",
+    "https://x.com/coinminutes_en/status/2049475221158064619",
+    "https://x.com/AftermathFi",
+    "https://suiscan.xyz/mainnet/account/0x1a65086c85114c1a3f8dc74140115c6e18438d48d33a21fd112311561112d41e",
+    "https://aftermath.finance",
+    "https://docs.aftermath.finance"
+  ],
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-05-22",
+    "human_verified": false
+  },
+  "date": "2026-04-29",
+  "locales": {
+    "zh-TW": {
+      "title": "AftermathFi 永續合約負數手續費漏洞攻擊事件",
+      "description": "2026 年 4 月 29 日，一名攻擊者利用 AftermathFi 在 Sui Network 上的永續合約交易模組中的商業邏輯漏洞，從協議金庫 drained 約 114 萬 USDC。此攻擊針對清算所（clearing house）手續費會計邏輯的缺陷：當特定訂單條件觸發負數整合者手續費（negative integrator fee）計算時，無號數 u256 整數運算發生 underflow，產生接近 u256 最大值的數字（約 1.15×10^77）。協議的抵押品會計系統將此 underflow 的「手續費」誤解為巨額正向信用額度，使攻擊者的抵押品餘額膨脹數個數量級，遠超其每倉位實際存入的 100 USDC。攻擊者在約 36 分鐘內重複此模式 14 筆交易，總計 withdrawn 1,141,052.06 USDC。鏈上事件分析揭露了精確的攻擊機制：每筆攻擊交易依序發出 CreatedPosition（兩個倉位）、DepositedCollateral（100 USDC）、AllocatedCollateral（少量分配）、UpdatedOpenInterestAndFeesAccrued、PaidIntegratorFees（u256 接近最大值，表明 underflow）、DeallocatedCollateral（協議精度顯示數億 USDC 價值的 phantom collateral），最後是 WithdrewCollateral（每筆數萬至數十萬 USDC）。此攻擊無需特權存取、閃電貸或重入，只需存入最低抵押品並觸發手續費計算路徑。AftermathFi 在偵測到攻擊後立即暫停協議，並與 zeroShadow、Seal、Blockaid 及 OtterSec 協調追蹤與復原。漏洞修補程式已開發，執法單位已介入，受影響用戶的全額退款於 2026 年 5 月 5 日處理完畢。攻擊後，攻擊者透過 AftermathFi 自有路由器將部分被盜 USDC 兌換回 SUI 以分散資金。調查時，攻擊者地址仍持有約 930 USDC 及約 3,443 SUI。",
+      "rootCause": "AftermathFi 永續合約清算所手續費會計邏輯存在缺陷，允許在特定訂單條件下計算出負數整合者手續費。在 Move 語言的無號數 u256 整數運算中，負數結果 underflow 至接近 u256::MAX 的值（約 1.15×10^77）。協議的 `PaidIntegratorFees` 事件記錄了此 underflow 數值，但抵押品解除分配（deallocation）邏輯將其視為巨額正向信用額度，膨脹了攻擊者的可提領餘額。根本原因在於缺少一個驗證步驟，即在手續費輸出應用於抵押品會計之前，應先確保其為非負數。此為商業邏輯／計算錯誤，並非存取控制繞過。",
+      "attackVector": "1. 準備階段（08:21:48 UTC）：攻擊者透過 AftermathFi 智慧訂單路由器將 300 SUI 兌換為 278.73 USDC，取得初始資金。2. 建立倉位：在 14 筆攻擊交易中，攻擊者各建立兩個永續合約倉位（account ID 從 1201 開始遞增）。3. 存入抵押品：透過 `DepositedCollateral` 每倉位存入 100 USDC。4. 觸發手續費 underflow：透過構造使清算所手續費公式計算結果為負數的訂單，無號數 u256 手續費計算發生 underflow。5. 合成抵押品膨脹：underflow 的手續費值（~1.15×10^77）被抵押品系統視為信用額度，使 `DeallocatedCollateral` 事件顯示數億 USDC 價值的 phantom collateral。6. 提領：攻擊者呼叫提領函式，14 筆交易共產生 1,141,052.06 USDC 的 `WithdrewCollateral` 事件。7. 洗錢：攻擊後，攻擊者透過 AftermathFi 路由器將被盜 USDC 兌換回 SUI（例如 10:24:29 UTC 的 50,000 USDC → ~53,335 SUI），分散資金。",
+      "transactions": [
+        {
+          "txHash": "p7pi9jYCfutVr3SPzQ3NF9P6WbFqWB84o3mka2iWmFt",
+          "chain": "sui",
+          "role": "setup",
+          "description": "準備交易。攻擊者透過 AftermathFi 智慧訂單路由器（0xcad1bc93...）將 300 SUI 兌換為 278.73 USDC，以資助初始抵押品存入。執行於 08:21:48 UTC，比第一筆攻擊交易早約 34 分鐘。"
+        },
+        {
+          "txHash": "531W14qrdyoD8tZrA34CzSU8pe4Dz1bNEAEcq2mC7E7u",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "首筆攻擊交易，執行於 08:55:50 UTC。建立永續合約倉位 1201 與 1202，存入 100 USDC 抵押品，觸發清算所手續費會計中的負數整合者手續費 underflow，解除分配約 770 萬 USDC 價值的 phantom collateral，並從協議金庫提領 261,752.22 USDC。"
+        },
+        {
+          "txHash": "FQALUkZD1NnY9cDYoah2Zus6Z4TSp6voj1k2XKuA863Y",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "攻擊交易，執行於 08:55:54 UTC。建立倉位 1203/1204，存入 100 USDC，觸發手續費 underflow，解除分配約 2.325 億 USDC 價值的 phantom collateral，並提領 199,664.41 USDC。"
+        },
+        {
+          "txHash": "4pGQdfFG96Ghqj1xqkaeeAgMQCpttivdkgSRUGc6wVD8",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "最後一筆攻擊交易，執行於 09:31:49 UTC。建立倉位 1227/1228，存入 100 USDC，觸發手續費 underflow，解除分配約 3.498 億 USDC 價值的 phantom collateral，並提領 79,710.45 USDC。此地址後續無再與永續合約互動。"
+        },
+        {
+          "txHash": "FE2ug1H58q2AUjfMx57BM5BmTV8x91L4djA5F3GL2Fxq",
+          "chain": "sui",
+          "role": "laundering",
+          "description": "攻擊後洗錢交易，執行於 10:24:29 UTC。攻擊者透過 AftermathFi 智慧訂單路由器將 50,000 USDC 兌換為約 53,335 SUI，將被盜資金分散至 Sui 生態系。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x1a65086c85114c1a3f8dc74140115c6e18438d48d33a21fd112311561112d41e",
+          "chain": "sui",
+          "role": "primary_attacker",
+          "description": "主要攻擊者外部擁有帳戶（EOA）。Suiscan 標記為「Known Malicious」。未部署任何智能合約；所有攻擊邏輯皆透過 ProgrammableTransaction 區塊直接執行。調查時餘額：約 3,443 SUI + 約 930 USDC。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x21d001e8b07da2e3facb3e2d636bbaef43ba3c978bd84810368840b7d57c5068",
+          "chain": "sui",
+          "role": "protocol_contract",
+          "description": "AftermathFi 永續合約核心智能合約套件（package）於 Sui Network。此合約包含清算所手續費會計漏洞，允許負數整合者手續費在無號數 u256 算術中 underflow，膨脹抵押品餘額並使攻擊者得以從協議金庫未經授權提領資金。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "無號數整數運算用於手續費計算極具風險：在將手續費輸出應用於抵押品或餘額會計之前，務必驗證其為非負數且在預期範圍內。",
+        "清算所手續費會計的商業邏輯漏洞可能與存取控制漏洞同等致命。必須對所有手續費公式進行嚴格的單元測試、模糊測試及邊界案例分析。",
+        "協議用於兌換的路由器可能無意中為攻擊資金的籌集與洗錢提供便利。應考慮對大額金庫轉出設定斷路器或速率限制。",
+        "MoveVM 的物件模型與型別系統無法防止套件程式碼中的商業邏輯錯誤。對於持有實質價值的 DeFi 協議，應優先對關鍵財務計算（手續費、抵押品、清算）進行形式驗證。",
+        "快速事件回應——協議暫停、安全公司介入、執法單位協調及透明退款處理——對於維持用戶信任與最小化系統性損害至關重要。"
+      ]
+    },
+    "ja": {
+      "title": "AftermathFi Perpetuals 負の手数料脆弱性による攻撃",
+      "description": "2026年4月29日、攻撃者はSui Network上のAftermathFiのパーペチュアル取引モジュールに存在するビジネスロジックの脆弱性を悪用し、プロトコルヴォールトから約114万USDCを drained しました。この攻撃はクリアリングハウスの手数料会計ロジックの欠陥を狙ったものです：特定の注文条件が負のインテグレーター手数料（negative integrator fee）の計算を引き起こすと、符号なしu256整数演算でアンダーフローが発生し、u256の最大値に近い数値（約1.15×10^77）が生成されました。プロトコルの担保会計システムは、このアンダーフローした「手数料」を巨大な正のクレジットと誤認識し、攻撃者の担保残高を実際の各ポジションへの100 USDC預金をはるかに超える規模に膨張させました。攻撃者は約36分間で14トランザクションにわたってこのパターンを繰り返し、合計1,141,052.06 USDCを引き出しました。オンチェーンイベント分析により、正確な攻撃メカニズムが明らかになりました：各攻撃トランザクションは、CreatedPosition（2つのポジション）、DepositedCollateral（100 USDC）、AllocatedCollateral（少量の割り当て）、UpdatedOpenInterestAndFeesAccrued、PaidIntegratorFees（u256が最大値に近く、アンダーフローを示す）、DeallocatedCollateral（プロトコル精度で数億USDC相当のファントム担保）、最後にWithdrewCollateral（各トランザクションで数万～数十万USDC）を順に発行しました。この攻撃には特権アクセス、フラッシュローン、または再入攻撃は不要で、最小限の担保を預金し手数料計算パスをトリガーするだけでした。AftermathFiは攻撃検知後、直ちにプロトコルを一時停止し、zeroShadow、Seal、Blockaid、OtterSecと協力して追跡と回復に取り組みました。パッチが開発され、法執行機関が関与し、影響を受けたユーザーへの全額返金は2026年5月5日までに完了しました。攻撃後、攻撃者はAftermathFiの独自ルーターを通じて盗まれたUSDCの一部をSUIに交換し、資金を分散させました。調査時点で、攻撃者のアドレスには約930 USDCと約3,443 SUIが残存していました。",
+      "rootCause": "AftermathFi Perpetualsのクリアリングハウス手数料会計ロジックに欠陥があり、特定の注文条件下で負のインテグレーター手数料が計算される可能性がありました。Move言語の符号なしu256整数演算では、負の結果がu256::MAXに近い値（約1.15×10^77）へアンダーフローしました。プロトコルの`PaidIntegratorFees`イベントはこのアンダーフロー値を記録しましたが、担保の割り当て解除（deallocation）ロジックはその大きさを巨大な正のクレジットとして解釈し、攻撃者の引き出し可能残高を膨張させました。根本原因は、手数料出力を担保会計に適用する前に、それが非負であることを確認すべき検証ステップが欠けていたことです。これはアクセスコントロールのバイパスではなく、ビジネスロジック／計算エラーです。",
+      "attackVector": "1. 準備（08:21:48 UTC）：攻撃者はAftermathFiのスマートオーダールーターを通じて300 SUIを278.73 USDCに交換し、初期資金を調達しました。2. ポジション作成：14の攻撃トランザクションそれぞれで、攻撃者は2つのPerpetualsポジションを作成しました（アカウントIDは1201から順に増加）。3. 担保の預入：各ポジションに100 USDCを`DepositedCollateral`で預入しました。4. 手数料トリガー：クリアリングハウスの手数料式が負の数値を評価するような注文を構成することで、符号なしu256の手数料計算がアンダーフローしました。5. 合成担保の膨張：アンダーフローした手数料（~1.15×10^77）が担保システムによってクレジットとして処理され、`DeallocatedCollateral`イベントで数億USDC相当のプロトコル精度が示されました。6. 引き出し：攻撃者は引き出し関数を呼び出し、14トランザクションで合計1,141,052.06 USDCの`WithdrewCollateral`イベントを生成しました。7. 資金洗浄：攻撃後、攻撃者はAftermathFiのルーターを通じて盗まれたUSDCをSUIに交換しました（例：10:24:29 UTCの50,000 USDC → ~53,335 SUI）。",
+      "transactions": [
+        {
+          "txHash": "p7pi9jYCfutVr3SPzQ3NF9P6WbFqWB84o3mka2iWmFt",
+          "chain": "sui",
+          "role": "setup",
+          "description": "準備トランザクション。攻撃者はAftermathFiのスマートオーダールーター（0xcad1bc93...）を通じて300 SUIを278.73 USDCに交換し、初期担保の預入資金を確保しました。08:21:48 UTCに実行され、最初の攻撃トランザクションより約34分前です。"
+        },
+        {
+          "txHash": "531W14qrdyoD8tZrA34CzSU8pe4Dz1bNEAEcq2mC7E7u",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "最初の攻撃トランザクション、08:55:50 UTCに実行。Perpetualsポジション1201と1202を作成し、100 USDCの担保を預入。清算所手数料会計の負のインテグレーター手数料アンダーフローを引き起こし、約770万USDC相当のファントム担保を割り当て解除し、プロトコルヴォールトから261,752.22 USDCを引き出しました。"
+        },
+        {
+          "txHash": "FQALUkZD1NnY9cDYoah2Zus6Z4TSp6voj1k2XKuA863Y",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "攻撃トランザクション、08:55:54 UTCに実行。ポジション1203/1204を作成し、100 USDCを預入。手数料アンダーフローを引き起こし、約2.325億USDC相当のファントム担保を割り当て解除し、199,664.41 USDCを引き出しました。"
+        },
+        {
+          "txHash": "4pGQdfFG96Ghqj1xqkaeeAgMQCpttivdkgSRUGc6wVD8",
+          "chain": "sui",
+          "role": "exploit",
+          "description": "最後の攻撃トランザクション、09:31:49 UTCに実行。ポジション1227/1228を作成し、100 USDCを預入。手数料アンダーフローを引き起こし、約3.498億USDC相当のファントム担保を割り当て解除し、79,710.45 USDCを引き出しました。このアドレスはその後、Perpetualsとのさらなるやり取りは行いませんでした。"
+        },
+        {
+          "txHash": "FE2ug1H58q2AUjfMx57BM5BmTV8x91L4djA5F3GL2Fxq",
+          "chain": "sui",
+          "role": "laundering",
+          "description": "攻撃後の資金洗浄トランザクション、10:24:29 UTCに実行。攻撃者はAftermathFiのスマートオーダールーターを通じて50,000 USDCを約53,335 SUIに交換し、盗まれた資金をSuiエコシステムに分散させました。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x1a65086c85114c1a3f8dc74140115c6e18438d48d33a21fd112311561112d41e",
+          "chain": "sui",
+          "role": "primary_attacker",
+          "description": "主要攻撃者の外部所有アカウント（EOA）。Suiscanでは「Known Malicious」としてフラグ付けされています。スマートコントラクトを展開せず、すべての攻撃ロジックはProgrammableTransactionブロックを通じて直接実行されました。調査時の残高：約3,443 SUI + 約930 USDC。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x21d001e8b07da2e3facb3e2d636bbaef43ba3c978bd84810368840b7d57c5068",
+          "chain": "sui",
+          "role": "protocol_contract",
+          "description": "AftermathFi Perpetualsのコアスマートコントラクトパッケージ（Sui Network上）。このコントラクトには清算所手数料会計の脆弱性が含まれており、負のインテグレーター手数料が符号なしu256算術でアンダーフローすることを許容し、担保残高を膨張させ、プロトコルヴォールトからの未承認引き出しを可能にしました。",
+          "accountType": "contract_open_source"
+        }
+      ],
+      "lessons": [
+        "手数料計算における符号なし整数演算は危険です：手数料出力を担保または残高会計に適用する前に、常に非負であり予想範囲内であることを検証してください。",
+        "クリアリングハウスの手数料会計におけるビジネスロジックの欠陥は、アクセスコントロールの脆弱性と同様に壊滅的な影響を及ぼす可能性があります。すべての手数料式に対して厳格なユニットテスト、ファジングテスト、およびエッジケース分析が不可欠です。",
+        "スワップに使用されるプロトコルルーターは、攻撃資金の調達と資金洗浄を無意識に促進する可能性があります。大規模な外部ヴォールト転送に対するサーキットブレーカーやレート制限を検討してください。",
+        "MoveVMのオブジェクトモデルと型システムは、パッケージコード内のビジネスロジックエラーを防ぐことはできません。実質的な価値を保持するDeFiプロトコルでは、重要な財務計算（手数料、担保、清算）の形式検証を優先すべきです。",
+        "迅速なインシデント対応——プロトコルの一時停止、セキュリティ会社の関与、法執行機関との協調、および透明な返金処理——は、ユーザーの信頼を維持し、系統的な損害を最小化するために重要です。"
+      ]
+    }
+  }
+}
