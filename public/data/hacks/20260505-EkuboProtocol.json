@@ -1,0 +1,213 @@
+{
+  "id": "ekubo-2026",
+  "title": "Ekubo Protocol HuffRouter Approval Draining via Trailing Calldata",
+  "protocol": "Ekubo Protocol",
+  "blockchain": [
+    "ethereum",
+    "arbitrum"
+  ],
+  "category": [
+    "business_logic"
+  ],
+  "ecosystem": "evm",
+  "language": "huff",
+  "estimatedLoss": {
+    "totalUSD": "1419543",
+    "breakdown": [
+      {
+        "asset": "WBTC",
+        "amount": "17.01583735",
+        "convertedUSD": "1368147"
+      },
+      {
+        "asset": "cbBTC",
+        "amount": "0.34386474",
+        "convertedUSD": "27715"
+      },
+      {
+        "asset": "USDC",
+        "amount": "20550.007788",
+        "convertedUSD": "20550"
+      },
+      {
+        "asset": "EKUBO",
+        "amount": "5813.547755142307722539",
+        "convertedUSD": "3024"
+      },
+      {
+        "asset": "USDT",
+        "amount": "92.38397",
+        "convertedUSD": "92"
+      },
+      {
+        "asset": "gEKUBO-26Q2",
+        "amount": "15.806237743227243531",
+        "convertedUSD": "8"
+      },
+      {
+        "asset": "LINK",
+        "amount": "0.550329927867664502",
+        "convertedUSD": "6"
+      }
+    ],
+    "note": "Total ~$1.42M calculated from Ekubo official incident report reimbursement data. WBTC accounted for ~96.4% of total loss. The main exploit transaction (0x770bc9...) drained 17.0 WBTC from a single victim EOA via 85 iterations of 0.2 WBTC each within one transaction. Additional tokens were drained from other victims across multiple affected router deployments (V2 and V3 on Ethereum and Arbitrum)."
+  },
+  "attackTime": {
+    "startTime": "2026-05-05T17:49:47Z",
+    "endTime": "2026-05-05T17:50:35Z",
+    "isRange": true,
+    "note": "The attacker deployed an intermediary contract at 17:49:47 UTC and executed the main exploit transaction at 17:50:35 UTC. The entire attack completed within a single Ethereum block (25030409), containing 85 repeated calldata iterations that drained 0.2 WBTC per iteration. The protocol publicly disclosed the incident on May 6, 2026.",
+    "date": "2026-05-05"
+  },
+  "transactions": [
+    {
+      "txHash": "0x2058474156d2225b8fd7b63f3bdb30efcb9238a6cca70bbd08ed25c4bb80f542",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Attacker-deployed intermediary contract (0x61b0dAD9628D3e644eB560a5c9B0F960430E3A75) creation transaction at block 25030409. Gas used: 260,105. Confirmed contract creation via eth_getTransactionReceipt contractAddress field."
+    },
+    {
+      "txHash": "0x770bc9a1f7c32cb63a5002b9ceb5c7994cd3af0fc6b2309cb32d3c46f629daa0",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Primary exploit transaction at block 25030409 (2026-05-05 17:50:35 UTC). Called forward() on attacker intermediary contract, which forwarded crafted calldata to Ekubo HuffRouter V2 (0x8ccb...). Gas used: 1,735,786. Receipt contains 170 WBTC Transfer event logs demonstrating 85 iterations of 0.2 WBTC drained from victim 0x765d... via approval abuse."
+    },
+    {
+      "txHash": "0xd5d4ceb4527427e78a77dd9b193e550a04cebfc5bf1e01e2c00b9a0bf3fa724c",
+      "chain": "ethereum",
+      "role": "laundering",
+      "description": "Post-exploit WBTC token approval/transfer transaction at 2026-05-05 17:51:59 UTC. Gas used: 48,272."
+    },
+    {
+      "txHash": "0x780f0aa86034d607d37869e277e477ee579ef28e267c46f0c4855e642239aacc",
+      "chain": "ethereum",
+      "role": "laundering",
+      "description": "Swap/laundering transaction to unidentified aggregator contract 0x6a000f20005980200259b80c5102003040001068 at 2026-05-05 17:52:47 UTC. Gas used: 1,814,602."
+    },
+    {
+      "txHash": "0x3adb8f997decf65e189d37ff1a35785e6f17b498003c3974d236c025e0ab8657",
+      "chain": "ethereum",
+      "role": "laundering",
+      "description": "Tornado Cash deposit transaction to 0xfa7093cdd9ee6932b4eb2c9e1cde7ce00b1fa4b9 at 2026-05-05 17:57:59 UTC. Gas used: 752,108."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0xa911ff351b143634dbc5af3e204ea074583a83e3",
+      "chain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Attacker externally owned account (EOA) that deployed the intermediary contract and executed the exploit. Confirmed EOA via eth_getCode (no contract code). Subsequently laundered stolen funds through DEX swaps and Tornado Cash deposits.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x61b0dad9628d3e644eb560a5c9b0f960430e3a75",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attacker-deployed intermediary smart contract (1,686 bytes, unverified) created at 2026-05-05 17:49:47 UTC. Its forward() function was called in the main exploit transaction to relay malicious calldata to the Ekubo HuffRouter. Official incident report identifies this address as the routerCaller.",
+      "accountType": "contract_close_source"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x8ccb1ffd5c2aa6bd926473425dea4c8c15de60fd",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ekubo HuffRouter V2 deployment on Ethereum mainnet (45,018 bytes, unverified). One of the affected routers vulnerable to the calldata parsing bug. Holds no funds directly but was the conduit through which user approvals were abused.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x8f52903d17e2d8d6c77d1a1de0cc975b6b5a0d15",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ekubo HuffRouter V2 deployment on Ethereum mainnet (37,902 bytes, unverified). Second affected V2 router instance identified in the official incident report.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x4f168f17923435c999f5c8565acab52c2218edf2",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ekubo HuffRouter V3 deployment on Ethereum mainnet (49,106 bytes, unverified). Affected V3 router identified in the official incident report.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0xc93c4ad185ca48d66fefe80f906a67ef859fc47d",
+      "chain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Ekubo HuffRouter V3 deployment on Arbitrum. Affected Arbitrum router identified in the official incident report. One successful exploit of 5 USDC confirmed on Arbitrum.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x765decf4fa157756e850c1079f60801b9219edd1",
+      "chain": "ethereum",
+      "role": "victim_eoa",
+      "description": "Primary victim externally owned account whose WBTC allowance to the HuffRouter was exploited. On-chain receipt analysis shows 85 unauthorized Transfer events moving 0.2 WBTC per iteration (17.0 WBTC total) from this address via the Ekubo Core singleton. Confirmed EOA via eth_getCode.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xe0e0e08a6a4b9dc7bd67bcb7aade5cf48157d444",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ekubo Core singleton contract (47,502 bytes, unverified) inferred from the fund flow. In the exploit transaction, WBTC was first transferred from the victim EOA to this contract, then from this contract to the attacker EOA, consistent with the Core.forward() and settlement mechanics described in the official incident report.",
+      "accountType": "contract_close_source"
+    }
+  ],
+  "description": "On May 5, 2026, an attacker exploited a calldata parsing vulnerability in Ekubo Protocol's HuffRouter—a gas-optimized router contract written in Huff—to drain approximately $1.42 million in user funds. The vulnerability allowed attacker-controlled trailing bytes appended after a swap route to be reinterpreted during settlement as the transferFrom address, enabling the attacker to spend arbitrary ERC20 allowances granted by victims to the affected router.\n\nThe attacker first deployed an intermediary contract (0x61b0...) and, within a single Ethereum block (25030409), executed a transaction (0x770bc9...) that performed 85 iterations of 0.2 WBTC transfers, draining 17.0 WBTC from victim EOA 0x765d... through the Ekubo Core singleton. On-chain receipt analysis confirms 170 WBTC Transfer event logs, alternating between victim-to-Core and Core-to-attacker flows. Additional victims lost USDC, EKUBO, USDT, cbBTC, gEKUBO-26Q2, and LINK tokens across the affected Ethereum and Arbitrum deployments.\n\nEkubo Protocol publicly disclosed the incident on May 6, 2026, urged all users to revoke approvals to the affected routers, and subsequently published a full post-mortem, remediation plan, and reimbursement scheme.",
+  "rootCause": "A calldata parsing bug in HuffRouter's settlement logic. When calling Core#lock, the router passes original calldata extended with router-set data. If withRecipient=false, it appends msg.sender as both the default recipient and an ABI-encoded transferFrom address. The vulnerable settlement logic loaded transferFrom and recipient from a relative offset based on the logical end of the decoded route. Because the parser's logical end of route data did not guarantee the actual end of calldata, attacker-supplied trailing bytes appended after the route could be reinterpreted during settlement as the transferFrom address. While the recipient is intended to be caller-controllable, the transferFrom address must not be, which allowed the attacker to point it at any victim that had previously approved the router.",
+  "attackVector": "1. The attacker identified victims that had granted infinite or large ERC20 approvals to one of the affected HuffRouter deployments (0x8ccb..., 0x8f52..., 0x4f168..., or 0xc93c...). 2. The attacker deployed an intermediary contract at 0x61b0dAD9628D3e644eB560a5c9B0F960430E3A75. 3. From EOA 0xa911..., the attacker called the intermediary contract's forward() function, constructing malicious calldata consisting of a short, intentionally-failing swap route (a single TokenWrapper unwrap hop on WBTC) followed by trailing bytes encoding: attacker address as recipient, 12 bytes of junk, and victim address 0x765d... as transferFrom. 4. The intermediary contract relayed this calldata to the HuffRouter. The router parsed and attempted the route hop, which failed silently (WBTC does not implement the Core.forward callback). 5. During settlement, the router interpreted the trailing bytes as router-set data, reading the victim's address as transferFrom. 6. Because the victim had previously approved the router, the router used transferFrom to move 0.2 WBTC from the victim to the Ekubo Core singleton (0xe0e0...), while simultaneously withdrawing the same amount from Core to the attacker. 7. The attacker repeated this pattern 85 times within a single transaction, draining 17.0 WBTC. 8. Post-exploit, the attacker laundered stolen WBTC through DEX swaps and Tornado Cash deposits.",
+  "lessons": [
+    "Never derive security-critical parameters (such as transferFrom addresses) from route-relative calldata offsets; always anchor reads to the actual end of calldata or use fixed, authenticated data structures.",
+    "Gas-optimized contracts written in low-level languages (e.g., Huff, Yul, assembly) require extra scrutiny during review, as manual calldata parsing is highly error-prone.",
+    "Router contracts that hold or can spend user ERC20 approvals represent high-value targets and should undergo professional security audits before deployment, regardless of expected usage volume.",
+    "Time-bounded or expiring token approvals (e.g., ERC-8255) can significantly reduce the blast radius of approval-based exploits by limiting the window during which stale approvals remain exploitable.",
+    "Immutable router deployments cannot be patched in place. Incident response for such contracts must include immediate frontend warnings, revoke campaigns, and user-facing alerts for any outstanding approvals.",
+    "On-chain receipt analysis of Transfer event sequences can reveal the exact iteration count and per-iteration amount of approval-draining attacks, providing precise loss quantification even when the exploit contract is unverified."
+  ],
+  "references": [
+    "https://github.com/EkuboProtocol/huff-router/blob/main/incident-report/README.md",
+    "https://x.com/GoPlusZH/status/2051872890472276395",
+    "https://x.com/EkuboProtocol/status/2051754481465856038",
+    "https://x.com/EkuboProtocol/status/2051760043146567684",
+    "https://etherscan.io/tx/0x770bc9a1f7c32cb63a5002b9ceb5c7994cd3af0fc6b2309cb32d3c46f629daa0",
+    "https://etherscan.io/tx/0x2058474156d2225b8fd7b63f3bdb30efcb9238a6cca70bbd08ed25c4bb80f542",
+    "https://etherscan.io/address/0x8ccb1ffd5c2aa6bd926473425dea4c8c15de60fd",
+    "https://etherscan.io/address/0xa911ff351b143634dbc5af3e204ea074583a83e3",
+    "https://revoke.cash/exploits/ekubo?chainId=1",
+    "https://eips.ethereum.org/EIPS/eip-8255"
+  ],
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-05-22",
+    "human_verified": true
+  },
+  "date": "2026-05-05",
+  "locales": {
+    "zh-TW": {
+      "title": "Ekubo Protocol HuffRouter 尾隨 Calldata 濫用授權竊取事件",
+      "description": "2026 年 5 月 5 日，攻擊者利用 Ekubo Protocol 的 HuffRouter（一個以 Huff 語言撰寫、針對 Gas 最佳化的路由合約）中的 calldata 解析漏洞， drained 約 142 萬美元的用戶資金。該漏洞允許攻擊者在合法的交換路由後附加任意位元組，這些位元組在結算時被重新解讀為 transferFrom 地址，使攻擊者能夠花費受害者對受影響路由合約的 ERC20 授權額度。\n\n攻擊者首先部署中介合約 0x61b0...，並在單一以太坊區塊（25030409）內執行交易 0x770bc9...，進行了 85 次迭代、每次 0.2 WBTC 的轉移，共從受害者 EOA 0x765d...  drained 17.0 WBTC。鏈上收據分析證實了 170 個 WBTC Transfer 事件日誌，呈現受害者轉至 Ekubo Core、Core 再轉至攻擊者的交替模式。其他受害者還損失了 USDC、EKUBO、USDT、cbBTC、gEKUBO-26Q2 與 LINK 等代幣，涵蓋受影響的 Ethereum 與 Arbitrum 部署。\n\nEkubo Protocol 於 2026 年 5 月 6 日公開披露此事件，敦促所有用戶撤銷對受影響路由合約的授權，並隨後發布完整的事後分析、修補計畫與賠償方案。",
+      "rootCause": "HuffRouter 結算邏輯中的 calldata 解析錯誤。當呼叫 Core#lock 時，路由合約會傳遞原始 calldata，並在其後附加路由設定的資料。若 withRecipient=false，則會附加 msg.sender 作為預設接收方，以及再次附加 msg.sender 作為 ABI 編碼的 transferFrom 地址。有漏洞的結算邏輯從解碼路由的邏輯結尾相對偏移量載入 transferFrom 與 recipient。由於解析器的邏輯路由結尾不保證與實際 calldata 結尾一致，攻擊者在路由後附加的尾隨位元組可在結算時被重新解讀為 transferFrom 地址。recipient 本應可由呼叫者控制，但 transferFrom 地址絕對不應被控制，這使攻擊者得以將其指向任何先前對路由合約授權的受害者。",
+      "attackVector": "1. 攻擊者找出對受影響 HuffRouter 部署（0x8ccb...、0x8f52...、0x4f168... 或 0xc93c...）授予無限或大量 ERC20 授權的受害者。2. 攻擊者在 0x61b0dAD9628D3e644eB560a5c9B0F960430E3A75 部署中介合約。3. 攻擊者從 EOA 0xa911... 呼叫中介合約的 forward() 函數，構造惡意 calldata：先是一段短暫且故意失敗的交換路由（單一 WBTC TokenWrapper unwrap hop），後面尾隨編碼了攻擊者地址為 recipient、12 位元組垃圾、以及受害者地址 0x765d... 為 transferFrom 的位元組。4. 中介合約將此 calldata 轉發給 HuffRouter。路由合約解析並嘗試執行路由 hop，但因 WBTC 未實現 Core.forward 回調而靜默失敗。5. 結算時，路由合約將尾隨位元組解讀為路由設定資料，讀取受害者地址為 transferFrom。6. 由於受害者先前已對路由合約授權，路由合約使用 transferFrom 將 0.2 WBTC 從受害者移至 Ekubo Core 單例（0xe0e0...），同時從 Core 提領相同數額給攻擊者。7. 攻擊者在單筆交易中重複此模式 85 次， drained 17.0 WBTC。8. 攻擊後，攻擊者透過 DEX 兌換與 Tornado Cash 存款清洗被盜 WBTC。",
+      "lessons": [
+        "絕對不能從路由相對 calldata 偏移量推導安全關鍵參數（如 transferFrom 地址）；必須將讀取錨定到實際 calldata 結尾，或使用固定且已認證的資料結構。",
+        "以低階語言（如 Huff、Yul、assembly）撰寫的 Gas 最佳化合約在審查時需要額外關注，因為手動 calldata 解析極易出錯。",
+        "能夠持有或花費用戶 ERC20 授權額度的路由合約屬於高價值目標，無論預期使用量高低，部署前都應接受專業安全稽核。",
+        "具時效性或到期機制的代幣授權（例如 ERC-8255）可顯著降低基於授權的攻擊影響範圍，透過限制過期授權的可利用時間窗口來保護用戶。",
+        "不可變的路由部署無法就地修補。對此類合約的事件回應必須包含立即的前端警告、撤銷授權活動，以及針對尚未撤銷授權用戶的介面提示。",
+        "Transfer 事件序列的鏈上收據分析可以揭示授權 drained 攻擊的確切迭代次數與每次金額，即使攻擊合約未經驗證，也能提供精確的損失量化。"
+      ]
+    },
+    "ja": {
+      "title": "Ekubo Protocol HuffRouter 末尾Calldataによる承認濫用窃取事件",
+      "description": "2026年5月5日、攻撃者はEkubo ProtocolのHuffRouter（Huff言語で記述されたガス最適化ルーター契約）にあるcalldata解析の脆弱性を悪用し、約142万ドルのユーザー資金を排出した。この脆弱性により、攻撃者は正当なスワップルートの後に任意のバイトを追加し、それらのバイトが決済時にtransferFromアドレスとして再解釈されることで、被害者が影響を受けるルーターに付与したERC20承認を消費できた。\n\n攻撃者はまず仲介契約0x61b0...をデプロイし、単一のイーサリアムブロック（25030409）内でトランザクション0x770bc9...を実行して、0.2 WBTCずつ85回の繰り返し転送を行い、被害者EOA 0x765d...から合計17.0 WBTCを排出した。オンチェーンレシート分析は170個のWBTC Transferイベントログを確認し、被害者からEkubo Core、Coreから攻撃者への交互フローを示している。他の被害者はUSDC、EKUBO、USDT、cbBTC、gEKUBO-26Q2、LINKなどのトークンも損失し、影響を受けたEthereumおよびArbitrumのデプロイメント全体で被害が及んだ。\n\nEkubo Protocolは2026年5月6日にこの事件を公表し、すべてのユーザーに影響を受けるルーターへの承認取り消しを促した。その後、完全な事後分析、修復計画、および補償スキームを発表した。",
+      "rootCause": "HuffRouterの決済ロジックにおけるcalldata解析のバグ。Core#lockを呼び出す際、ルーターは元のcalldataにルーター設定データを追加して渡す。withRecipient=falseの場合、デフォルトの受信者およびABIエンコードされたtransferFromアドレスとしてmsg.senderを追加する。脆弱な決済ロジックは、デコードされたルートの論理的終端からの相対オフセットからtransferFromおよびrecipientを読み込んでいた。パーサーの論理的なルート終端がcalldataの実際の終端を保証していなかったため、ルートの後に攻撃者が追加した末尾のバイトが決済時にtransferFromアドレスとして再解釈される可能性があった。recipientは呼び出し元が制御可能な設計だが、transferFromアドレスは制御されるべきではなく、これにより攻撃者は以前ルーターに承認を付与した任意の被害者を指すことができた。",
+      "attackVector": "1. 攻撃者は影響を受けるHuffRouterデプロイメント（0x8ccb...、0x8f52...、0x4f168...、または0xc93c...）に無限または大量のERC20承認を付与していた被害者を特定した。2. 攻撃者は0x61b0dAD9628D3e644eB560a5c9B0F960430E3A75に仲介契約をデプロイした。3. EOA 0xa911...から、攻撃者は仲介契約のforward()関数を呼び出し、悪意のあるcalldataを構築した：短く意図的に失敗するスワップルート（単一のWBTC TokenWrapper unwrap hop）の後に、受信者として攻撃者アドレス、12バイトのジャンク、そしてtransferFromとして被害者アドレス0x765d...をエンコードした末尾バイトが続く。4. 仲介契約はこのcalldataをHuffRouterに中継した。ルーターはルートhopを解析して実行を試みるが、WBTCがCore.forwardコールバックを実装していないため、静かに失敗した。5. 決済時、ルーターは末尾バイトをルーター設定データとして解釈し、transferFromとして被害者のアドレスを読み取った。6. 被害者が以前にルーターに承認を付与していたため、ルーターはtransferFromを使用して0.2 WBTCを被害者からEkubo Coreシングルトン（0xe0e0...）に移動し、同時にCoreから攻撃者へ同額を引き出した。7. 攻撃者は単一のトランザクション内でこのパターンを85回繰り返し、17.0 WBTCを排出した。8. 攻撃後、攻撃者はDEXスワップとTornado Cashへの預金を通じて盗まれたWBTCを洗濯した。",
+      "lessons": [
+        "セキュリティ上重要なパラメータ（transferFromアドレスなど）は、ルート相対calldataオフセットから導出してはならない。常に実際のcalldata終端に読み取りをアンカリングするか、固定された認証済みデータ構造を使用する。",
+        "低レベル言語（例：Huff、Yul、アセンブリ）で記述されたガス最適化合約は、手動calldata解析が非常にエラーしやすいため、レビュー時に特別な注意が必要だ。",
+        "ユーザーのERC20承認を保持または消費できるルーター契約は高価値ターゲットであり、予想使用量に関わらず、デプロイ前に専門的なセキュリティ監査を受けるべきだ。",
+        "時間制限付きまたは期限切れのトークン承認（例：ERC-8255）は、期限切れ承認が悪用可能な期間を制限することで、承認ベースの攻撃の影響範囲を大幅に縮小できる。",
+        "不変なルーターデプロイメントはその場でパッチできない。このような契約のインシデント対応には、即座のフロントエンド警告、取り消しキャンペーン、および未取り消し承認を持つユーザー向けのアラートを含める必要がある。",
+        "Transferイベントシーケンスのオンチェーンレシート分析は、承認draining攻撃の正確な反復回数と1回あたりの金額を明らかにでき、攻撃契約が未検証であっても正確な損失定量化を提供する。"
+      ]
+    }
+  }
+}
