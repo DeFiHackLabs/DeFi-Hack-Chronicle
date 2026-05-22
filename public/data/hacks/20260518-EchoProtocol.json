@@ -2,7 +2,7 @@
   "id": "echo-protocol-2026",
   "title": "Echo Protocol Admin Key Compromise",
   "protocol": "Echo Protocol",
-  "blockchain": ["default"],
+  "blockchain": ["monad", "ethereum"],
   "category": ["access_control"],
   "ecosystem": "evm",
   "language": "solidity",
@@ -86,7 +86,7 @@
   "victims": [
     {
       "address": "TBD",
-      "chain": "default",
+      "chain": "monad",
       "role": "protocol_contract",
       "description": "Echo Protocol eBTC contract on Monad. Admin key compromise allowed unauthorized minting of 1,000 eBTC. Contract worked as designed but lacked multi-sig, timelock, minting cap, and rate limits.",
       "accountType": "contract_close_source"
@@ -187,7 +187,7 @@
       "victims": [
         {
           "address": "TBD",
-          "chain": "default",
+          "chain": "monad",
           "role": "protocol_contract",
           "description": "Echo Protocol 在 Monad 上的 eBTC 合約。管理員金鑰外洩導致未經授權鑄造 1,000 顆 eBTC。合約本身按設計運作，但缺乏多簽、時間鎖、鑄造上限與速率限制。",
           "accountType": "contract_close_source"
@@ -266,7 +266,7 @@
       "victims": [
         {
           "address": "TBD",
-          "chain": "default",
+          "chain": "monad",
           "role": "protocol_contract",
           "description": "Monad上のEcho Protocol eBTCコントラクト。管理者キーの漏洩により1,000枚の未承認eBTCが鋳造された。コントラクト自体は設計通りに動作していたが、マルチシグ、タイムロック、鋳造上限、レート制限が欠けていた。",
           "accountType": "contract_close_source"
