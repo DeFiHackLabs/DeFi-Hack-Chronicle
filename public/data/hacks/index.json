@@ -24,6 +24,12 @@
       "file": "20171106-Parity.json"
     },
     {
+      "id": "radiant-capital-2024",
+      "date": "2024-10-16",
+      "protocol": "Radiant Capital",
+      "file": "20241016-RadiantCapital.json"
+    },
+    {
       "id": "drift-protocol-2026",
       "date": "2026-04-01",
       "protocol": "Drift Protocol",
