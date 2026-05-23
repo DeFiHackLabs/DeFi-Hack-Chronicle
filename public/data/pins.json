@@ -32,7 +32,7 @@
       "tag": "DeFi Summer",
       "protocol": "Multiple Protocols",
       "description": "The launch of the Compound token (COMP) is considered the start of DeFi Summer, when on-chain finance rapidly scaled and security concerns gradually shifted from isolated smart contract bugs to systemic and economic risks.",
-      "tagColor": "#f43f5e",
+      "tagColor": "#00D395",
       "estimatedLoss": "N/A",
       "link": ""
     },
@@ -41,7 +41,7 @@
       "tag": "Stablecoin Depeg",
       "protocol": "Terra / LUNA",
       "description": "TerraUSD lost its dollar peg and triggered a death spiral in LUNA, wiping out much of the ecosystem's value within days and intensifying the broader crypto market sell-off.",
-      "tagColor": "#f43f5e",
+      "tagColor": "#5592F9",
       "estimatedLoss": "$40B",
       "link": ""
     },
@@ -68,7 +68,7 @@
       "tag": "Bloody April",
       "protocol": "Multiple Protocols",
       "description": "A total of 61 DeFi incidents occurred within a single month, marking the highest monthly level since October 2022. Meanwhile, the releases of Opus 4.7 and GPT 5.5 in the middle of the month further highlighted the trend of AI significantly lowering the cost of executing DeFi attacks.",
-      "tagColor": "#f43f5e",
+      "tagColor": "##173f2e",
       "estimatedLoss": "$644.7M",
       "link": ""
     },
@@ -77,7 +77,7 @@
       "tag": "State-sponsored Attack",
       "protocol": "Drift Protocol",
       "description": "DPRK APT group UNC4736 spent 6 months conducting social engineering operations, posing as a quantitative trading firm to gain the trust of Drift Protocol's contributors. The attackers compromised a signer’s device, obtained pre-signed multisig transactions, and drained $285 million within 128 seconds. It became the largest DeFi exploit of 2026.",
-      "tagColor": "#f43f5e",
+      "tagColor": "#E61B26",
       "estimatedLoss": "$285M",
       "link": "/?event=drift-protocol-2026"
     }
