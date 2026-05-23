@@ -68,7 +68,7 @@
       "tag": "Bloody April",
       "protocol": "Multiple Protocols",
       "description": "A total of 61 DeFi incidents occurred within a single month, marking the highest monthly level since October 2022. Meanwhile, the releases of Opus 4.7 and GPT 5.5 in the middle of the month further highlighted the trend of AI significantly lowering the cost of executing DeFi attacks.",
-      "tagColor": "##173f2e",
+      "tagColor": "#173f2e",
       "estimatedLoss": "$644.7M",
       "link": ""
     },
