@@ -178,7 +178,7 @@ export default function Sidebar(props: SidebarProps) {
 
       {/* ── Footer: GitHub + attribution ── */}
       <div className="sidebar-footer">
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="github-link">
+        <a href="https://github.com/DeFiHackLabs/DeFi-Hack-Chronicle/" target="_blank" rel="noopener noreferrer" className="github-link">
           <IconGitHub size={16} />
           <span>{t('github')}</span>
         </a>
