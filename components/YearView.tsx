@@ -68,6 +68,14 @@ export default function YearView({ year, events, categories, selectedDate, getEv
                     ? `${eventCount} event${eventCount > 1 ? 's' : ''} · ${formatCurrency(totalLoss)} loss`
                     : `${eventCount} event${eventCount > 1 ? 's' : ''}`;
 
+                  const colIndex = (firstDay + day) % 7;
+                  let tooltipAlignClass = '';
+                  if (colIndex <= 1) {
+                    tooltipAlignClass = 'tooltip-left';
+                  } else if (colIndex >= 5) {
+                    tooltipAlignClass = 'tooltip-right';
+                  }
+
                   return (
                     <div
                       key={day}
@@ -77,7 +85,7 @@ export default function YearView({ year, events, categories, selectedDate, getEv
                     >
                       {day + 1}
                       {hasEvent && (
-                        <span className="year-tooltip">{tooltipText}</span>
+                        <span className={`year-tooltip ${tooltipAlignClass}`.trim()}>{tooltipText}</span>
                       )}
                     </div>
                   );
