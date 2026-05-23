@@ -9,6 +9,7 @@
 // ============================================================================
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Chart as ChartJS,
@@ -308,13 +309,13 @@ export default function ChartPage() {
   return (
     <div style={{ padding: 24, background: '#1a1a2e', minHeight: '100vh', color: '#fff' }}>
       {/* Back link */}
-      <a href="/" style={{
+      <Link href="/" style={{
         display: 'inline-flex', alignItems: 'center', gap: 8,
         color: '#ff2e63', textDecoration: 'none', fontWeight: 500, marginBottom: 24,
       }}>
         <IconChevronLeft size={16} />
         Back to Calendar
-      </a>
+      </Link>
 
       {/* Header + coin switcher */}
       <div style={{
