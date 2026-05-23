@@ -1,7 +1,7 @@
 "use client";
 
 import type { HackEvent, Category } from '@/lib/types';
-import { getDaysInMonth, getFirstDayOfMonth, isSameDay, formatDate, getDayEventColor } from '@/lib/utils';
+import { getDaysInMonth, getFirstDayOfMonth, isSameDay, formatDate, getDayEventColor, formatCurrency } from '@/lib/utils';
 
 /**
  * @file YearView — 12-month grid, each month rendered as a mini calendar.
@@ -60,6 +60,14 @@ export default function YearView({ year, events, categories, selectedDate, getEv
                   const hasEvent = dayEvents.length > 0;
                   const color = hasEvent ? getDayEventColor(dayEvents, categories) : null;
 
+                  const eventCount = dayEvents.length;
+                  const totalLoss = dayEvents.reduce((sum, e) => {
+                    return sum + (parseInt(e.estimatedLoss?.totalUSD || '0') || 0);
+                  }, 0);
+                  const tooltipText = totalLoss > 0
+                    ? `${eventCount} event${eventCount > 1 ? 's' : ''} · ${formatCurrency(totalLoss)} loss`
+                    : `${eventCount} event${eventCount > 1 ? 's' : ''}`;
+
                   return (
                     <div
                       key={day}
@@ -68,6 +76,9 @@ export default function YearView({ year, events, categories, selectedDate, getEv
                       onClick={() => onDayClick(date)}
                     >
                       {day + 1}
+                      {hasEvent && (
+                        <span className="year-tooltip">{tooltipText}</span>
+                      )}
                     </div>
                   );
                 })}

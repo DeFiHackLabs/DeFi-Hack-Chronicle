@@ -237,7 +237,7 @@ function FilterSection({
             <div
               key={item.id}
               className={`category-item ${isActive ? 'active' : ''}`}
-              style={isActive && item.color ? { borderLeftColor: item.color } : undefined}
+              style={isActive && showDot && item.color ? { borderLeftColor: item.color } : undefined}
               onClick={() => onToggle(item.id)}
             >
               {showDot && item.color && <span className="category-dot" style={{ background: item.color }}></span>}

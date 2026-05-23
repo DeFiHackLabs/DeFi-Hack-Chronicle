@@ -937,61 +937,76 @@ body {
   opacity: 0.4;
 }
 
+/* Today: filled accent background */
 .year-day.today {
-  position: relative;
+  background: var(--text-accent);
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
-.year-day.today::before {
+/* Event dates: color dot below the date */
+.year-day.has-event::before {
   content: '';
   position: absolute;
   bottom: 1px;
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--text-accent);
+  background: var(--event-color, var(--color-reentrancy));
   z-index: 2;
 }
 
-.year-day.has-event {
-  background: var(--event-color, var(--color-reentrancy));
-  color: white;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
-.year-day.has-event[style*="--event-color: #ffd93d"],
-.year-day.has-event[style*="--event-color:#ffd93d"] {
-  background: color-mix(in srgb, #ffd93d 85%, #000000 15%);
-}
-
-.year-day.has-event[style*="--event-color: #6bcb77"],
-.year-day.has-event[style*="--event-color:#6bcb77"] {
-  background: color-mix(in srgb, #6bcb77 85%, #000000 15%);
-}
-
-.year-day.has-event.today {
-  background: var(--event-color, var(--color-reentrancy));
-  color: white;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
+/* Today + Event: today bg + event colored dot */
 .year-day.has-event.today::before {
-  background: white;
+  background: var(--event-color);
 }
 
+/* Selected state */
 .year-day.selected {
   background: var(--bg-active);
   box-shadow: inset 0 0 0 2px var(--text-accent);
+  color: inherit;
+  font-weight: normal;
 }
 
 .year-day.selected.today {
+  background: var(--bg-active);
   box-shadow: inset 0 0 0 2px var(--text-accent);
+  color: inherit;
+  font-weight: normal;
 }
 
 .year-day.selected.has-event {
-  background: var(--bg-active) !important;
   box-shadow: inset 0 0 0 2px var(--text-accent);
+}
+
+/* Tooltip on hover for event dates */
+.year-day.has-event .year-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 10000;
+  box-shadow: var(--shadow-lg);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
+}
+
+.year-day.has-event:hover .year-tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* ============================================
