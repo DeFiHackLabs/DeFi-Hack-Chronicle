@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-23"
+    "lastUpdated": "2026-05-26"
   },
   "files": [
     {
@@ -24,13 +24,13 @@
       "file": "20171106-Parity.json"
     },
     {
-      "id": "radiant-capital-2024",
+      "id": "radiant-2024-1",
       "date": "2024-10-16",
       "protocol": "Radiant Capital",
       "file": "20241016-RadiantCapital.json"
     },
     {
-      "id": "drift-protocol-2026",
+      "id": "drift-2026",
       "date": "2026-04-01",
       "protocol": "Drift Protocol",
       "file": "20260401-Drift-Protocol.json"
