@@ -1,0 +1,391 @@
+{
+  "id": "cream-2021-08",
+  "title": "Cream Finance Reentrancy Attack",
+  "protocol": "Cream Finance",
+  "blockchain": [
+    "ethereum"
+  ],
+  "category": [
+    "reentrancy",
+    "flashloan"
+  ],
+  "ecosystem": "evm",
+  "language": "solidity",
+  "estimatedLoss": {
+    "totalUSD": "18800000",
+    "breakdown": [
+      {
+        "asset": "ETH",
+        "amount": "6000",
+        "convertedUSD": "18800000"
+      }
+    ],
+    "note": "Approximately 6,000 ETH stolen across 17 exploit transactions, valued at ~$18.8M at time of hack (ETH ~$3,130). Loss also included 418,311,571 AMP tokens from the Cream AMP market. The stolen ETH remained in the attacker's address at the time of reporting."
+  },
+  "attackTime": {
+    "startTime": "2021-08-30T03:50:26Z",
+    "endTime": "2021-08-30T06:29:43Z",
+    "isRange": true,
+    "note": "Attack began with deployment of first exploit contract at 03:50:26 UTC. Main exploit window (approximately 17 attack transactions) ran from ~04:03 UTC to ~05:44 UTC, using multiple sequentially deployed exploit contracts. The final exploit transaction at ~05:44 UTC deployed Attack Contract A (0x38c40427...) which internally created Contract B (0x0ec306d7...). Post-exploit token swaps and fund consolidation continued until ~06:29 UTC.",
+    "date": "2021-08-30"
+  },
+  "transactions": [
+    {
+      "txHash": "0x478d724da4e6125c889053ccf6068ed0f8f8013dd20bc80bab6a203542c3f93d",
+      "chain": "ethereum",
+      "role": "deploy",
+      "description": "Deploy of first exploit contract (0xbd51cb8c...) at block 13124538 (03:50:26 UTC). This was the first in a series of approximately 18 contracts deployed by the attacker."
+    },
+    {
+      "txHash": "0x0016745693d68d734faa408b94cdf2d6c95f511b50f47b03909dc599c1dd9ff6",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Call to first exploit contract at block 13124591 (04:03:40 UTC). Initiates the first attack cycle against Cream's AMP market."
+    },
+    {
+      "txHash": "0x454753361f29e90c1974f885d43885183112d8b511614387606bb696126f6bd8",
+      "chain": "ethereum",
+      "role": "deploy",
+      "description": "Deploy of another exploit contract (0x862c8b2e...) at block 13124615 (04:07:58 UTC). One of approximately 18 sequentially deployed contracts used across the attack."
+    },
+    {
+      "txHash": "0xcb16bb40a7b4d2174d3e2b05ed037ae3a8ac71f1f53fe0545c7eb267900c9e85",
+      "chain": "ethereum",
+      "role": "prepare",
+      "description": "Token swap via 1inch aggregator at block 13124745 (04:33:08 UTC). Intermediate asset acquisition between exploit cycles."
+    },
+    {
+      "txHash": "0xc1b523bbf29861c8737a22459f0c973aea923098f353fb3718994ec756c35ee9",
+      "chain": "ethereum",
+      "role": "deploy",
+      "description": "Deploy of Attack Contract A (0x38c40427...) at block 13125064 (05:42:59 UTC). The final exploit contract used in the attack sequence. This contract would internally create Contract B (0x0ec306d7...) during the subsequent exploit transaction."
+    },
+    {
+      "txHash": "0xa9a1b8ea288eb9ad315088f17f7c7386b9989c95b4d13c81b69d5ddad7ffe61e",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Final exploit transaction at block 13125071 (2021-08-30 05:44:47 UTC). Attack Contract A takes flash loan of 500 WETH from dYdX, deposits as collateral on Cream minting 24,170 crETH, borrows 19.48M AMP, then exploits AMP token reentrancy to borrow an additional 355 ETH before the first borrow() state update. Contract B is internally created by Contract A during this transaction, funded with 9.74M AMP to partially liquidate Contract A's loan, redeeming 187 WETH. Profit: 41 ETH + 9.74M AMP. One of ~17 exploit transactions executed across multiple deployed contracts."
+    },
+    {
+      "txHash": "0x7df47235a039d10022aa3a5d6408206fd9641669fc3152ea8610a641215bdf2e",
+      "chain": "ethereum",
+      "role": "consolidate",
+      "description": "Token swap via 1inch at block 13125124 (05:58:24 UTC). Consolidation of stolen assets through DEX aggregation."
+    },
+    {
+      "txHash": "0xc16c686fcd76cea925ce0c6892858aa78690c231404f38e5f203872058299076",
+      "chain": "ethereum",
+      "role": "consolidate",
+      "description": "Uniswap v3 swap at block 13125243 (06:26:30 UTC). Final consolidation of stolen assets through Uniswap."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0xce1f4b4f17224ec6df16eeb1e3e5321c54ff6ede",
+      "chain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA that deployed exploit contracts, executed 17 exploit transactions, and accumulated ~6,000 ETH in stolen funds. At the time of reporting, the stolen ETH remained in this address.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x38c40427efbaae566407e4cde2a91947df0bd22b",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attack Contract A. Used to take flash loan of 500 WETH from dYdX, deposit as collateral on Cream, borrow AMP, and exploit reentrancy to extract additional ETH.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x0ec306d7634314d35139d1df4a630d829475a125",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attack Contract B. Funded with half of the AMP tokens borrowed by Contract A, used to partially liquidate Contract A's loan and redeem WETH back to Contract A, completing the profit extraction cycle.",
+      "accountType": "contract_close_source"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xff20817765cb7f73d4bde2e66e067e58d11095c2",
+      "chain": "ethereum",
+      "role": "vulnerable_token",
+      "description": "AMP token contract. Implements ERC777-style hooks via ERC1820 with _callPreTransferHooks, which introduced a reentrancy vulnerability. The token contract's transfer() function could call back into Cream's borrow() function before state updates were completed.",
+      "accountType": "contract_open_source"
+    },
+    {
+      "address": "0xD06527D5e56A3495252A528C4987003b712860eE",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "crETH (Cream Ether) market contract. Used by the attacker as collateral (minted crETH by depositing WETH from flash loan) to borrow AMP against.",
+      "accountType": "contract_open_source"
+    },
+    {
+      "address": "0x3d5BC3c8d13dcB8bF317092d84783c2697AE9258",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Cream Finance Unitroller/Comptroller. The core lending protocol contract that lacked reentrancy protection on its borrow() function, allowing the nested reentrancy to succeed.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "description": "On August 30, 2021, Cream Finance was exploited for approximately $18.8 million (~6,000 ETH) through a reentrancy attack involving the AMP token contract. The attacker deployed approximately 18 custom exploit contracts and executed around 17 exploit transactions using flash loans from dYdX. Each deployed contract executed one attack cycle: (1) take a 500 WETH flash loan from dYdX and deposit as collateral on Cream, minting ~24,170 crETH; (2) borrow ~19.48M AMP against the crETH; (3) exploit the reentrancy bug in AMP's transfer() to borrow an additional 355 ETH before the first borrow() state update; (4) internally create or use a secondary contract to partially liquidate the primary contract's loan, redeeming ~187 WETH; and (5) repay the flash loan, netting ~41 ETH and ~9.74M AMP per cycle. The final exploit transaction used Attack Contract A (0x38c40427...), which internally created Contract B (0x0ec306d7...). Cream Finance's lending protocol lacked reentrancy protection on its borrow/lend functions. The AMP token contract (0xff208177...) implemented ERC777-style hooks via ERC1820 with _callPreTransferHooks, introducing the reentrancy vulnerability. Cream had been audited by Trail of Bits on January 28, 2021, but the AMP token was added as a collateral asset via a community proposal on February 10, 2021, after the audit. The stolen funds remained in the attacker's EOA address (0xce1f4b4f...) at the time of reporting.",
+  "rootCause": "The Cream Finance lending protocol's borrow() function lacked reentrancy protection, and the AMP token contract implemented ERC777-style _callPreTransferHooks via ERC1820. When Cream's borrow() function transferred AMP tokens to the borrower, the AMP token's pre-transfer hook triggered a callback into the borrower's contract, which could then call Cream's borrow() function again before the first borrow() state update (balance changes, borrow index updates) had been committed. This allowed the attacker to borrow additional assets against the same collateral that had already been pledged, effectively creating an infinite borrow loop within a single transaction. The vulnerability was introduced after Cream's January 2021 Trail of Bits audit when the AMP token was added as a collateral asset on February 10, 2021, without adequate reentrancy safeguards.",
+  "attackVector": "1. The attacker deployed approximately 18 custom exploit contracts on August 30, 2021 starting at 03:50 UTC, including the first contract (0xbd51cb8c...) at block 13124538 and Attack Contract A (0x38c40427...) at block 13125064. 2. Each deployed contract executed one attack cycle: take a flash loan of 500 WETH from dYdX and deposit it as collateral on Cream Finance, minting ~24,170 crETH tokens. 3. Borrow ~19.48M AMP tokens against the crETH. 4. The AMP token contract's ERC777-style transfer triggered _callPreTransferHooks, calling back into the exploit contract. 5. Before the initial borrow() state update was committed, the callback initiated a second borrow() call to extract an additional 355 ETH. 6. In the final cycle, Contract A internally created Contract B (0x0ec306d7...), funded it with 9.74M AMP (half of A's borrowed AMP), and used it to partially liquidate Contract A's loan, redeeming 187 WETH back to Contract A. 7. Repay the dYdX flash loan with the reentrancy-extracted ETH. 8. Net profit per cycle: ~41 ETH and ~9.74M AMP. 9. The attacker repeated this process across approximately 17 transactions, accumulating ~6,000 ETH (~$18.8M). 10. Stolen assets were consolidated via 1inch aggregator and Uniswap v3 swaps.",
+  "lessons": [
+    "All lending protocol functions (borrow, lend, liquidate) must have reentrancy guards (e.g., OpenZeppelin's ReentrancyGuard) as a baseline protection, regardless of whether reentrancy is expected via the specific token integration.",
+    "Integrating tokens with callback hooks (ERC777/ERC1820, or any token with _beforeTokenTransfer/_afterTokenTransfer hooks) introduces systemic risk to DeFi protocols; such tokens require extra scrutiny and may need protocol-level reentrancy protection.",
+    "Post-audit protocol changes—especially adding new collateral assets—require re-auditing the specific integration risks, even if the core protocol logic is unchanged. The AMP token was added 13 days after the audit and introduced the vulnerable attack surface.",
+    "DeFi protocols should consider using pull-over-push payment patterns and avoid making external calls within state-changing functions without proper reentrancy protection.",
+    "Flash loan availability amplifies the economic impact of reentrancy vulnerabilities by enabling attackers to seed attacks with large amounts of capital at zero upfront cost.",
+    "Protocol-level circuit breakers and borrow caps per asset can limit the blast radius of single-transaction exploits.",
+    "On-chain monitoring systems should flag abnormal patterns such as nested calls to borrow() within the same transaction, allowing for real-time mitigation.",
+    "Cross-token reentrancy (where the reentrant call goes through the token contract rather than the protocol contract) is a subtle attack pattern that standard security tooling may miss."
+  ],
+  "references": [
+    "https://www.rekt.news/cream-rekt/",
+    "https://www.rekt.news/zh/cream-rekt/",
+    "https://defillama.com/hacks/cream-lending-0",
+    "https://etherscan.io/address/0xce1f4b4f17224ec6df16eeb1e3e5321c54ff6ede",
+    "https://etherscan.io/address/0x38c40427efbaae566407e4cde2a91947df0bd22b",
+    "https://etherscan.io/address/0x0ec306d7634314d35139d1df4a630d829475a125",
+    "https://etherscan.io/address/0xff20817765cb7f73d4bde2e66e067e58d11095c2",
+    "https://etherscan.io/tx/0xa9a1b8ea288eb9ad315088f17f7c7386b9989c95b4d13c81b69d5ddad7ffe61e",
+    "https://forum.cream.finance/t/proposal-add-amp-as-a-collateral-asset/387",
+    "https://twitter.com/peckshield/status/1432224092275548160",
+    "https://twitter.com/peckshield/status/1432249600002478081",
+    "https://twitter.com/CreamdotFinance/status/1359348996032974852",
+    "https://docs.cream.finance/audit-report"
+  ],
+  "metadata": {
+    "dateAdded": "2025-05-26",
+    "lastUpdated": "2025-05-26",
+    "human_verified": false,
+    "models": [
+      "big-pickle"
+    ]
+  },
+  "date": "2021-08-30",
+  "locales": {
+    "zh-TW": {
+      "title": "Cream Finance 重入攻擊事件",
+      "description": "2021 年 8 月 30 日，Cream Finance 因重入攻擊（Reentrancy Attack）損失約 1,880 萬美元（約 6,000 ETH）。攻擊者部署了約 18 個自訂攻擊合約，透過約 17 筆攻擊交易，利用 dYdX 的閃電貸（Flash Loan）作為啟動資金。每次攻擊循環中，各合約獨立執行：（1）從 dYdX 取得 500 WETH 閃電貸並存入 Cream 作為抵押品，鑄造約 24,170 個 crETH；（2）以 crETH 為抵押借出約 1,948 萬個 AMP；（3）利用 AMP 代幣 transfer() 中的重入漏洞，在首次 borrow() 狀態更新前額外借出 355 ETH；（4）在最後一輪中，攻擊合約 A（0x38c40427...）於交易內部創建了合約 B（0x0ec306d7...），以一半的 AMP 部分清算合約 A 的貸款，贖回約 187 WETH；（5）用重入提取的 ETH 償還閃電貸，每輪淨賺約 41 ETH 和 974 萬個 AMP。漏洞根源在於 AMP 代幣合約（0xff208177...）實作了 ERC777 風格的鉤子機制（透過 ERC1820 註冊 _callPreTransferHooks），這使得在 Cream 的 borrow() 函數轉移 AMP 代幣時，代幣合約會回呼攻擊者合約，讓攻擊者在首次 borrow() 狀態更新完成前再次呼叫 borrow()，藉由同一抵押品重複借貸。Cream Finance 的借貸協議缺乏重入保護機制。攻擊者此前曾委託 Trail of Bits 於 2021 年 1 月 28 日完成稽核，但 AMP 代幣是於 2021 年 2 月 10 日透過社群提案新增為抵押資產——這是在稽核完成之後。被盜資金在事發當時仍留在攻擊者 EOA 地址（0xce1f4b4f...）中。",
+      "rootCause": "Cream Finance 借貸協議的 borrow() 函數缺乏重入保護（Reentrancy Guard），而 AMP 代幣合約透過 ERC1820 實作了 ERC777 風格的 _callPreTransferHooks。當 Cream 的 borrow() 函數將 AMP 代幣轉移給借款人時，AMP 代幣的轉移前鉤子（Pre-transfer Hook）觸發了回呼至借款人合約，使借款人能在首次 borrow() 的狀態更新（餘額變動、借貸指數更新）提交之前再次呼叫 Cream 的 borrow() 函數。這讓攻擊者能針對同一筆已抵押的資產重複借貸，在單筆交易內形成無限借貸迴圈。此漏洞是在 Cream 2021 年 1 月的 Trail of Bits 稽核完成後才被引入——AMP 代幣於 2021 年 2 月 10 日被新增為抵押資產，但並未加入適當的重入防護機制。",
+      "attackVector": "1. 攻擊者於 2021 年 8 月 30 日 03:50 UTC 起部署了約 18 個自訂攻擊合約，包含首個合約（0xbd51cb8c...，區塊 13124538）及攻擊合約 A（0x38c40427...，區塊 13125064）。2. 每個部署的合約執行一輪攻擊：從 dYdX 取得 500 WETH 閃電貸，存入 Cream Finance 作為抵押品，鑄造約 24,170 個 crETH。3. 以 crETH 為抵押品，借出約 1,948 萬個 AMP 代幣。4. AMP 代幣合約的 ERC777 風格轉移觸發了 _callPreTransferHooks，回呼至攻擊合約。5. 在首次 borrow() 狀態更新提交之前，攻擊合約的回呼函數發起了第二次 borrow() 呼叫，額外提取了 355 ETH。6. 在最後一輪中，合約 A 於交易內部創建了合約 B（0x0ec306d7...），獲得 974 萬個 AMP（合約 A 借出的一半），並用於部分清算合約 A 的貸款，將 187 WETH 贖回給合約 A。7. 使用重入提取的 ETH 償還 dYdX 閃電貸。8. 每輪淨利潤：約 41 ETH 和 974 萬個 AMP。9. 攻擊者重複此流程約 17 次，累積約 6,000 ETH（約 1,880 萬美元）。10. 被盜資產透過 1inch 聚合器和 Uniswap v3 進行整合兌換。",
+      "lessons": [
+        "所有借貸協議函數（borrow、lend、liquidate）都必須具備重入保護（例如 OpenZeppelin 的 ReentrancyGuard）作為基本防護，無論預期是否會透過特定代幣整合發生重入。",
+        "整合含有回呼鉤子（ERC777/ERC1820，或任何具有 _beforeTokenTransfer/_afterTokenTransfer 鉤子的代幣）的代幣會為 DeFi 協議帶來系統性風險；此類代幣需要額外審查，並可能需要協議層級的重入保護。",
+        "稽核後對協議的變更——特別是新增抵押資產——即使核心協議邏輯未變，也需重新稽核特定的整合風險。AMP 代幣在稽核完成 13 天後才被新增，而正是這個新增引入了攻擊面。",
+        "DeFi 協議應考慮採用 Pull-over-Push 的支付模式，避免在狀態變更函數中進行外部呼叫而未加上重入保護。",
+        "閃電貸的可用性放大了重入漏洞的經濟影響，讓攻擊者能以零前期成本投入大量資本發動攻擊。",
+        "協議層級的熔斷機制（Circuit Breaker）與每項資產的借貸上限可以限制單筆交易漏洞的影響範圍。",
+        "鏈上監控系統應標記異常模式，如同筆交易中對 borrow() 的巢狀呼叫，以便進行即時緩解。",
+        "跨代幣重入（即重入呼叫是透過代幣合約而非協議合約進行）是一種微妙的攻擊模式，標準安全工具可能無法檢測到。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x478d724da4e6125c889053ccf6068ed0f8f8013dd20bc80bab6a203542c3f93d",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "部署第一個攻擊合約（0xbd51cb8c...），區塊 13124538（03:50:26 UTC）。這是攻擊者部署的約 18 個合約中的第一個。"
+        },
+        {
+          "txHash": "0x0016745693d68d734faa408b94cdf2d6c95f511b50f47b03909dc599c1dd9ff6",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "呼叫第一個攻擊合約，區塊 13124591（04:03:40 UTC）。啟動針對 Cream AMP 市場的第一輪攻擊循環。"
+        },
+        {
+          "txHash": "0x454753361f29e90c1974f885d43885183112d8b511614387606bb696126f6bd8",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "部署另一個攻擊合約（0x862c8b2e...），區塊 13124615（04:07:58 UTC）。攻擊者依序部署的多個合約之一。"
+        },
+        {
+          "txHash": "0xcb16bb40a7b4d2174d3e2b05ed037ae3a8ac71f1f53fe0545c7eb267900c9e85",
+          "chain": "ethereum",
+          "role": "prepare",
+          "description": "透過 1inch 聚合器進行代幣兌換，區塊 13124745（04:33:08 UTC）。攻擊循環之間的資產調度準備步驟。"
+        },
+        {
+          "txHash": "0xc1b523bbf29861c8737a22459f0c973aea923098f353fb3718994ec756c35ee9",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "部署攻擊合約 A（0x38c40427...），區塊 13125064（05:42:59 UTC）。攻擊序列中最後一個部署的攻擊合約。此合約會在後續的攻擊交易中內部創建合約 B（0x0ec306d7...）。"
+        },
+        {
+          "txHash": "0xa9a1b8ea288eb9ad315088f17f7c7386b9989c95b4d13c81b69d5ddad7ffe61e",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "最後一輪攻擊交易，區塊 13125071（2021-08-30 05:44:47 UTC）。攻擊合約 A 從 dYdX 取得 500 WETH 閃電貸，存入 Cream 作為抵押品鑄造 24,170 crETH，借出 1,948 萬 AMP，然後利用 AMP 代幣重入漏洞在首次 borrow() 狀態更新前額外借出 355 ETH。合約 B 由合約 A 於此交易內部創建，獲得 974 萬 AMP 以部分清算合約 A 的貸款，贖回 187 WETH。每輪利潤：41 ETH + 974 萬 AMP。為約 17 筆攻擊交易之一。"
+        },
+        {
+          "txHash": "0x7df47235a039d10022aa3a5d6408206fd9641669fc3152ea8610a641215bdf2e",
+          "chain": "ethereum",
+          "role": "consolidate",
+          "description": "透過 1inch 進行代幣兌換，區塊 13125124（05:58:24 UTC）。利用 DEX 聚合器整合被盜資產。"
+        },
+        {
+          "txHash": "0xc16c686fcd76cea925ce0c6892858aa78690c231404f38e5f203872058299076",
+          "chain": "ethereum",
+          "role": "consolidate",
+          "description": "Uniswap v3 兌換，區塊 13125243（06:26:30 UTC）。通過 Uniswap 進行的最終資產整合。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0xce1f4b4f17224ec6df16eeb1e3e5321c54ff6ede",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA，部署了攻擊合約、執行了 17 筆攻擊交易，並累積了約 6,000 ETH 的被盜資金。在報告當時，被盜的 ETH 仍留在該地址中。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x38c40427efbaae566407e4cde2a91947df0bd22b",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊合約 A。用於從 dYdX 取得 500 WETH 閃電貸、存入 Cream 作為抵押品、借出 AMP，並利用重入漏洞提取額外 ETH。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x0ec306d7634314d35139d1df4a630d829475a125",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊合約 B。獲得合約 A 借出的一半 AMP 代幣，用於部分清算合約 A 的貸款並將 WETH 贖回給合約 A，完成利潤提取循環。",
+          "accountType": "contract_close_source"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xff20817765cb7f73d4bde2e66e067e58d11095c2",
+          "chain": "ethereum",
+          "role": "vulnerable_token",
+          "description": "AMP 代幣合約。透過 ERC1820 實作了 ERC777 風格的 _callPreTransferHooks，引入了重入漏洞。該代幣合約的 transfer() 函數可在狀態更新完成前回呼 Cream 的 borrow() 函數。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0xD06527D5e56A3495252A528C4987003b712860eE",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "crETH（Cream Ether）市場合約。攻擊者將其作為抵押品使用（透過存入閃電貸取得的 WETH 鑄造 crETH），以借出 AMP。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0x3d5BC3c8d13dcB8bF317092d84783c2697AE9258",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Cream Finance Unitroller/Comptroller。核心借貸協議合約，其 borrow() 函數缺乏重入保護，導致巢狀重入攻擊得以成功。",
+          "accountType": "contract_open_source"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Cream Finance リエントランシー攻撃事件",
+      "description": "2021年8月30日、Cream Financeはリエントランシー攻撃により約1,880万ドル（約6,000 ETH）の損失を被った。攻撃者は約18個のカスタム攻撃コントラクトをデプロイし、約17件の攻撃トランザクションを通じて、dYdXのフラッシュローンを起点資金として利用した。各デプロイされたコントラクトは1サイクルの攻撃を実行：（1）dYdXから500 WETHのフラッシュローンを取得し、Creamに預入して約24,170 crETHを鋳造；（2）crETHを担保に約1,948万AMPを借入；（3）AMPのtransfer()のリエントランシー脆弱性を悪用し、最初のborrow()状態更新前に追加で355 ETHを借入；（4）最終サイクルでは、攻撃コントラクトA（0x38c40427...）がトランザクション内部でコントラクトB（0x0ec306d7...）を作成し、AMPの半分を使用してコントラクトAのローンを部分的に清算し、約187 WETHを償還；（5）リエントランシーで引き出したETHでフラッシュローンを返済し、1サイクルあたり約41 ETHと974万AMPの純利益を得た。脆弱性の根本原因は、AMPトークンコントラクト（0xff208177...）がERC777スタイルのフック機構（ERC1820を介した_callPreTransferHooks）を実装していたことにある。攻撃者は以前、2021年1月28日にTrail of Bitsによる監査を依頼していたが、AMPトークンは監査完了後の2021年2月10日にコミュニティ提案を通じて担保資産として追加されていた。盗まれた資金は報告時点で攻撃者のEOAアドレス（0xce1f4b4f...）に残っていた。",
+      "rootCause": "Cream Financeの貸出プロトコルのborrow()関数にリエントランシー保護が欠如しており、AMPトークンコントラクトがERC1820を介してERC777スタイルの_callPreTransferHooksを実装していた。Creamのborrow()関数がAMPトークンを借り手に転送する際、AMPトークンの転送前フックが借り手コントラクトへのコールバックをトリガーし、最初のborrow()の状態更新（残高変動、借入インデックス更新）がコミットされる前に、借り手が再びCreamのborrow()関数を呼び出すことができた。これにより攻撃者は、すでに担保として預けられた同一の資産に対して重複して借り入れを行うことができ、単一トランザクション内で無限の借入ループを形成できた。この脆弱性は、Creamの2021年1月のTrail of Bits監査が完了した後に導入された——AMPトークンは2021年2月10日に担保資産として追加されたが、適切なリエントランシー防御が施されていなかった。",
+      "attackVector": "1. 攻撃者は2021年8月30日03:50 UTCから約18個のカスタム攻撃コントラクトをデプロイした。これには最初のコントラクト（0xbd51cb8c...、ブロック13124538）と攻撃コントラクトA（0x38c40427...、ブロック13125064）が含まれる。2. 各デプロイされたコントラクトは1サイクルの攻撃を実行：dYdXから500 WETHのフラッシュローンを取得し、Cream Financeに担保として預入して約24,170 crETHを鋳造した。3. crETHを担保に、約1,948万AMPを借り入れた。4. AMPトークンコントラクトのERC777スタイル転送が_callPreTransferHooksをトリガーし、攻撃コントラクトにコールバックした。5. 最初のborrow()の状態更新がコミットされる前に、攻撃コントラクトのコールバック関数が2回目のborrow()呼び出しを開始し、追加で355 ETHを引き出した。6. 最終サイクルでは、コントラクトAがトランザクション内部でコントラクトB（0x0ec306d7...）を作成し、974万AMP（コントラクトAが借りた半分）を受け取り、コントラクトAのローンを部分的に清算して187 WETHを償還した。7. リエントランシーで引き出したETHを使用してdYdXのフラッシュローンを返済した。8. 1サイクルあたりの純利益：約41 ETHと974万AMP。9. 攻撃者はこのプロセスを約17回繰り返し、約6,000 ETH（約1,880万ドル）を蓄積した。10. 盗まれた資産は1inchアグリゲーターとUniswap v3を通じて統合・交換された。",
+      "lessons": [
+        "すべての貸出プロトコル関数（borrow、lend、liquidate）は、特定のトークン統合を介したリエントランシーが予期されるかどうかに関わらず、基本保護としてリエントランシーガード（例：OpenZeppelinのReentrancyGuard）を実装すべきである。",
+        "コールバックフックを持つトークン（ERC777/ERC1820、または_beforeTokenTransfer/_afterTokenTransferフックを持つ任意のトークン）を統合することは、DeFiプロトコルにシステム的リスクをもたらす。そのようなトークンは追加の精査を必要とし、プロトコルレベルのリエントランシー保護が必要となる可能性がある。",
+        "監査後のプロトコル変更——特に新しい担保資産の追加——は、コアプロトコルロジックが変更されていなくても、特定の統合リスクの再監査が必要である。AMPトークンは監査完了から13日後に追加され、攻撃面を導入した。",
+        "DeFiプロトコルはPull-over-Pushの支払いパターンを採用し、適切なリエントランシー保護なしに状態変更関数内で外部呼び出しを行うことを避けるべきである。",
+        "フラッシュローンの利用可能性はリエントランシー脆弱性の経済的影響を増幅させ、攻撃者がゼロの先行コストで大量の資本を投入することを可能にする。",
+        "プロトコルレベルのサーキットブレーカーと資産ごとの借入上限は、単一トランザクションのエクスプロイトの影響範囲を制限できる。",
+        "オンチェーンモニタリングシステムは、同一トランザクション内でのborrow()へのネストされた呼び出しなどの異常なパターンをフラグ付けし、リアルタイムでの緩和を可能にすべきである。",
+        "クロストークン・リエントランシー（リエントラント呼び出しがプロトコルコントラクトではなくトークンコントラクトを介して行われるもの）は、標準的なセキュリティツールが見逃す可能性のある微妙な攻撃パターンである。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x478d724da4e6125c889053ccf6068ed0f8f8013dd20bc80bab6a203542c3f93d",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "最初の攻撃コントラクトのデプロイ（0xbd51cb8c...）、ブロック13124538（03:50:26 UTC）。攻撃者がデプロイした約18個のコントラクトの最初のもの。"
+        },
+        {
+          "txHash": "0x0016745693d68d734faa408b94cdf2d6c95f511b50f47b03909dc599c1dd9ff6",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "最初の攻撃コントラクトへの呼び出し、ブロック13124591（04:03:40 UTC）。Cream AMP市場への最初の攻撃サイクルを開始。"
+        },
+        {
+          "txHash": "0x454753361f29e90c1974f885d43885183112d8b511614387606bb696126f6bd8",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "別の攻撃コントラクトのデプロイ（0x862c8b2e...）、ブロック13124615（04:07:58 UTC）。攻撃者が順次デプロイした複数のコントラクトの1つ。"
+        },
+        {
+          "txHash": "0xcb16bb40a7b4d2174d3e2b05ed037ae3a8ac71f1f53fe0545c7eb267900c9e85",
+          "chain": "ethereum",
+          "role": "prepare",
+          "description": "1inchアグリゲーターを介したトークンスワップ、ブロック13124745（04:33:08 UTC）。攻撃サイクル間の資産調達準備。"
+        },
+        {
+          "txHash": "0xc1b523bbf29861c8737a22459f0c973aea923098f353fb3718994ec756c35ee9",
+          "chain": "ethereum",
+          "role": "deploy",
+          "description": "攻撃コントラクトAのデプロイ（0x38c40427...）、ブロック13125064（05:42:59 UTC）。攻撃シーケンスで最後にデプロイされたコントラクト。このコントラクトは後続の攻撃トランザクションでコントラクトB（0x0ec306d7...）を内部作成した。"
+        },
+        {
+          "txHash": "0xa9a1b8ea288eb9ad315088f17f7c7386b9989c95b4d13c81b69d5ddad7ffe61e",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "最後の攻撃トランザクション、ブロック13125071（2021-08-30 05:44:47 UTC）。攻撃コントラクトAがdYdXから500 WETHのフラッシュローンを取得し、Creamに預入して24,170 crETHを鋳造、1,948万AMPを借入、AMPのリエントランシー脆弱性を悪用して最初のborrow()状態更新前に追加で355 ETHを借入。コントラクトBはコントラクトAによってこのトランザクション内部で作成され、974万AMPでコントラクトAのローンを部分的に清算し、187 WETHを償還。1サイクルあたり41 ETH + 974万AMPの利益。約17件の攻撃トランザクションの1つ。"
+        },
+        {
+          "txHash": "0x7df47235a039d10022aa3a5d6408206fd9641669fc3152ea8610a641215bdf2e",
+          "chain": "ethereum",
+          "role": "consolidate",
+          "description": "1inchを介したトークンスワップ、ブロック13125124（05:58:24 UTC）。DEXアグリゲーションによる盗難資産の統合。"
+        },
+        {
+          "txHash": "0xc16c686fcd76cea925ce0c6892858aa78690c231404f38e5f203872058299076",
+          "chain": "ethereum",
+          "role": "consolidate",
+          "description": "Uniswap v3スワップ、ブロック13125243（06:26:30 UTC）。Uniswapを介した最終的な盗難資産の統合。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0xce1f4b4f17224ec6df16eeb1e3e5321c54ff6ede",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "攻撃コントラクトを展開し、17件の攻撃トランザクションを実行し、約6,000 ETHの盗難資金を蓄積した主要攻撃者EOA。報告時点で、盗まれたETHはこのアドレスに残っていた。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x38c40427efbaae566407e4cde2a91947df0bd22b",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃コントラクトA。dYdXから500 WETHのフラッシュローンを取得し、Creamに担保として預入し、AMPを借入れ、リエントランシーを悪用して追加のETHを引き出すために使用された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x0ec306d7634314d35139d1df4a630d829475a125",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃コントラクトB。コントラクトAが借りたAMPトークンの半分を受け取り、コントラクトAのローンを部分的に清算してWETHを償還し、利益抽出サイクルを完了するために使用された。",
+          "accountType": "contract_close_source"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xff20817765cb7f73d4bde2e66e067e58d11095c2",
+          "chain": "ethereum",
+          "role": "vulnerable_token",
+          "description": "AMPトークンコントラクト。ERC1820を介してERC777スタイルの_callPreTransferHooksを実装し、リエントランシー脆弱性を導入した。このトークンコントラクトのtransfer()関数は、状態更新が完了する前にCreamのborrow()関数をコールバックできた。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0xD06527D5e56A3495252A528C4987003b712860eE",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "crETH（Cream Ether）マーケットコントラクト。攻撃者はこれを担保として使用し（フラッシュローンから取得したWETHを預入してcrETHを鋳造）、AMPを借り入れた。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0x3d5BC3c8d13dcB8bF317092d84783c2697AE9258",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Cream Finance Unitroller/Comptroller。コアとなる貸出プロトコルコントラクトで、borrow()関数にリエントランシー保護が欠如しており、ネストされたリエントランシー攻撃を許した。",
+          "accountType": "contract_open_source"
+        }
+      ]
+    }
+  }
+}
