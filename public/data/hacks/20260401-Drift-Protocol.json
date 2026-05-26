@@ -1,5 +1,5 @@
 {
-  "id": "drift-protocol-2026",
+  "id": "drift-2026",
   "title": "Drift Protocol Social Engineering Exploit",
   "protocol": "Drift Protocol",
   "blockchain": [
@@ -13,7 +13,7 @@
   "ecosystem": "solana",
   "language": "rust",
   "estimatedLoss": {
-    "totalUSD": "285260000",
+    "totalUSD": "285257820",
     "breakdown": [
       {
         "asset": "JLP",
@@ -111,7 +111,7 @@
         "convertedUSD": "2740"
       }
     ],
-    "note": "Total confirmed loss: $285.26M drained across 18 tokens in 128 seconds. JLP was the largest single position at $159.35M (55.9% of total). Funds were bridged to Ethereum via Circle CCTP (100+ transactions over 6 hours) and Chainflip, consolidated into ETH across four attacker EOAs. Largest DeFi hack of 2026, second-largest in Solana history after Wormhole."
+    "note": "Total confirmed loss: $285.26M drained across 19 tokens in 128 seconds. JLP was the largest single position at $159.35M (55.9% of total). Funds were bridged to Ethereum via Circle CCTP (100+ transactions over 6 hours) and Chainflip, consolidated into ETH across four attacker EOAs. Largest DeFi hack of 2026, second-largest in Solana history after Wormhole."
   },
   "attackTime": {
     "startTime": "2026-04-01T16:05:18Z",
@@ -314,7 +314,7 @@
       "rootCause": "根本原因是一次營運安全失誤，而非程式碼漏洞。Drift 的安全理事會運行在 Squads V4 多重簽章上，簽章門檻低至危險的 2/5 且無時間鎖，這意味著任何兩個簽署者都可以授權即時、不可逆的管理級別變更。攻擊者利用了 Solana 的持久化 Nonce 功能——一種用於多重簽章工作流程和離線簽署的合法工具，可以繞過標準的約 60 秒 blockhash 過期機制——在實際執行前數天就收集了預簽名交易。這場六個月的社交工程行動包括面對面會議、Telegram 群組的建立、合法資金存入（超過 100 萬美元），以及最終透過零點擊 VSCode/Cursor 漏洞或惡意 TestFlight 應用程式進行的設備入侵。一旦簽署者的設備被入侵，攻擊者就能取得多重簽章的預批准權。Neodyme 2024 年的安全審計曾審查 Drift 的權限結構（管理員創建市場和更新參數的能力），但將其分類為協議信任模型中的可接受假設——任何審計都無法捕捉到被入侵的私鑰。薄弱多重簽章門檻、無時間鎖、持久化 Nonce 濫用和社交工程的結合，使攻擊者在沒有破壞任何一行程式碼的情況下取得了所需的一切。",
       "attackVector": "1. 偵察（2025 年 10 月至 2026 年 3 月）：北韓關聯組織（UNC4736）偽裝成量化交易公司，在加密貨幣會議上接觸 Drift 貢獻者，在六個月內建立專業關係，創建 Telegram 群組，在多國和行業活動中保持持續存在。2. 滲透（2025 年 12 月至 2026 年 1 月）：該組織在 Drift 上開設了生態系統金庫，存入超過 100 萬美元自有資金，參與工作會議，提出詳細的產品問題。3. 設備入侵（2026 年 2 月至 3 月）：該組織分享了被描述為前端部署和錢包產品的連結、儲存庫和應用程式。至少一名貢獻者克隆了共享儲存庫（利用了已知的零點擊 VSCode/Cursor 漏洞，僅打開檔案或資料夾即可靜默執行任意程式碼）及/或下載了 TestFlight 應用程式。這使攻擊者獲得了簽署工作流程的存取權。4. 持久化 Nonce 設定（2026 年 3 月 23-30 日）：攻擊者創建了與 5 個多重簽章簽署者中至少 2 人綁定的多個持久化 Nonce 帳戶，誘騙他們預簽名管理權轉移交易。5. 多重簽章遷移利用（2026 年 3 月 27 日）：Drift 遷移安全理事會，替換了 5 個簽署者中的 4 個，將門檻從 3/5 降至 2/5。3 天內，攻擊者從替換簽署者處獲得了預簽名 Nonce。6. CVT 代幣準備（2026 年 3 月 12 日）：攻擊者創建了 CarbonVote Token (CVT)，鑄造 7.5 億枚（成本 1.19 美元），在 Raydium 流動性池中投入 500 美元種子資金，經數週洗盤交易推升至 1 美元/枚，為預言機操縱建立可信的價格歷史。7. 管理權接管（2026 年 4 月 1 日 16:05:18-19 UTC）：兩筆預簽名 Nonce 交易在區塊 410344005/410344009 一秒間隔內執行，將 Drift State 帳戶所有權轉移給攻擊者。8. 市場操縱（16:05:19 UTC）：攻擊者創建了具有最大寬鬆參數的 CVT 現貨市場，在 5 個市場上調用 updateWithdrawGuardThreshold() 將上限提高到 500 兆。9. 清空（16:05:43 - 16:07:26 UTC）：攻擊者在第 25 秒存入 5 億 CVT，然後在 103 秒內執行 33 筆借款循環交易，清空了價值 2.8526 億美元的 18 種代幣。10. 資金退出（4 月 1 日 16:07+ UTC）：被盜資產透過 Jupiter 轉換為 USDC/WSOL/WBTC/WETH，透過 Circle CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊，在 4 個 EOA 中合併為 ETH。",
       "estimatedLoss": {
-        "note": "已確認損失總計 2.8526 億美元，於 128 秒內清空 18 種代幣。JLP 為最大單一持倉，達 1.5935 億美元（佔總額 55.9%）。資金經 Circle CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊，在四個攻擊者 EOA 中合併為 ETH。這是 2026 年最大的 DeFi 攻擊事件，也是 Solana 歷史上第二大攻擊，僅次於 Wormhole。"
+        "note": "已確認損失總計 2.8526 億美元，於 128 秒內清空 19 種代幣。JLP 為最大單一持倉，達 1.5935 億美元（佔總額 55.9%）。資金經 Circle CCTP（6 小時內 100 多筆交易）和 Chainflip 跨鏈至以太坊，在四個攻擊者 EOA 中合併為 ETH。這是 2026 年最大的 DeFi 攻擊事件，也是 Solana 歷史上第二大攻擊，僅次於 Wormhole。"
       },
       "attackTime": {
         "note": "攻擊執行：128 秒（UTC 16:05:18 至 16:07:26，區塊 410344005 至約 410344017）。社交工程準備始於 2025 年 10 月（約 6 個月）。鏈上設定（持久化 Nonce 創建）始於 2026 年 3 月 23 日。CVT 代幣創建於 2026 年 3 月 12 日。攻擊者資金來自 Tornado Cash 的 10 ETH，經跨鏈至 Solana。"
@@ -464,7 +464,7 @@
       "rootCause": "根本原因はコードの脆弱性ではなく、運用セキュリティの失敗だった。DriftのセキュリティカウンシルはSquads V4マルチシグで運用されており、危険なまでに低い2/5の署名閾値とゼロタイムロックが設定されていたため、署名者2名が即座に不可逆的な管理者レベルの変更を承認できた。攻撃者はSolanaのダーラブルノンシー機能（マルチシグワークフローとオフライン署名のための正当なツールで、標準の約60秒のブロックハッシュ有効期限をバイパス）を悪用し、実行の数日前に事前署名トランザクションを収集した。6ヶ月にわたるソーシャルエンジニアリングキャンペーンには、対面カンファレンス、Telegramグループの設立、正当な資金の預入（100万ドル超）、ゼロクリックVSCode/Cursor脆弱性または悪質なTestFlightアプリを介した最終的なデバイス侵害が含まれていた。署名者のデバイスが侵害されると、攻撃者はマルチシグの事前承認を取得できた。Neodymeの2024年セキュリティ監査はDriftの権限構造をレビューしたが、管理者の市場作成機能をプロトコルの信頼モデル内で許容可能な仮定として分類した。弱いマルチシグ閾値、タイムロックの欠如、ダーラブルノンシーの悪用、ソーシャルエンジニアリングの組み合わせにより、攻撃者はコードの1行も壊すことなく必要なすべてを取得した。",
       "attackVector": "1. 偵察（2025年10月〜2026年3月）：北朝鮮関連グループ（UNC4736）が定量取引会社を装い、暗号通貨カンファレンスでDriftコントリビューターに接触、6ヶ月間で専門的関係を構築、Telegramグループを設立。2. 侵入（2025年12月〜2026年1月）：Drift上でエコシステムVaultを開設、100万ドル以上の自己資金を預入、作業セッションに参加。3. デバイス侵害（2026年2月〜3月）：共有VSCode/Cursorリポジトリのゼロクリック脆弱性および/または悪質なTestFlightアプリを介して署名ワークフローへのアクセスを取得。4. ダーラブルノンシー設定（2026年3月23-30日）：5名の署名者のうち少なくとも2名に紐づくノンシーアカウントを作成、管理者転送トランザクションを事前署名させるよう欺いた。5. マルチシグ移行の悪用（2026年3月27日）：Driftがセキュリティカウンシルを移行（5名中4名を置換、閾値を3/5から2/5に引き下げ）。3日以内に攻撃者は置換署名者から事前署名ノンシーを取得。6. CVTトークン準備（2026年3月12日）：CarbonVote Token（CVT）を作成、7.5億枚を1.19ドルで鋳造、Raydium LPに500ドルをシード、数週間のウォッシュトレードで1ドル/トークンまで価格を構築。7. 管理者乗っ取り（2026年4月1日 16:05:18-19 UTC）：ブロック410344005/410344009で1秒間隔で2つの事前署名ノンシートランザクションを実行、Drift Stateアカウントの所有権を攻撃者に転送。8. 市場操作（16:05:19 UTC）：寛容なパラメータでCVTスポット市場を開設、5つの市場でupdateWithdrawGuardThreshold()を呼び出し上限を500兆に引き上げ。9. 枯渇（16:05:43〜16:07:26 UTC）：25秒目に5億CVTを預入、その後103秒間で33回のborrow-loopトランザクションを実行、18種類のトークン合計2億8526万ドルを枯渇。10. 資金出口（4月1日 16:07+ UTC）：Jupiter経由でUSDC/WSOL/WBTC/WETHにスワップ、Circle CCTP（6時間で100回以上のトランザクション）とChainflipを介してEthereumにブリッジ、4つのEOAでETHに統合。",
       "estimatedLoss": {
-        "note": "確認済み損失合計：2億8526万ドル、128秒間で18種類のトークンが枯渇。JLPは最大の単一ポジションで1億5935万ドル（全体の55.9％）。資金はCircle CCTP（6時間で100回以上のトランザクション）とChainflipを介してEthereumにブリッジされ、4つの攻撃者EOAでETHに統合。2026年最大のDeFiハッキング、Wormholeに次ぐSolana史上2番目に大規模な攻撃。"
+        "note": "確認済み損失合計：2億8526万ドル、128秒間で19種類のトークンが枯渇。JLPは最大の単一ポジションで1億5935万ドル（全体の55.9％）。資金はCircle CCTP（6時間で100回以上のトランザクション）とChainflipを介してEthereumにブリッジされ、4つの攻撃者EOAでETHに統合。2026年最大のDeFiハッキング、Wormholeに次ぐSolana史上2番目に大規模な攻撃。"
       },
       "attackTime": {
         "note": "エクスプロイト実行：128秒（UTC 16:05:18〜16:07:26、ブロック410344005〜約410344017）。ソーシャルエンジニアリング準備は2025年10月開始（約6ヶ月）。オンチェーン設定（ダーラブルノンシー作成）は2026年3月23日開始。CVTトークンは2026年3月12日作成。攻撃資金はTornado Cashからの10 ETHをSolanaにブリッジ。"
