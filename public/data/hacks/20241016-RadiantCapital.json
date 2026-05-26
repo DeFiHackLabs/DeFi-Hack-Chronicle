@@ -1,5 +1,5 @@
 {
-  "id": "radiant-capital-2024",
+  "id": "radiant-2024-1",
   "title": "Radiant Capital - Rekt II",
   "protocol": "Radiant Capital",
   "blockchain": [
@@ -58,7 +58,7 @@
       "accountType": "eoa"
     },
     {
-      "address": "0x97a05becc2e7891d07f382457cd5d57fd242e4e8",
+      "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
       "chain": "arbitrum",
       "role": "secondary_attacker",
       "description": "Secondary attacker EOA on Arbitrum associated with the exploit.",
@@ -210,7 +210,7 @@
           "accountType": "eoa"
         },
         {
-          "address": "0x97a05becc2e7891d07f382457cd5d57fd242e4e8",
+          "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
           "chain": "arbitrum",
           "role": "secondary_attacker",
           "description": "Arbitrum 上與攻擊相關的次要攻擊者 EOA。",
@@ -336,7 +336,7 @@
           "accountType": "eoa"
         },
         {
-          "address": "0x97a05becc2e7891d07f382457cd5d57fd242e4e8",
+          "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
           "chain": "arbitrum",
           "role": "secondary_attacker",
           "description": "攻撃に関連するArbitrum上の二次攻撃者EOA。",
