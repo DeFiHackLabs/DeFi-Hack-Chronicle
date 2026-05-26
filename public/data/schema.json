@@ -223,10 +223,16 @@
     },
     "metadata": {
       "type": "object",
+      "required": ["human_verified"],
       "properties": {
         "dateAdded": { "type": "string" },
         "lastUpdated": { "type": "string" },
-        "human_verified": { "type": "boolean" }
+        "human_verified": { "type": "boolean" },
+        "models": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "AI models used to investigate this event (optional)"
+        }
       }
     },
     "date": {

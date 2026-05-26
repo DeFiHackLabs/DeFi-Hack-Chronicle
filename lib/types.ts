@@ -98,7 +98,8 @@ export interface HackEvent {
   metadata?: {
     dateAdded?: string;
     lastUpdated?: string;
-    human_verified?: boolean;
+    human_verified: boolean;
+    models?: string[];
   };
   /** Locale-specific overrides: `{ zh: { title: "..." }, ko: { title: "..." } }` */
   locales?: Record<string, Record<string, unknown>>;
