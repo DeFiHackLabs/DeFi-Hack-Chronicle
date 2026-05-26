@@ -24,6 +24,18 @@
       "file": "20171106-Parity.json"
     },
     {
+      "id": "harvest-2020",
+      "date": "2020-10-26",
+      "protocol": "Harvest Finance",
+      "file": "20201026-HarvestFinance.json"
+    },
+    {
+      "id": "cream-2021-08",
+      "date": "2021-08-30",
+      "protocol": "Cream Finance",
+      "file": "20210830-CreamFinance.json"
+    },
+    {
       "id": "radiant-2024-1",
       "date": "2024-10-16",
       "protocol": "Radiant Capital",
