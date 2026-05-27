@@ -1,0 +1,638 @@
+{
+  "id": "penpie-2024",
+  "title": "Penpie Reentrancy Exploit",
+  "protocol": "Penpie",
+  "blockchain": ["ethereum", "arbitrum"],
+  "category": ["reentrancy", "business_logic"],
+  "ecosystem": "evm",
+  "language": "solidity",
+  "estimatedLoss": {
+    "totalUSD": "27000000",
+    "breakdown": [
+      {
+        "asset": "rswETH",
+        "amount": "695",
+        "convertedUSD": "2200000"
+      },
+      {
+        "asset": "agETH",
+        "amount": "4101",
+        "convertedUSD": "4200000"
+      },
+      {
+        "asset": "wstETH",
+        "amount": "2723",
+        "convertedUSD": "7500000"
+      },
+      {
+        "asset": "sUSDe",
+        "amount": "2520000",
+        "convertedUSD": "2520000"
+      },
+      {
+        "asset": "egETH",
+        "amount": "[uncertain]",
+        "convertedUSD": "[uncertain]"
+      },
+      {
+        "asset": "gUSDC",
+        "amount": "[uncertain]",
+        "convertedUSD": "[uncertain]"
+      }
+    ],
+    "note": "Total loss widely reported as approximately $27 million. PeckShield initially reported >$16M on Ethereum only; the ~$27M figure includes additional losses on Arbitrum and subsequent revaluations. Breakdown amounts are approximate and derived from security firm post-mortems. egETH and gUSDC amounts from Arbitrum exploit leg are not precisely quantified in public sources. USD conversions are rough estimates at time of attack."
+  },
+  "attackTime": {
+    "startTime": "2024-09-03T18:23:00Z",
+    "endTime": "2024-09-03T19:14:00Z",
+    "isRange": true,
+    "note": "First exploit transaction on Ethereum mined at approximately 18:23 UTC. Three main exploit transactions executed between 18:23 UTC and 18:42 UTC. Arbitrum exploit transaction occurred at approximately 19:14 UTC. Pendle team paused contracts approximately three minutes after the final Ethereum attack transaction (18:42 UTC).",
+    "date": "2024-09-03"
+  },
+  "transactions": [
+    {
+      "txHash": "0x56e09abb35ff12271fdb38ff8a23e4d4a7396844426a94c4d3af2e8b7a0a2813",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "First major exploit transaction on Ethereum. Attacker invoked batchHarvestMarketRewards() via malicious SY contract 0x4af4c234b8cb6e060797e87afb724cfb1d320bb7, draining rswETH and other Pendle-related assets."
+    },
+    {
+      "txHash": "0x42b2ec27c732100dd9037c76da415e10329ea41598de453bb0c0c9ea7ce0d8e5",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Second major exploit transaction on Ethereum. Attacker repeated the reentrancy attack via malicious SY contract 0x4476b6ca46b28182944ed750e74e2bb1752f87ae, draining agETH and wstETH."
+    },
+    {
+      "txHash": "0x663b55a1ee992603f7636ef23ff5cf19d3b261ab81494d06e218c86482df5342",
+      "chain": "ethereum",
+      "role": "exploit",
+      "description": "Third major exploit transaction on Ethereum. Attacker executed the final reentrancy leg via malicious SY contract 0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2, draining remaining agETH and rswETH."
+    },
+    {
+      "txHash": "0x67c5400da117b906f8c0fc5f5149e4ea10ed6358cd9ea2ec0ed8f559d757b7df",
+      "chain": "arbitrum",
+      "role": "exploit",
+      "description": "Arbitrum exploit transaction. Attacker leveraged flash loans in gUSDC and exploited Penpie's Arbitrum deployment using malicious contract 0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487."
+    },
+    {
+      "txHash": "0xfda0dde38fa4c5b0e13c506782527a039d3a87f93f9208c104ee569a642172d2",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Deployment of the first malicious SY contract (0x4af4c234b8cb6e060797e87afb724cfb1d320bb7) and creation of fake Pendle market with counterfeit PT and YT tokens."
+    },
+    {
+      "txHash": "0x7e7f9548f301d3dd863eac94e6190cb742ab6aa9d7730549ff743bf84cbd21d1",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Deployment of the second malicious SY contract (0x4476b6ca46b28182944ed750e74e2bb1752f87ae) and creation of a second fake Pendle market."
+    },
+    {
+      "txHash": "0x7961b0d3382bddff4c777e432902ea0b6940414ec16aa1a1dcebc4ebcbd8f867",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Deployment of the third malicious SY contract (0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2) and creation of a third fake Pendle market."
+    },
+    {
+      "txHash": "0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e",
+      "chain": "ethereum",
+      "role": "setup",
+      "description": "Deployment of a fourth malicious contract related to the exploit infrastructure."
+    },
+    {
+      "txHash": "0x8fd212e0ee577477b01ede2d0ce218d28dfa81bef507135b3577694aa504a549",
+      "chain": "ethereum",
+      "role": "message",
+      "description": "On-chain message sent by Penpie team to the attacker providing contact information (Telegram/Email) for negotiation. The attacker did not respond."
+    },
+    {
+      "txHash": "0x183ceb6808fcda523b06e05ff9904fdc7972975289345c90247ba4ffcdeaab2a",
+      "chain": "ethereum",
+      "role": "laundering",
+      "description": "Tornado Cash deposit transaction. Attacker laundered stolen funds in batches of 100 ETH through Tornado Cash to obfuscate the trail."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x7a2f4d625fb21f5e51562ce8dc2e722e12a61d1b",
+      "chain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA. Deployed malicious SY contracts, executed the exploit transactions, and controlled the main fund aggregation wallet.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xc0eb7e6e2b94aa43bdd0c60e645fe915d5c6eb84",
+      "chain": "ethereum",
+      "role": "secondary_attacker",
+      "description": "Secondary attacker EOA used to transfer funds from the first malicious SY contract exploit.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x28e3fd9edca8fccb912fe3ab36c78f96cfc74769",
+      "chain": "ethereum",
+      "role": "fund_tunnel",
+      "description": "Fund tunneling wallet used for laundering and offboarding stolen funds.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x69751b7e52dbbd64281ec9049dfa623c7ecdeb52",
+      "chain": "ethereum",
+      "role": "fund_tunnel",
+      "description": "Fund tunneling wallet used for laundering and offboarding stolen funds.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x2f2dde668e5426463e05d795f5297db334f61c39",
+      "chain": "ethereum",
+      "role": "fund_tunnel",
+      "description": "Fund tunneling wallet used for laundering and offboarding stolen funds.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x2dc15e0ff02f39d4d23a96d6ef2595df3d1e18a0",
+      "chain": "ethereum",
+      "role": "fund_tunnel",
+      "description": "Fund tunneling wallet used for laundering and offboarding stolen funds.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x4af4c234b8cb6e060797e87afb724cfb1d320bb7",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "First malicious SY (Standardized Yield) contract deployed by the attacker. Created fake Pendle market with counterfeit PT and YT tokens. Served as both the exploit contract and fake yield-bearing token.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x4476b6ca46b28182944ed750e74e2bb1752f87ae",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Second malicious SY contract deployed by the attacker. Used in the second exploit transaction.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Third malicious SY contract deployed by the attacker. Used in the third exploit transaction.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487",
+      "chain": "arbitrum",
+      "role": "exploit_contract",
+      "description": "Malicious contract deployed on Arbitrum for the cross-chain exploit leg using gUSDC flash loans.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x0ab305033592e16db7d8e77d613f8d172a76ddc9",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "First malicious Pendle Market deployed by the attacker, explicitly identified in Pendle's official post-mortem. Funded from Tornado Cash and served as the initial attack contract.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0xb115a4cc41a351a2adb5a00f11c7ed15f46912dd",
+      "chain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Fourth malicious contract deployed by the attacker as part of the exploit infrastructure, deployed via transaction 0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x688413d6cae1c0e0882e274a98e0b901fdf7233c",
+      "chain": "ethereum",
+      "role": "fund_tunnel",
+      "description": "Fund tunneling wallet used for Tornado Cash deposits to launder stolen funds. Sent 100 ETH batches to Tornado.Cash: Router.",
+      "accountType": "eoa"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x6E799758CEE75DAe3d84e09D40dc416eCf713652",
+      "chain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Penpie: Staking contract (PendleStaking) on Ethereum. This was the primary victim contract containing the vulnerable batchHarvestMarketRewards() function that lacked reentrancy protection.",
+      "accountType": "contract_open_source"
+    },
+    {
+      "address": "0x6Db96BBEB081d2a85E0954c252F2C1dC108b3F81",
+      "chain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Penpie: Pendle Staking contract on Arbitrum. Cross-chain victim of the same reentrancy vulnerability.",
+      "accountType": "contract_open_source"
+    }
+  ],
+  "description": "On September 3, 2024, Penpie, a yield optimization protocol built on Pendle Finance, was exploited for approximately $27 million through a reentrancy vulnerability in its PendleStaking contract. The attacker created fake Pendle markets using malicious Standardized Yield (SY) contracts that mimicked legitimate yield-bearing tokens. By depositing these counterfeit tokens into Penpie's pools, the attacker gained Liquidity Provider Tokens (LPT) and Pool Reward Tokens (PRT). The core vulnerability was in the batchHarvestMarketRewards() function, which lacked a reentrancy guard. The attacker invoked this function with their fake market as input; during the reward redemption callback, they re-entered the deposit flow, temporarily inflating Penpie's balance. The contract then misinterpreted this balance increase as newly harvested rewards, causing it to distribute disproportionately large payouts to the attacker. The attacker used flash loans from Balancer to seed the fake markets with real assets including wstETH, agETH, rswETH, and sUSDe. Three major exploit transactions were executed on Ethereum between 18:23 UTC and 18:42 UTC, followed by a similar attack on Arbitrum using gUSDC. The Pendle team paused contracts three minutes after the final attack, preventing an estimated additional $70-105 million in potential losses. The attacker did not respond to Penpie's on-chain bounty offer and subsequently laundered funds through Tornado Cash.",
+  "rootCause": "Two critical flaws enabled the attack: (1) The batchHarvestMarketRewards() function in PendleStaking lacked a reentrancy guard (nonReentrant modifier), allowing the attacker to re-enter the deposit flow during reward redemption callbacks. Although depositMarket() itself had reentrancy protection, the higher-level batch harvest function did not. (2) Penpie's protocol assumed all markets created on Pendle Finance were legitimate and did not validate or whitelist SY tokens, PT/YT pairs, or market contracts before accepting them into its staking and reward distribution system. Pendle markets are permissionlessly created, so anyone can deploy a market with arbitrary, malicious SY tokens.",
+  "attackVector": "1. The attacker deployed multiple malicious SY contracts on Ethereum (and one on Arbitrum) that implemented Pendle's SY interface but were backed by valueless or attacker-controlled assets. 2. Using these fake SY tokens, the attacker minted counterfeit Principal Tokens (PT) and Yield Tokens (YT), then created fake Pendle markets through Pendle's permissionless market factory. 3. The attacker deposited these fake markets into Penpie's staking pools, receiving legitimate PRT tokens as proof of deposit. 4. The attacker obtained flash loans from Balancer Vault in real assets (wstETH, agETH, rswETH, sUSDe, gUSDC) and deposited them into the malicious SY contracts. 5. The attacker called batchHarvestMarketRewards() with their fake market as the target. The function recorded bonus tokens, called redeemRewards() on the fake SY contract, which in turn deposited the flash-loaned assets into legitimate Pendle markets via depositMarket(). Because batchHarvestMarketRewards() lacked reentrancy protection, this deposit inflated Penpie's balance. 6. The function compared balances before and after redemption, incorrectly attributing the flash-loan deposit balance increase to harvested rewards. 7. Penpie transferred the overstated rewards to the RewardDistributor, attributing them to the attacker's fake market. As the sole depositor, the attacker claimed all rewards. 8. The attacker withdrew from legitimate markets, converted tokens, repaid flash loans, and transferred profits to tunneling addresses. 9. The attacker repeated the process three times on Ethereum and once on Arbitrum, then laundered proceeds through Tornado Cash.",
+  "lessons": [
+    "All state-changing functions that interact with external contracts must implement reentrancy guards (e.g., OpenZeppelin ReentrancyGuard), especially batch operations that call user-supplied market contracts.",
+    "Never assume that permissionlessly created markets, tokens, or pools are legitimate. Protocols must implement strict whitelisting or validation for external markets before accepting them into reward-bearing systems.",
+    "Functions that compare balances before and after external calls (balance-delta pattern) are inherently dangerous when the external contract can trigger state changes. Use reentrancy locks and careful ordering of Checks-Effects-Interactions.",
+    "Flash loan availability amplifies exploit impact. Protocols handling large TVL should consider circuit breakers or rate-limiting on large, rapid withdrawals and reward claims.",
+    "Cross-chain deployments must receive equal security scrutiny. The same vulnerability was present on Arbitrum, enabling a second exploit leg.",
+    "Audit reports are necessary but not sufficient. Penpie had been audited by WatchPug and Zokyo prior to the incident, yet the reentrancy and market-validation issues were missed. Continuous auditing and real-time monitoring are essential.",
+    "Incident response planning should include rapid contract-pause capabilities, on-chain messaging to attackers, and pre-established relationships with security firms and law enforcement.",
+    "Laundering via Tornado Cash remains a common post-exploit pattern. Protocols should pre-emptively integrate with analytics firms (Chainalysis, Elliptic, zeroShadow) and exchanges to freeze funds where possible."
+  ],
+  "references": [
+    "https://smartcontractshacking.com/hacks/penpie-hack-2024",
+    "https://threesigma.xyz/blog/exploit/penpie-reentrancy-exploit-analysis",
+    "https://www.halborn.com/blog/post/explained-the-penpie-hack-september-2024",
+    "https://research.blockscope.co/penpie",
+    "https://blockapex.io/penpie-hack-analysis/",
+    "https://cybercory.com/2024/09/06/27m-stolen-in-penpie-defi-hack-a-detailed-breakdown-of-the-attack-and-lessons-learned/",
+    "https://incrypthos.com/security/penpie-finance-suffers-27-million-reentrancy-exploit-on-arbitrum/",
+    "https://www.auditone.io/blog-posts/the-penpie-hack-understanding-the-september-2024-reentrancy-exploit-and-the-role-of-auditing-in-defi-security",
+    "https://x.com/peckshield/status/1831072098669953388",
+    "https://x.com/AnciliaInc/status/1831080555292856476",
+    "https://x.com/hackenclub/status/1831383106554573099",
+    "https://x.com/Penpiexyz_io/status/1831462760787452240",
+    "https://x.com/pendle_fi/status/1831168623634993402",
+    "https://etherscan.io/tx/0x56e09abb35ff12271fdb38ff8a23e4d4a7396844426a94c4d3af2e8b7a0a2813",
+    "https://etherscan.io/tx/0x42b2ec27c732100dd9037c76da415e10329ea41598de453bb0c0c9ea7ce0d8e5",
+    "https://etherscan.io/tx/0x663b55a1ee992603f7636ef23ff5cf19d3b261ab81494d06e218c86482df5342",
+    "https://arbiscan.io/tx/0x67c5400da117b906f8c0fc5f5149e4ea10ed6358cd9ea2ec0ed8f559d757b7df"
+  ],
+  "metadata": {
+    "dateAdded": "2025-05-27",
+    "lastUpdated": "2025-05-27",
+    "human_verified": false,
+    "models": ["kimi-k2.6"]
+  },
+  "date": "2024-09-03",
+  "locales": {
+    "zh-TW": {
+      "title": "Penpie 重入攻擊事件",
+      "description": "2024 年 9 月 3 日，建立在 Pendle Finance 之上的收益優化協議 Penpie 因 PendleStaking 合約中的重入漏洞遭受攻擊，損失約 2,700 萬美元。攻擊者利用惡意的 Standardized Yield（SY）合約創建虛假的 Pendle 市場，這些合約模仿了合法的有收益代幣。透過將這些偽造代幣存入 Penpie 的資金池，攻擊者獲得了流動性提供者代幣（LPT）和資金池獎勵代幣（PRT）。核心漏洞在於 batchHarvestMarketRewards() 函式缺少重入保護。攻擊者以假市場為目標呼叫此函式；在獎勵贖回回調期間，他們重新進入存款流程，暫時膨脹了 Penpie 的餘額。合約隨後將此餘額增加誤認為新收割的獎勵，導致向攻擊者分配不成比例的大額獎勵。攻擊者利用 Balancer 的閃電貸為假市場注入真實資產，包括 wstETH、agETH、rswETH 和 sUSDe。在 18:23 UTC 至 18:42 UTC 之間，以太坊上執行了三筆主要攻擊交易，隨後在 Arbitrum 上使用 gUSDC 進行了類似攻擊。Pendle 團隊在最後一次攻擊後約三分鐘暫停了合約，阻止了估計額外 7,000 萬至 1.05 億美元的潛在損失。攻擊者未回應 Penpie 的鏈上賞金提議，隨後透過 Tornado Cash 洗錢。",
+      "rootCause": "兩個關鍵缺陷導致了攻擊：(1) PendleStaking 中的 batchHarvestMarketRewards() 函式缺少重入鎖（nonReentrant 修飾符），允許攻擊者在獎勵贖回回調期間重新進入存款流程。雖然 depositMarket() 本身有重入保護，但更高層級的批量收割函式沒有。(2) Penpie 的協議假設在 Pendle Finance 上創建的所有市場都是合法的，在接受它們進入質押和獎勵分配系統之前，沒有驗證或白名單化 SY 代幣、PT/YT 對或市場合約。Pendle 市場是無需許可創建的，因此任何人都可以使用任意的惡意 SY 代幣部署市場。",
+      "attackVector": "1. 攻擊者在以太坊上部署了多個惡意 SY 合約（在 Arbitrum 上部署了一個），這些合約實現了 Pendle 的 SY 介面，但背後是無價值或攻擊者控制的資產。2. 使用這些假 SY 代幣，攻擊者鑄造了偽造的本金代幣（PT）和收益代幣（YT），然後透過 Pendle 的無需許可市場工廠創建了虛假的 Pendle 市場。3. 攻擊者將這些假市場存入 Penpie 的質押池，收到合法的 PRT 代幣作為存款證明。4. 攻擊者從 Balancer Vault 獲得真實資產（wstETH、agETH、rswETH、sUSDe、gUSDC）的閃電貸，並將其存入惡意 SY 合約。5. 攻擊者以假市場為目標呼叫 batchHarvestMarketRewards()。該函式記錄了獎勵代幣，在假 SY 合約上呼叫 redeemRewards()，後者透過 depositMarket() 將閃電貸資產存入合法的 Pendle 市場。由於 batchHarvestMarketRewards() 缺少重入保護，此次存款膨脹了 Penpie 的餘額。6. 函式比較了贖回前後的餘額，錯誤地將閃電貸存款造成的餘額增加歸因於收割的獎勵。7. Penpie 將誇大的獎勵轉移給 RewardDistributor，並將其歸因於攻擊者的假市場。作為唯一的存款人，攻擊者領取了所有獎勵。8. 攻擊者從合法市場提款、兌換代幣、償還閃電貸，並將利潤轉移到洗錢地址。9. 攻擊者在以太坊上重複了三次此流程，在 Arbitrum 上重複了一次，然後透過 Tornado Cash 清洗收益。",
+      "lessons": [
+        "所有與外部合約互動的狀態更改函式必須實施重入鎖（例如 OpenZeppelin ReentrancyGuard），尤其是呼叫使用者提供市場合約的批量操作。",
+        "切勿假設無需許可創建的市場、代幣或資金池是合法的。協議在接受外部市場進入獎勵系統之前，必須實施嚴格的白名單或驗證機制。",
+        "比較外部呼叫前後餘額的函式（餘額差額模式）當外部合約可以觸發狀態更改時本質上是危險的。請使用重入鎖並仔細遵循 Checks-Effects-Interactions 順序。",
+        "閃電貸的可用性放大了攻擊影響。處理大額 TVL 的協議應考慮對大額、快速的提款和獎勵領取設置斷路器或速率限制。",
+        "跨鏈部署必須接受同等的安全審查。相同的漏洞也存在於 Arbitrum 上，導致了第二次攻擊。",
+        "審計報告是必要的，但並不充分。Penpie 在事件發生前曾接受 WatchPug 和 Zokyo 的審計，但重入和市場驗證問題被遺漏了。持續審計和即時監控至關重要。",
+        "事件回應計畫應包括快速合約暫停能力、對攻擊者的鏈上訊息傳遞，以及與安全公司和執法機構的預先建立關係。",
+        "透過 Tornado Cash 洗錢仍然是常見的攻擊後模式。協議應預先與分析公司（Chainalysis、Elliptic、zeroShadow）和交易所整合，盡可能凍結資金。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x56e09abb35ff12271fdb38ff8a23e4d4a7396844426a94c4d3af2e8b7a0a2813",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "以太坊上第一筆主要攻擊交易。攻擊者透過惡意 SY 合約 0x4af4c234b8cb6e060797e87afb724cfb1d320bb7 呼叫 batchHarvestMarketRewards()， drained rswETH 和其他 Pendle 相關資產。"
+        },
+        {
+          "txHash": "0x42b2ec27c732100dd9037c76da415e10329ea41598de453bb0c0c9ea7ce0d8e5",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "以太坊上第二筆主要攻擊交易。攻擊者透過惡意 SY 合約 0x4476b6ca46b28182944ed750e74e2bb1752f87ae 重複重入攻擊， drained agETH 和 wstETH。"
+        },
+        {
+          "txHash": "0x663b55a1ee992603f7636ef23ff5cf19d3b261ab81494d06e218c86482df5342",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "以太坊上第三筆主要攻擊交易。攻擊者透過惡意 SY 合約 0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2 執行最後一次重入攻擊， drained 剩餘的 agETH 和 rswETH。"
+        },
+        {
+          "txHash": "0x67c5400da117b906f8c0fc5f5149e4ea10ed6358cd9ea2ec0ed8f559d757b7df",
+          "chain": "arbitrum",
+          "role": "exploit",
+          "description": "Arbitrum 攻擊交易。攻擊者利用 gUSDC 閃電貸，使用惡意合約 0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487 攻擊 Penpie 的 Arbitrum 部署。"
+        },
+        {
+          "txHash": "0xfda0dde38fa4c5b0e13c506782527a039d3a87f93f9208c104ee569a642172d2",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "部署第一個惡意 SY 合約（0x4af4c234b8cb6e060797e87afb724cfb1d320bb7）並創建帶有偽造 PT 和 YT 代幣的虛假 Pendle 市場。"
+        },
+        {
+          "txHash": "0x7e7f9548f301d3dd863eac94e6190cb742ab6aa9d7730549ff743bf84cbd21d1",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "部署第二個惡意 SY 合約（0x4476b6ca46b28182944ed750e74e2bb1752f87ae）並創建第二個虛假 Pendle 市場。"
+        },
+        {
+          "txHash": "0x7961b0d3382bddff4c777e432902ea0b6940414ec16aa1a1dcebc4ebcbd8f867",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "部署第三個惡意 SY 合約（0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2）並創建第三個虛假 Pendle 市場。"
+        },
+        {
+          "txHash": "0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "部署第四個與攻擊基礎設施相關的惡意合約。"
+        },
+        {
+          "txHash": "0x8fd212e0ee577477b01ede2d0ce218d28dfa81bef507135b3577694aa504a549",
+          "chain": "ethereum",
+          "role": "message",
+          "description": "Penpie 團隊向攻擊者發送的鏈上訊息，提供聯絡方式（Telegram/電子郵件）以便協商。攻擊者未回應。"
+        },
+        {
+          "txHash": "0x183ceb6808fcda523b06e05ff9904fdc7972975289345c90247ba4ffcdeaab2a",
+          "chain": "ethereum",
+          "role": "laundering",
+          "description": "Tornado Cash 存款交易。攻擊者以每批 100 ETH 的方式將被盜資金轉入 Tornado Cash 以混淆追踪。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x7a2f4d625fb21f5e51562ce8dc2e722e12a61d1b",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA。部署惡意 SY 合約、執行攻擊交易並控制主要資金聚合錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xc0eb7e6e2b94aa43bdd0c60e645fe915d5c6eb84",
+          "chain": "ethereum",
+          "role": "secondary_attacker",
+          "description": "用於從第一個惡意 SY 合約攻擊轉移資金的次要攻擊者 EOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x28e3fd9edca8fccb912fe3ab36c78f96cfc74769",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "用於清洗和轉移被盜資金的資金通道錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x69751b7e52dbbd64281ec9049dfa623c7ecdeb52",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "用於清洗和轉移被盜資金的資金通道錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x2f2dde668e5426463e05d795f5297db334f61c39",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "用於清洗和轉移被盜資金的資金通道錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x2dc15e0ff02f39d4d23a96d6ef2595df3d1e18a0",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "用於清洗和轉移被盜資金的資金通道錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x4af4c234b8cb6e060797e87afb724cfb1d320bb7",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的第一個惡意 SY（Standardized Yield）合約。創建帶有偽造 PT 和 YT 代幣的虛假 Pendle 市場。同時作為攻擊合約和假收益代幣。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x4476b6ca46b28182944ed750e74e2bb1752f87ae",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的第二個惡意 SY 合約。用於第二次攻擊交易。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的第三個惡意 SY 合約。用於第三次攻擊交易。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487",
+          "chain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "在 Arbitrum 上部署的惡意合約，用於使用 gUSDC 閃電貸的跨鏈攻擊。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x0ab305033592e16db7d8e77d613f8d172a76ddc9",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的第一個惡意 Pendle 市場，Pendle 官方 post-mortem 明確指出。資金來源為 Tornado Cash，作為初始攻擊合約。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xb115a4cc41a351a2adb5a00f11c7ed15f46912dd",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的第四個惡意合約，屬於攻擊基礎設施的一部分，通過交易 0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e 部署。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x688413d6cae1c0e0882e274a98e0b901fdf7233c",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "用於將被盜資金存入 Tornado Cash 洗錢的資金通道錢包。以每批 100 ETH 的方式發送至 Tornado.Cash: Router。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x6E799758CEE75DAe3d84e09D40dc416eCf713652",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "以太坊上的 Penpie: Staking 合約（PendleStaking）。這是包含易受攻擊的 batchHarvestMarketRewards() 函式的主要受害合約，該函式缺少重入保護。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0x6Db96BBEB081d2a85E0954c252F2C1dC108b3F81",
+          "chain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Arbitrum 上的 Penpie: Pendle Staking 合約。相同重入漏洞的跨鏈受害者。",
+          "accountType": "contract_open_source"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Penpie リエントランシー攻撃事件",
+      "description": "2024年9月3日、Pendle Finance上に構築された利回り最適化プロトコルPenpieが、PendleStakingコントラクトのリエントランシー脆弱性を悪用された攻撃を受け、約2,700万ドルの損失が発生した。攻撃者は、悪意あるStandardized Yield（SY）コントラクトを使用して偽のPendle市場を作成し、これらのコントラクトは正当な利回りベアリングトークンを模倣していた。これらの偽造トークンをPenpieのプールに預入することで、攻撃者は流動性プロバイダートークン（LPT）とプール報酬トークン（PRT）を獲得した。核心的な脆弱性は、batchHarvestMarketRewards()関数にリエントランシーガードが欠如していたことにある。攻撃者は偽の市場を引数としてこの関数を呼び出し、報酬償還コールバックの間に入金フローに再入したため、Penpieの残高が一時的に膨張した。コントラクトはこの残高増加を新しく収穫された報酬と誤認し、攻撃者に不釣り合いに大きな報酬を分配した。攻撃者はBalancerのフラッシュローンを利用して、wstETH、agETH、rswETH、sUSDeなどの実際の資産で偽の市場に資金を供給した。18:23 UTCから18:42 UTCの間にイーサリアムで3件の主要な攻撃トランザクションが実行され、その後ArbitrumでgUSDCを使用して同様の攻撃が行われた。Pendleチームは最後の攻撃後約3分でコントラクトを一時停止し、推定7,000万ドルから1億500万ドルの追加損失を防いだ。攻撃者はPenpieのオンチェインバウンティ提案に応答せず、その後Tornado Cashを通じて資金を洗浄した。",
+      "rootCause": "2つの致命的な欠陥が攻撃を可能にした：(1) PendleStakingのbatchHarvestMarketRewards()関数にリエントランシーロック（nonReentrant修飾子）が欠如しており、攻撃者が報酬償還コールバックの間に入金フローに再入することを可能にした。depositMarket()自体にはリエントランシー保護があったが、より高次のバッチ収穫関数にはなかった。(2) Penpieのプロトコルは、Pendle Finance上に作成されたすべての市場が正当であると仮定し、それらをステーキングおよび報酬分配システムに受け入れる前に、SYトークン、PT/YTペア、または市場コントラクトを検証またはホワイトリスト化していなかった。Pendle市場はパーミッションレスに作成されるため、誰でも任意の悪意あるSYトークンで市場を展開できる。",
+      "attackVector": "1. 攻撃者はイーサリアム上に複数の悪意あるSYコントラクト（Arbitrum上に1つ）を展開し、これらはPendleのSYインターフェースを実装していたが、裏には無価値または攻撃者が管理する資産があった。2. これらの偽のSYトークンを使用して、攻撃者は偽造された元本トークン（PT）と利回りトークン（YT）を鋳造し、Pendleのパーミッションレス市場ファクトリーを通じて偽のPendle市場を作成した。3. 攻撃者はこれらの偽の市場をPenpieのステーキングプールに預入し、預入の証明として正当なPRTトークンを受け取った。4. 攻撃者はBalancer Vaultから実際の資産（wstETH、agETH、rswETH、sUSDe、gUSDC）のフラッシュローンを取得し、悪意あるSYコントラクトに預入した。5. 攻撃者は偽の市場をターゲットとしてbatchHarvestMarketRewards()を呼び出した。関数はボーナストークンを記録し、偽のSYコントラクト上でredeemRewards()を呼び出した。これはdepositMarket()を介してフラッシュローン資産を正当なPendle市場に預入した。batchHarvestMarketRewards()にリエントランシー保護が欠如していたため、この入金によりPenpieの残高が膨張した。6. 関数は償還前後の残高を比較し、フラッシュローン入金による残高増加を誤って収穫された報酬として帰属させた。7. Penpieは誇張された報酬をRewardDistributorに転送し、それを攻撃者の偽の市場に帰属させた。唯一の預入者として、攻撃者はすべての報酬を請求した。8. 攻撃者は正当な市場から引き出し、トークンを交換し、フラッシュローンを返済し、利益をトンネリングアドレスに転送した。9. 攻撃者はイーサリアムでこのプロセスを3回、Arbitrumで1回繰り返し、その後Tornado Cashを通じて収益を洗浄した。",
+      "lessons": [
+        "外部コントラクトと相互作用するすべての状態変更関数は、リエントランシーガード（例：OpenZeppelin ReentrancyGuard）を実装する必要がある。特に、ユーザー提供の市場コントラクトを呼び出すバッチ操作において重要である。",
+        "パーミッションレスに作成された市場、トークン、またはプールが正当であると仮定してはならない。プロトコルは、外部市場を報酬システムに受け入れる前に、厳格なホワイトリスト化または検証を実装しなければならない。",
+        "外部呼び出しの前後で残高を比較する関数（残高デルタパターン）は、外部コントラクトが状態変更を引き起こせる場合、本質的に危険である。リエントランシーロックとChecks-Effects-Interactionsの慎重な順序付けを使用すること。",
+        "フラッシュローンの可用性は攻撃の影響を拡大する。大きなTVLを扱うプロトコルは、大規模かつ急速な引き出しおよび報酬請求に対してサーキットブレーカーやレート制限を検討すべきである。",
+        "クロスチェーン展開は同等のセキュリティ監査を受ける必要がある。同じ脆弱性がArbitrumにも存在し、2回目の攻撃を可能にした。",
+        "監査レポートは必要だが十分ではない。Penpieは事件前にWatchPugとZokyoによる監査を受けていたが、リエントランシーと市場検証の問題は見落とされていた。継続的な監査とリアルタイム監視が不可欠である。",
+        "インシデント対応計画には、迅速なコントラクト一時停止機能、攻撃者へのオンチェーンメッセージング、およびセキュリティ企業や法執行機関との事前に確立された関係が含まれるべきである。",
+        "Tornado Cashを介したマネーロンダリングは、依然として一般的な攻撃後のパターンである。プロトコルは、分析企業（Chainalysis、Elliptic、zeroShadow）や取引所と事前に統合し、可能な限り資金を凍結すべきである。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x56e09abb35ff12271fdb38ff8a23e4d4a7396844426a94c4d3af2e8b7a0a2813",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "イーサリアム上の最初の主要な攻撃トランザクション。攻撃者は悪意あるSYコントラクト0x4af4c234b8cb6e060797e87afb724cfb1d320bb7を介してbatchHarvestMarketRewards()を呼び出し、rswETHやその他のPendle関連資産を排出した。"
+        },
+        {
+          "txHash": "0x42b2ec27c732100dd9037c76da415e10329ea41598de453bb0c0c9ea7ce0d8e5",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "イーサリアム上の2番目の主要な攻撃トランザクション。攻撃者は悪意あるSYコントラクト0x4476b6ca46b28182944ed750e74e2bb1752f87aeを介してリエントランシー攻撃を繰り返し、agETHとwstETHを排出した。"
+        },
+        {
+          "txHash": "0x663b55a1ee992603f7636ef23ff5cf19d3b261ab81494d06e218c86482df5342",
+          "chain": "ethereum",
+          "role": "exploit",
+          "description": "イーサリアム上の3番目の主要な攻撃トランザクション。攻撃者は悪意あるSYコントラクト0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2を介して最後のリエントランシー攻撃を実行し、残りのagETHとrswETHを排出した。"
+        },
+        {
+          "txHash": "0x67c5400da117b906f8c0fc5f5149e4ea10ed6358cd9ea2ec0ed8f559d757b7df",
+          "chain": "arbitrum",
+          "role": "exploit",
+          "description": "Arbitrum上の攻撃トランザクション。攻撃者はgUSDCフラッシュローンを利用し、悪意あるコントラクト0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487を使用してPenpieのArbitrum展開を攻撃した。"
+        },
+        {
+          "txHash": "0xfda0dde38fa4c5b0e13c506782527a039d3a87f93f9208c104ee569a642172d2",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "最初の悪意あるSYコントラクト（0x4af4c234b8cb6e060797e87afb724cfb1d320bb7）の展開と、偽造されたPTおよびYTトークンを持つ偽のPendle市場の作成。"
+        },
+        {
+          "txHash": "0x7e7f9548f301d3dd863eac94e6190cb742ab6aa9d7730549ff743bf84cbd21d1",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "2番目の悪意あるSYコントラクト（0x4476b6ca46b28182944ed750e74e2bb1752f87ae）の展開と、2番目の偽のPendle市場の作成。"
+        },
+        {
+          "txHash": "0x7961b0d3382bddff4c777e432902ea0b6940414ec16aa1a1dcebc4ebcbd8f867",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "3番目の悪意あるSYコントラクト（0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2）の展開と、3番目の偽のPendle市場の作成。"
+        },
+        {
+          "txHash": "0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e",
+          "chain": "ethereum",
+          "role": "setup",
+          "description": "4番目の攻撃インフラストラクチャに関連する悪意あるコントラクトの展開。"
+        },
+        {
+          "txHash": "0x8fd212e0ee577477b01ede2d0ce218d28dfa81bef507135b3577694aa504a549",
+          "chain": "ethereum",
+          "role": "message",
+          "description": "Penpieチームから攻撃者に送信されたオンチェーンメッセージ。協議のために連絡先（Telegram/メール）を提供した。攻撃者は応答しなかった。"
+        },
+        {
+          "txHash": "0x183ceb6808fcda523b06e05ff9904fdc7972975289345c90247ba4ffcdeaab2a",
+          "chain": "ethereum",
+          "role": "laundering",
+          "description": "Tornado Cash入金トランザクション。攻撃者は盗まれた資金を100 ETHずつのバッチでTornado Cashに送金し、追跡を困難にした。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x7a2f4d625fb21f5e51562ce8dc2e722e12a61d1b",
+          "chain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要な攻撃者のEOA。悪意あるSYコントラクトを展開し、攻撃トランザクションを実行し、主要な資金集約ウォレットを管理した。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xc0eb7e6e2b94aa43bdd0c60e645fe915d5c6eb84",
+          "chain": "ethereum",
+          "role": "secondary_attacker",
+          "description": "最初の悪意あるSYコントラクト攻撃から資金を移転するために使用された2次的な攻撃者のEOA。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x28e3fd9edca8fccb912fe3ab36c78f96cfc74769",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "マネーロンダリングと資金のオフボーディングに使用された資金トンネリングウォレット。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x69751b7e52dbbd64281ec9049dfa623c7ecdeb52",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "マネーロンダリングと資金のオフボーディングに使用された資金トンネリングウォレット。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x2f2dde668e5426463e05d795f5297db334f61c39",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "マネーロンダリングと資金のオフボーディングに使用された資金トンネリングウォレット。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x2dc15e0ff02f39d4d23a96d6ef2595df3d1e18a0",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "マネーロンダリングと資金のオフボーディングに使用された資金トンネリングウォレット。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x4af4c234b8cb6e060797e87afb724cfb1d320bb7",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者が展開した最初の悪意あるSY（Standardized Yield）コントラクト。偽造されたPTおよびYTトークンを持つ偽のPendle市場を作成した。攻撃コントラクトおよび偽の利回りベアリングトークンとしても機能した。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x4476b6ca46b28182944ed750e74e2bb1752f87ae",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者が展開した2番目の悪意あるSYコントラクト。2番目の攻撃トランザクションで使用された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xcde2cd6aeaaf0238f4ce33295be13704e4a97de2",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者が展開した3番目の悪意あるSYコントラクト。3番目の攻撃トランザクションで使用された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x4BC9815b859c8172CEe1ab2CD372fD0Eb00eb487",
+          "chain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "Arbitrum上に展開された悪意あるコントラクト。gUSDCフラッシュローンを使用したクロスチェーン攻撃に使用された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x0ab305033592e16db7d8e77d613f8d172a76ddc9",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者が展開した最初の悪意あるPendle市場。Pendle公式のpost-mortemで明確に指摘されている。Tornado Cashからの資金提供を受け、初期攻撃コントラクトとして機能した。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xb115a4cc41a351a2adb5a00f11c7ed15f46912dd",
+          "chain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者が展開した4番目の悪意あるコントラクト。攻撃インフラの一部として、トランザクション 0xca87f257280e19378dc1890a478514195f068857affacde0b92c851b897dff9e により部署された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x688413d6cae1c0e0882e274a98e0b901fdf7233c",
+          "chain": "ethereum",
+          "role": "fund_tunnel",
+          "description": "盗まれた資金をTornado Cashに送金して洗浄するための資金トンネリングウォレット。100 ETH毎のバッチでTornado.Cash: Routerに送金した。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x6E799758CEE75DAe3d84e09D40dc416eCf713652",
+          "chain": "ethereum",
+          "role": "protocol_contract",
+          "description": "イーサリアム上のPenpie: Stakingコントラクト（PendleStaking）。脆弱なbatchHarvestMarketRewards()関数を含む主要な被害コントラクトであり、リエントランシー保護が欠如していた。",
+          "accountType": "contract_open_source"
+        },
+        {
+          "address": "0x6Db96BBEB081d2a85E0954c252F2C1dC108b3F81",
+          "chain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Arbitrum上のPenpie: Pendle Stakingコントラクト。同じリエントランシー脆弱性のクロスチェーン被害者。",
+          "accountType": "contract_open_source"
+        }
+      ]
+    }
+  }
+}
