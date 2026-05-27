@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-26"
+    "lastUpdated": "2026-05-27"
   },
   "files": [
     {
@@ -34,6 +34,12 @@
       "date": "2021-08-30",
       "protocol": "Cream Finance",
       "file": "20210830-CreamFinance.json"
+    },
+    {
+      "id": "penpie-2024",
+      "date": "2024-09-03",
+      "protocol": "Penpie",
+      "file": "20240903-Penpie.json"
     },
     {
       "id": "radiant-2024-1",
