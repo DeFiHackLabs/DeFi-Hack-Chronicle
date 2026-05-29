@@ -42,6 +42,15 @@ Read `x-tweets-crawler/last_run.txt` for ISO timestamp of previous execution.
 ### Step 3: Filter & Classify Tweets
 Read `cache.json`. Filter entries where `timestamp` ∈ `[lastRun, now]`.
 
+**Thread Assembly (auto-done by crawler):** The crawler now merges same-account
+replies into the parent tweet. Parent tweets carry:
+- `replyThread[]` — array of `{id, text, timestamp, permalink}` for each reply
+- `fullText` — combined text of parent + all replies (e.g. `"Alert: X hacked\n\n— Reply —\nTx: 0xabc..."`)
+
+Classification MUST check `fullText` (if present) or `text + replyThread[].text`
+rather than `text` alone, since key details (tx hashes, addresses, loss figures)
+are often posted in follow-up replies.
+
 **Classification Criteria (all must be true for positive):**
 1. Tweet mentions a **protocol name** being attacked / exploited / drained
 2. Contains **wallet addresses**, **tx hashes**, or **external URLs** with on-chain data
@@ -63,7 +72,8 @@ Read `cache.json`. Filter entries where `timestamp` ∈ `[lastRun, now]`.
 For each confirmed alert, extract entities and investigate on-chain.
 
 **4.1 Entity Extraction**
-Parse tweet text and linked URLs for:
+Parse the combined content (`fullText` if available, otherwise `text` + all
+`replyThread[].text` entries) and linked URLs for:
 - **Protocol name** (victim)
 - **Blockchain** (Ethereum, Arbitrum, BSC, etc.)
 - **Attacker addresses** (EOA or contract)
@@ -134,7 +144,7 @@ Write current ISO timestamp to `x-tweets-crawler/last_run.txt`.
 ## State Files
 | File | Purpose |
 |------|---------|
-| `x-tweets-crawler/cache.json` | Tweet cache (auto-updated by monitor) |
+| `x-tweets-crawler/cache.json` | Tweet cache (auto-updated by monitor). Parent tweets may include `replyThread[]` and `fullText` from thread assembly. |
 | `x-tweets-crawler/last_run.txt` | ISO timestamp of last successful pipeline execution |
 | `public/data/hacks/*.json` | Generated investigation reports |
 
@@ -192,6 +202,7 @@ Edit `x-tweets-crawler/config.json` to tune:
 - [ ] `attackTime.date` matches `date` field
 - [ ] At least one transaction hash in `transactions`
 - [ ] `references` includes original tweet permalink
+- [ ] Checked `replyThread`/`fullText` for any key info in follow-up replies
 - [ ] File saved to `public/data/hacks/`
 
 ## Common Mistakes
@@ -201,6 +212,7 @@ Edit `x-tweets-crawler/config.json` to tune:
 - **Skipping investigation** → report has only tweet text, no on-chain evidence
 - **Not validating schema** → run `python3 -m json.tool` on generated report before saving
 - **Over-classifying** → general security advice flagged as alert, wastes investigation time
+- **Ignoring reply threads** → key tx hashes/addresses in `replyThread` or `fullText` are missed, leading to incomplete reports or false negatives
 
 ## Red Flags
 - Tweets without protocol names or tx hashes → likely not an alert

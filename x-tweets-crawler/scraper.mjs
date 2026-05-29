@@ -127,25 +127,64 @@ export async function fetchWithTimeout(url, timeoutMs = 15000) {
 // Scrapes twstalker.com to extract tweet IDs from a user's profile page.
 
 /**
- * Discover tweet IDs from twstalker.com profile page.
+ * Discover tweet IDs from a profile page by trying discovery hosts in order.
+ * Works with twstalker.com, nitter instances, or any host serving profile
+ * pages with /username/status/ID links.
+ *
  * @param {string} username - X handle (without @)
- * @param {number} timeoutMs - default 20000
+ * @param {string[]} discoveryHosts - ordered list of hosts to try (default: ['twstalker.com'])
+ * @param {number} timeoutMs - per-host timeout (default 20000)
  * @returns {Promise<string[]>} deduplicated tweet IDs sorted newest-first
+ * @throws {Error} if all discovery hosts fail
  */
-export async function discoverTweetIds(username, timeoutMs = 20000) {
-  const url = `https://twstalker.com/${username}`;
-  const html = await fetchWithTimeout(url, timeoutMs);
+export async function discoverTweetIds(username, discoveryHosts = ['twstalker.com'], timeoutMs = 20000) {
+  let lastError = null;
 
-  // Match /username/status/1234567890123456789 followed by a non-digit boundary.
-  // Escapes the username so regex metacharacters won't break the pattern.
-  const regex = new RegExp(`/${esc(username)}/status/(\\d{19})(?=\\D|$)`, 'g');
-  const ids = new Set();
-  for (const match of html.matchAll(regex)) {
-    ids.add(match[1]);
+  for (const host of discoveryHosts) {
+    // Skip hosts with open circuit breaker
+    if (breaker.isOpen(host)) {
+      console.error(`[scraper] Skipping discovery host ${host} (circuit open)`);
+      continue;
+    }
+
+    try {
+      const url = `https://${host}/${username}`;
+      const html = await fetchWithTimeout(url, timeoutMs);
+
+      // Match /username/status/1234567890123456789 followed by a non-digit boundary.
+      const regex = new RegExp(`/${esc(username)}/status/(\\d{19})(?=\\D|$)`, 'g');
+      const ids = new Set();
+      for (const match of html.matchAll(regex)) {
+        ids.add(match[1]);
+      }
+
+      if (ids.size > 0) {
+        breaker.recordSuccess(host);
+        const sorted = [...ids].sort(
+          (a, b) => Number((BigInt(b) >> 22n) - (BigInt(a) >> 22n)),
+        );
+        console.error(`[scraper] discoverTweetIds: ${sorted.length} IDs from ${host} for @${username}`);
+        return sorted;
+      }
+
+      // Page loaded but no tweet IDs found — host might have different HTML format.
+      console.error(`[scraper] discoverTweetIds: ${host} returned 0 tweet IDs for @${username}, trying next host`);
+      breaker.recordFailure(host);
+    } catch (err) {
+      lastError = err;
+      const is5xx = /HTTP 5\d\d/.test(err.message);
+      console.error(`[scraper] discoverTweetIds: ${host} failed for @${username}: ${err.message}${is5xx ? ' (5xx, will try next)' : ''}`);
+      if (is5xx) {
+        breaker.recordFailure(host);
+      }
+      // Non-5xx errors (timeout, DNS) — try next host
+    }
   }
 
-  // Sort newest-first (snowflake ID → extract timestamp bits via BigInt shift)
-  return [...ids].sort((a, b) => Number((BigInt(b) >> 22n) - (BigInt(a) >> 22n)));
+  // All hosts exhausted
+  const msg = `discoverTweetIds: all hosts failed for @${username}${lastError ? ` — last error: ${lastError.message}` : ''}`;
+  console.error(`[scraper] ${msg}`);
+  throw new Error(msg);
 }
 
 // ─── Browser Fallback (Playwright) ─────────────────────────────────
@@ -377,6 +416,63 @@ function safeISOString(d) {
 
 // Escape regex special characters in a string.
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// ─── Thread Assembly ─────────────────────────────────────────────────
+// Merge same-account replies into parent tweets so key info in
+// follow-up replies (tx hashes, addresses) is not lost during
+// classification and investigation downstream.
+
+/**
+ * Group posts by monitoredHandle, sort by timestamp, and attach reply
+ * content to the parent tweet via replyThread[] and fullText.
+ * Reply posts whose parent is not found (cross-account) are kept standalone.
+ * Falls back gracefully on malformed data — missing fields are tolerated.
+ * @param {object[]} posts - post array, mutated in place
+ */
+export function assembleThreads(posts) {
+  if (!Array.isArray(posts) || posts.length === 0) return;
+
+  try {
+    const byHandle = {};
+    for (const p of posts) {
+      if (!p || !p.monitoredHandle) continue;
+      const h = p.monitoredHandle;
+      if (!byHandle[h]) byHandle[h] = [];
+      byHandle[h].push(p);
+    }
+
+    for (const handlePosts of Object.values(byHandle)) {
+      // Sort oldest-first so replies find their chronological parent
+      handlePosts.sort(
+        (a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0),
+      );
+
+      let parent = null;
+      for (const post of handlePosts) {
+        if (post.isReply) {
+          if (parent) {
+            // Same-account self-reply → attach to the parent tweet
+            parent.replyThread = parent.replyThread || [];
+            parent.replyThread.push({
+              id: post.id,
+              text: post.text,
+              timestamp: post.timestamp,
+              permalink: post.permalink,
+            });
+            // Build combined fullText for downstream classification
+            parent.fullText = (parent.fullText || parent.text)
+              + `\n\n— Reply —\n${post.text}`;
+          }
+          // No tracked parent (e.g. cross-account reply) → keep standalone
+        } else {
+          parent = post;
+        }
+      }
+    }
+  } catch (err) {
+    console.error(`[scraper] assembleThreads error: ${err.message} — continuing with unthreaded posts`);
+  }
+}
 
 // Normalize raw API response into a consistent internal shape.
 function normalizeTweet(data, username, id) {

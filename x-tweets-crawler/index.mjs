@@ -14,6 +14,7 @@ import {
   filterByLookbackHours,
   isTweetWithinLookback,
   createCache,
+  assembleThreads,
 } from './scraper.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -46,14 +47,14 @@ async function main() {
   const allPosts = [];
   let processedAccounts = 0;
 
-  // Per-account loop — serial discovery so we don't hammer twstalker.com.
+  // Per-account loop — serial discovery so we don't hammer external services.
   for (const handle of config.accounts) {
     console.error(`[index] Processing @${handle}...`);
 
-    // Step 1: discover tweet IDs from the account's twstalker profile page.
+    // Step 1: discover tweet IDs from the account's profile page.
     let ids;
     try {
-      ids = await discoverTweetIds(handle);
+      ids = await discoverTweetIds(handle, config.discoveryHosts);
     } catch (err) {
       console.error(`[index] Error discovering tweets for @${handle}:`, err.message);
       continue;
@@ -114,6 +115,10 @@ async function main() {
       await new Promise((r) => setTimeout(r, config.interAccountDelayMs));
     }
   }
+
+  // Step 5b: assemble reply threads so key info in follow-up replies
+  // is linked to the parent tweet before classification downstream.
+  assembleThreads(allPosts);
 
   // Step 6: sort all posts by timestamp descending (newest first).
   allPosts.sort((a, b) => {
