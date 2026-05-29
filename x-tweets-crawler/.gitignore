@@ -1,0 +1,6 @@
+# Runtime state — do not commit
+cache.json
+last_run.txt
+
+# macOS metadata
+.DS_Store

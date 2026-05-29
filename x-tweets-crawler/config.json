@@ -1,0 +1,69 @@
+{
+  // Monitored security X/Twitter accounts (handles without @)
+  // These accounts post alerts about DeFi exploits and hacks.
+  "accounts": [
+    "PeckShieldAlert",
+    "SlowMist_Team",
+    "BlockSecTeam",
+    "CertiKAlert",
+    "CyversAlerts",
+    "BeosinAlert",
+    "zachxbt",
+    "officer_cia",
+    "AnciliaInc",
+    "samczsun",
+    "neptunemutual",
+    "exvulsec"
+  ],
+
+  // How many hours back to fetch tweets on each run.
+  // Recommended: 24 for daily cron jobs.
+  "lookbackHours": 24,
+
+  // Number of concurrent requests when fetching tweet content.
+  // Set to 1 to avoid rate limits (recommended for free APIs).
+  "concurrency": 1,
+
+  // Timeout for each HTTP request (milliseconds).
+  // 15s is a safe default for potentially slow free APIs.
+  "requestTimeoutMs": 15000,
+
+  // Delay between successive tweet-fetch requests (milliseconds).
+  // Higher values reduce the risk of 429 rate-limit errors.
+  "rateLimitDelayMs": 5000,
+
+  // Delay between switching to the next account (milliseconds).
+  // Gives upstream APIs a breather between account batches.
+  "interAccountDelayMs": 10000,
+
+  // Maximum tweets to fetch per account per run.
+  // Keeps execution time and API load bounded.
+  "maxFetchPerAccount": 10,
+
+  // Fallback API hosts tried in order if the primary vxtwitter.com fails.
+  // Each host must expose the same /:username/status/:id JSON endpoint.
+  "fallbackHosts": [
+    "api.fxtwitter.com",
+    "api.fixvx.com",
+    "api.twittpr.com"
+  ],
+
+  // Disk cache file path (relative to x-tweets-crawler directory).
+  // Stores fetched tweets so we don't re-fetch identical IDs.
+  "cacheFile": "cache.json",
+
+  // Enable Playwright browser fallback when all API hosts are exhausted.
+  // Slower but useful when free APIs are down or rate-limited.
+  "useBrowserFallback": true,
+
+  // Max number of tweets to fetch via browser fallback per run.
+  // Browser fallback is expensive, so we limit it.
+  "browserMaxPerRun": 3,
+
+  // Max retries per host on 429 / 5xx errors before giving up on that host.
+  "maxRetries": 3,
+
+  // Base delay for exponential backoff with jitter (milliseconds).
+  // delay = baseDelayMs * 2^attempt + random(baseDelayMs)
+  "baseDelayMs": 3000
+}
