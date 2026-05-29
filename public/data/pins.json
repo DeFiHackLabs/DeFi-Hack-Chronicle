@@ -4,7 +4,7 @@
       "date": "2016-06-17",
       "tag": "Reentrancy Attack",
       "protocol": "The DAO",
-      "description": "The DAO was exploited in June 2016 through a reentrancy vulnerability, leading to the loss of about 3.6 million ETH ($60 million USD). The incident triggered Ethereum’s hard fork into ETH and ETC and marked a turning point for smart contract auditing and the growth of the blockchain security industry.",
+      "description": "The DAO was exploited in June 2016 through a reentrancy vulnerability, leading to the loss of about 3.6 million ETH ($60 million USD). The incident triggered Ethereum's hard fork into ETH and ETC and marked a turning point for smart contract auditing and the growth of the blockchain security industry.",
       "tagColor": "#EF4444",
       "estimatedLoss": "$60M",
       "link": "/?event=dao-2016"
@@ -13,16 +13,34 @@
       "date": "2016-07-09",
       "tag": "BTC Halving",
       "protocol": "Bitcoin",
-      "description": "Bitcoin’s 2nd halving, the block reward was cut from 25 BTC to 12.5 BTC",
+      "description": "Bitcoin's 2nd halving, the block reward was cut from 25 BTC to 12.5 BTC",
       "tagColor": "#F7931A",
       "estimatedLoss": "N/A",
       "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
     },
     {
+      "date": "2017-04-01",
+      "tag": "State-sponsored Attack",
+      "protocol": "Youbit (Yapizon)",
+      "description": "South Korean crypto exchange Youbit (formerly Yapizon) suffered 4 hacks over 2017-2018 leading to bankruptcy. The South Korean National Intelligence Service (NIS) and National Police attributed the attack to North Korean government hackers in Dec 2017, based on malware infrastructure TTP analysis. The UN Panel of Experts on DPRK (report S/2019/171) listed Youbit as DPRK crypto theft. Private security firms Kaspersky and FireEye independently linked the attacks to Lazarus Group based on attack infrastructure and malware family analysis.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$70M",
+      "link": "https://www.group-ib.com/media-center/press-releases/gib-crypto-summary/"
+    },
+    {
+      "date": "2018-06-10",
+      "tag": "State-sponsored Attack",
+      "protocol": "Coinrail",
+      "description": "South Korean cryptocurrency exchange Coinrail was hacked on June 10, 2018, with the attacker stealing multiple tokens. Blockchain security firm Chainalysis linked this attack to the North Korean hacking group Lazarus Group (also known as UNC4736) through on-chain pattern analysis.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$40M",
+      "link": "https://www.jstor.org/stable/resrep20679"
+    },
+    {
       "date": "2020-05-11",
       "tag": "BTC Halving",
       "protocol": "Bitcoin",
-      "description": "Bitcoin’s 3rd halving, the block reward was cut from 12.5 BTC to 6.25 BTC",
+      "description": "Bitcoin's 3rd halving, the block reward was cut from 12.5 BTC to 6.25 BTC",
       "tagColor": "#F7931A",
       "estimatedLoss": "N/A",
       "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
@@ -37,6 +55,33 @@
       "link": ""
     },
     {
+      "date": "2020-09-25",
+      "tag": "State-sponsored Attack",
+      "protocol": "KuCoin",
+      "description": "KuCoin lost ~$281M in a Sep 25, 2020 hot wallet breach. Chainalysis (Feb 2021) attributed it to North Korea's Lazarus Group; a UN Panel report also strongly suggested DPRK involvement.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$281M",
+      "link": "https://www.chainalysis.com/blog/lazarus-group-kucoin-exchange-hack/"
+    },
+    {
+      "date": "2021-08-19",
+      "tag": "State-sponsored Attack",
+      "protocol": "Liquid Global",
+      "description": "Japan-based crypto exchange Liquid Global lost ~$91M in a warm wallet breach, after its MPC wallet infrastructure was compromised. Chainalysis attributed the hack to North Korea's Lazarus Group in its January 2022 report, identifying it among seven DPRK-linked attacks in 2021.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$91M",
+      "link": "https://github.com/tayvano/lazarus-bluenoroff-research/blob/main/hacks-and-thefts/liquid_global.md"
+    },
+    {
+      "date": "2022-03-23",
+      "tag": "State-sponsored Attack",
+      "protocol": "Ronin Network",
+      "description": "Ronin bridge lost ~$625M on Mar 23, 2022 after 5 of 9 validators were compromised to forge withdrawals. The FBI confirmed North Korea's Lazarus Group was responsible, and the US Treasury OFAC sanctioned the group's wallet on Apr 14, 2022. Chainalysis also attributed the attack to Lazarus.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$625M",
+      "link": ""
+    },
+    {
       "date": "2022-05-09",
       "tag": "Stablecoin Depeg",
       "protocol": "Terra / LUNA",
@@ -46,10 +91,46 @@
       "link": ""
     },
     {
+      "date": "2022-03-23",
+      "tag": "State-sponsored Attack",
+      "protocol": "Harmony Horizon Bridge",
+      "description": "Harmony's Horizon Bridge lost ~$100M on Jun 23, 2022 after hackers compromised 2 of 5 validator keys to forge withdrawals. The FBI formally confirmed in Jan 2023 that North Korea's Lazarus Group and APT38 were responsible. Elliptic first identified DPRK links in Jun 2022 via on-chain laundering patterns; OFAC later sanctioned associated mixers.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$100M",
+      "link": ""
+    },
+    {
+      "date": "2023-06-02",
+      "tag": "State-sponsored Attack",
+      "protocol": "Atomic Wallet",
+      "description": "Atomic Wallet users lost ~$100M on Jun 2, 2023 after ~5,500 wallets were compromised. Blockchain firm Elliptic linked the attack to North Korea's Lazarus Group with high confidence in Jun 2023. The FBI officially attributed it to Lazarus in Aug 2023, alongside Alphapo and CoinsPaid heists. OFAC later sanctioned mixer Sinbad for laundering Lazarus funds from this incident.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$100M",
+      "link": "https://therecord.media/north-korea-lazarus-behind-crypto-heists"
+    },
+    {
+      "date": "2023-07-22",
+      "tag": "State-sponsored Attack",
+      "protocol": "CoinsPaid",
+      "description": "Crypto payment processor CoinsPaid lost ~$37M on Jul 22, 2023 after a six-month Lazarus social-engineering campaign involving fake LinkedIn job offers. The FBI formally attributed it to North Korea's Lazarus Group in Aug 2023. Blockchain security firm Match Systems also identified DPRK links via laundering patterns.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$37.3M",
+      "link": "https://coinspaid.com/company-updates/the-coinspaid-hack-explained/"
+    },
+    {
+      "date": "2023-07-23",
+      "tag": "State-sponsored Attack",
+      "protocol": "Alphapo",
+      "description": "Crypto payment provider Alphapo lost ~$60M on Jul 23, 2023 after hot wallet private keys were compromised. The FBI officially attributed the attack to Lazarus (APT38/TraderTraitor) in Aug 2023.",
+      "tagColor": "#E61B26",
+      "estimatedLoss": "$60M",
+      "link": "https://www.fbi.gov/news/press-releases/fbi-identifies-lazarus-group-cyber-actors-as-responsible-for-theft-of-41-million-from-stakecom"
+    },
+    {
       "date": "2024-04-20",
       "tag": "BTC Halving",
       "protocol": "Bitcoin",
-      "description": "Bitcoin’s 4th halving, the block reward was cut from 6.25 BTC to 3.125 BTC",
+      "description": "Bitcoin's 4th halving, the block reward was cut from 6.25 BTC to 3.125 BTC",
       "tagColor": "#F7931A",
       "estimatedLoss": "N/A",
       "link": "https://www.coingecko.com/en/coins/bitcoin/bitcoin-halving"
@@ -76,7 +157,7 @@
       "date": "2026-04-01",
       "tag": "State-sponsored Attack",
       "protocol": "Drift Protocol",
-      "description": "DPRK APT group UNC4736 spent 6 months conducting social engineering operations, posing as a quantitative trading firm to gain the trust of Drift Protocol's contributors. The attackers compromised a signer’s device, obtained pre-signed multisig transactions, and drained $285 million within 128 seconds. It became the largest DeFi exploit of 2026.",
+      "description": "DPRK APT group UNC4736 spent 6 months conducting social engineering operations, posing as a quantitative trading firm to gain the trust of Drift Protocol's contributors. The attackers compromised a signer's device, obtained pre-signed multisig transactions, and drained $285 million within 128 seconds. It became the largest DeFi exploit of 2026.",
       "tagColor": "#E61B26",
       "estimatedLoss": "$285M",
       "link": "/?event=drift-protocol-2026"
