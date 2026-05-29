@@ -1,6 +1,8 @@
 # Runtime state — do not commit
 cache.json
+tweets.json
 last_run.txt
+*.log
 
 # macOS metadata
 .DS_Store
