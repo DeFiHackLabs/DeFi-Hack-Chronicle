@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DeFi Hack Event",
-  "description": "Schema for individual hack event files in data/hacks/. Each file represents one security incident. Files may contain additional metadata beyond what is defined here.",
+  "description": "Schema for individual hack event files in data/hacks/. Each file represents one security incident. Files may contain additional metadata beyond what is defined here. NOTE: When no existing key in languages, ecosystems, categories, blockchains, accountTypes, or role matches the incident, you MAY add a new key to accurately describe it.",
   "type": "object",
   "required": [
     "id",
@@ -70,8 +70,11 @@
       { "id": "unknown", "name": "Unknown", "color": "#9ca3af", "description": "Account type could not be determined" }
     ],
     "fileNamingConvention": "YYYYMMDD-ProtocolName.json",
-    "repository": "data/hacks/"
-    
+    "repository": "data/hacks/",
+    "extensibleFields": {
+      "description": "The following fields MAY accept new keys when no existing key accurately describes the incident. Add new keys only as a last resort when no predefined key is a reasonable match.",
+      "fields": ["languages", "ecosystems", "categories", "blockchains", "accountTypes", "role"]
+    }
   },
   "properties": {
     "id": {
