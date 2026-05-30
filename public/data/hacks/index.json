@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-27"
+    "lastUpdated": "2026-05-30"
   },
   "files": [
     {
@@ -88,6 +88,12 @@
       "date": "2026-05-18",
       "protocol": "Echo Protocol",
       "file": "20260518-EchoProtocol.json"
+    },
+    {
+      "id": "dxsale-2026",
+      "date": "2026-05-28",
+      "protocol": "DxSale",
+      "file": "20260528-DxSale.json"
     }
   ]
 }
