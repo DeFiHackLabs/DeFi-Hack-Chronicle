@@ -1,0 +1,465 @@
+{
+  "id": "dxsale-2026",
+  "title": "DxSale Legacy Locker Exploit",
+  "protocol": "DxSale",
+  "blockchain": ["bsc"],
+  "category": ["access_control", "business_logic", "rugpull"],
+  "ecosystem": "evm",
+  "language": "solidity",
+  "estimatedLoss": {
+    "totalUSD": "7300000",
+    "breakdown": [
+      {
+        "asset": "BNB",
+        "amount": "2958",
+        "convertedUSD": "1870000"
+      },
+      {
+        "asset": "LP Tokens",
+        "amount": "various (from 1,400+ pools)",
+        "convertedUSD": "5430000"
+      }
+    ],
+    "note": "Approximately $7.3M total drained from 1,400+ LP pools on BNB Chain. Of this, 2,958 BNB (~$1.87M at ~$632/BNB) was transferred to two main attacker wallets and subsequently deposited to Binance. The remaining ~$5.43M was in LP tokens drained from liquidity pools. An additional ~$15.5M in locked LP assets across three other locker contracts (0x81E0eF68, 0x2D045410, 0x5b5e9448) had their ownership transferred to the attacker and remain at risk pending emergency withdrawal by affected projects."
+  },
+  "attackTime": {
+    "startTime": "2026-05-26T01:08:00Z",
+    "endTime": "2026-05-28T03:45:50Z",
+    "isRange": true,
+    "note": "Attack spanned ~51 hours across three days. Phase 1 (May 26 01:08 UTC): Original owner 0x47BAcf93 called transferOwnership on locker contract 0xEb3a9C56, transferring control to attacker 0xC4574D. Phase 2 (May 27): Attacker wallet received 104 BNB (~$67K) in initial funding from Bybit. Phase 3 (May 28 03:45:50 UTC): Attacker deployed EIP-7702 delegator contracts and executed the batch-drain transaction (0x16a932b7...) that unlocked and drained 1,400+ LP pools in a single transaction flow. Laundering through 80+ wallet hops to Binance began within hours and continued thereafter.",
+    "date": "2026-05-28"
+  },
+  "transactions": [
+    {
+      "txHash": "0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41",
+      "chain": "bsc",
+      "role": "setup",
+      "description": "Ownership transfer: Original owner 0x47BAcf93 called transferOwnership on DxSale Legacy Locker contract 0xEb3a9C56, transferring full control to attacker address 0xC4574D. Mined May 26, 2026 at 01:08 UTC. This was the critical access control breach that enabled all subsequent exploitation."
+    },
+    {
+      "txHash": "0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06",
+      "chain": "bsc",
+      "role": "prepare",
+      "description": "EIP-7702 delegation setup: Attacker deployed exploit contracts (e.g., 0x74Ad1E) and upgraded EOA 0xC4574D using EIP-7702, setting the Delegator to point to the exploit contract. This enabled the attacker EOA to execute arbitrary contract logic through the delegation mechanism, bypassing normal EOA limitations."
+    },
+    {
+      "txHash": "0xb107f19af1a8ff90d19cbb40d935f8be5d79f5fb9b497824e4ed28b9e7555fe9",
+      "chain": "bsc",
+      "role": "exploit",
+      "description": "unlockToken exploit: Attacker directly invoked the unlockToken function in the DxSale Legacy Locker contract using newly acquired owner privileges. The closed-source locker contract contained a verification bug where it did not properly check lock period expiration — when the lock period had not expired, the contract failed to rollback and instead continued execution, allowing unauthorized LP token unlocking. This was the core business logic vulnerability."
+    },
+    {
+      "txHash": "0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6",
+      "chain": "bsc",
+      "role": "exploit",
+      "description": "Batch drain via EIP-7702 delegation: Attacker leveraged EIP-7702 delegation mechanism to batch-drain more than 1,400 LP pools in a single transaction flow (mined May 28, 2026 at 03:45:50 UTC). Call method 0x84d3326c executed by 0xC4574D (delegated to exploit contract). On-chain analysis observed 667,465 attacker-directed unlock events across the affected lockers."
+    },
+    {
+      "txHash": "0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459",
+      "chain": "bsc",
+      "role": "consolidate",
+      "description": "LP liquidity removal: After obtaining unlocked LP tokens, the attacker removed liquidity from the DEX pools, converting LP tokens into underlying assets (primarily BNB and paired tokens). This was one of many consolidation transactions that followed the batch drain."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0xC4574DDEF299e7E563971e200433e592EeaaFA69",
+      "chain": "bsc",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA that received ownership of the locker contract via transferOwnership, received 104 BNB initial funding from Bybit on May 27, executed the EIP-7702 delegation upgrade, and orchestrated the batch drain of 1,400+ LP pools. Transferred 2,958 BNB (~$1.87M) to two main wallets before depositing to multiple Binance addresses through 80+ wallet hops.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x47BAcf935066b802EAA0067eC14AB035B24eB78b",
+      "chain": "bsc",
+      "role": "original_owner",
+      "description": "Original owner of the DxSale Legacy Locker contract 0xEb3a9C56. Called transferOwnership on May 26, 2026 at 01:08 UTC, transferring control to attacker 0xC4574D. Either a compromised key or a malicious insider — Telegram channels had been offering 'DxSale insider-connected LP unlock services' since August 2025, suggesting a premeditated insider operation rather than opportunistic key theft.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x74Ad1Ef17Fbb3e494c31c72F7ec730A27FEf0310",
+      "chain": "bsc",
+      "role": "exploit_contract",
+      "description": "EIP-7702 delegator contract deployed by the attacker. Used as the delegate target for the 0xC4574D EOA, enabling batch execution of unlock and drain operations across 1,400+ LP pools.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0xc2efbD94aeDFf1555b97ddCb216646DFC01e4718",
+      "chain": "bsc",
+      "role": "exploit_contract",
+      "description": "EIP-7702 delegator contract deployed by the attacker. Referenced by ExVul as the primary 'Drainer / EIP-7702 delegate' contract used in the batch drain transaction.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x47F80D09d1Bd0BB675ac627BDC1d1244731F66bf",
+      "chain": "bsc",
+      "role": "money_mule",
+      "description": "Intermediate aggregation address used to consolidate stolen funds before routing to Binance deposit addresses. Part of the 80+ wallet hop laundering chain.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xF19acAD8EDCd733A8bF9175C93da9AB660afC747",
+      "chain": "bsc",
+      "role": "money_mule",
+      "description": "Intermediate relay address in the laundering chain. Received funds from aggregation addresses and forwarded to secondary transfer wallets en route to Binance.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0xb71c1C2A0cD7A88f1317f9A996e4d121E7db5E92",
+      "chain": "bsc",
+      "role": "money_mule",
+      "description": "Secondary transfer wallet used in the final stage of laundering before depositing to Binance. One of two main wallets that received the 2,958 BNB.",
+      "accountType": "eoa"
+    },
+    {
+      "address": "0x4c5ee9703653C8e7725C65593bff372655e0453C",
+      "chain": "bsc",
+      "role": "money_mule",
+      "description": "Secondary transfer wallet used in the final stage of laundering before depositing to Binance. One of two main wallets that received the 2,958 BNB.",
+      "accountType": "eoa"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xeb3a9c56d963b971d320f889be2fb8b59853e449",
+      "chain": "bsc",
+      "role": "protocol_contract",
+      "description": "DxSale Legacy Locker smart contract — the primary exploited locker deployed in 2021. Held LP tokens from 1,400+ early BNB Chain projects. Closed-source (unverified) Solidity contract. Ownership was transferred to attacker 0xC4574D on May 26, then LP tokens were batch-drained on May 28 via EIP-7702 delegation exploiting a lock-period verification bug.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x81E0eF68e103Ee65002d3Cf766240eD1c070334d",
+      "chain": "bsc",
+      "role": "protocol_contract",
+      "description": "Additional DxSale Legacy Locker contract whose ownership was also transferred to attacker 0xC4574D. Holds approximately $13.2M in locked LP assets that remain at risk pending emergency withdrawal. Affected projects have been urged to verify and withdraw funds immediately.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x2D045410f002A95EFcEE67759A92518fA3FcE677",
+      "chain": "bsc",
+      "role": "protocol_contract",
+      "description": "Additional DxSale Legacy Locker contract whose ownership was transferred to attacker 0xC4574D. Holds approximately $2.2M in locked LP assets still at risk.",
+      "accountType": "contract_close_source"
+    },
+    {
+      "address": "0x5b5e94485c9628793B01A38762921Dc37B6829b6",
+      "chain": "bsc",
+      "role": "protocol_contract",
+      "description": "Additional DxSale Legacy Locker contract whose ownership was transferred to attacker 0xC4574D. Holds approximately $1,300 in locked assets.",
+      "accountType": "contract_close_source"
+    }
+  ],
+  "description": "On May 26-28, 2026, the DxSale Legacy Locker infrastructure on BNB Chain was exploited in a sophisticated two-phase attack combining access control breach and business logic exploitation, resulting in approximately $7.3M drained from over 1,400 LP pools. An additional ~$15.5M in locked LP assets across three other locker contracts remain at risk.\n\nPhase 1 — Access Control Breach (May 26): The original owner of the DxSale Legacy Locker contract (0x47BAcf93) called transferOwnership at 01:08 UTC, transferring full control of locker 0xEb3a9C56 to attacker address 0xC4574D. The legacy locker contract (deployed 2021) lacked timelock, multisig protection, and monitoring — the standard Ownable pattern permitted unilateral ownership transfer with zero safeguards. Three additional locker contracts (0x81E0eF68, 0x2D045410, 0x5b5e9448) also had ownership transferred to the same attacker.\n\nPhase 2 — Business Logic Exploit (May 28): On May 27, the attacker wallet received 104 BNB (~$67K) initial funding from Bybit. On May 28, the attacker deployed multiple EIP-7702 delegator contracts and upgraded EOA 0xC4574D to delegate execution to exploit contracts. At 03:45:50 UTC, the attacker executed a batch-drain transaction that exploited a critical verification bug in the closed-source locker contract: the unlockToken function failed to properly validate lock period expiration. When the lock period had not expired, the contract did not rollback — it continued execution and allowed unauthorized LP token unlocking. On-chain analysis by Defi Nerd / DarkNavy observed 667,465 attacker-directed unlock events across the affected lockers.\n\nThe attack exhibits strong indicators of a premeditated insider operation. Telegram channels had been openly advertising 'DxSale insider-connected LP unlock services' since August 2025 — nine months before the exploit. DxSale's historical infrastructure connections to projects such as SAFEMOON (whose team members were later criminally charged) further support the insider thesis. As of May 29, 2026, DxSale had issued no public incident response statement.\n\nPost-exploit, funds were laundered through 80+ wallet hops before reaching multiple Binance deposit addresses. PeckShield reported that 2,958 BNB (~$1.87M) was transferred to two main wallets and subsequently deposited to Binance. Security firms (GoPlus, ExVul, PeckShield) have recommended affected projects immediately verify LP lock status and withdraw funds, and urged exchanges (Bybit for funding source KYC, Binance for cash-out tracing) to freeze attacker-related accounts.",
+  "rootCause": "The DxSale Legacy Locker contract (deployed 2021, closed-source/unverified on BSCScan) had two critical security failures that combined to enable the exploit:\n\n1. ACCESS CONTROL: The transferOwnership function inherited from OpenZeppelin's standard Ownable pattern lacked any timelock, multisig requirement, or monitoring/alert mechanism. The single owner EOA could unilaterally transfer full contract control to any address at any time with no delay, no multi-party approval, and no automated notification to affected projects. Once the owner key was compromised (or the owner acted maliciously), all ~$7.3M in locked LP assets became instantly vulnerable.\n\n2. BUSINESS LOGIC: The unlockToken function in the closed-source locker contract contained a verification bug where it did not properly enforce lock period expiration. According to ACai_sec's analysis, the contract failed to rollback when the lock period had not expired — instead, it continued execution and permitted token unlocking. This allowed the attacker to batch-unlock all 1,400+ LP pools regardless of their individual lock schedules. The closed-source nature of the contract meant this vulnerability was invisible to users and unauditable by external security researchers.\n\nCompounding factors: (a) The contract had been unmaintained since 2021 with no audit updates; (b) No security monitoring was in place to detect ownership changes; (c) EIP-7702's delegation mechanism was abused to batch-execute unlocks across 1,400+ pools in a single transaction, dramatically reducing the window for intervention; (d) Evidence suggests premeditated insider planning dating back to August 2025.",
+  "attackVector": "1. PREPARATION (Aug 2025 – May 2026): Telegram channels began openly advertising 'DxSale insider-connected LP unlock services' in August 2025, indicating attackers had identified the exploitable nature of the legacy locker's owner privileges at least nine months before execution. The attackers monitored the locker contract, accumulated knowledge of affected LP pools, and prepared EIP-7702 delegator contracts.\n\n2. OWNERSHIP TRANSFER (May 26, 2026 01:08 UTC): Original owner EOA 0x47BAcf93 called transferOwnership on locker contract 0xEb3a9C56d963b971d320f889be2fb8b59853e449, transferring control to attacker EOA 0xC4574DDEF299e7E563971e200433e592EeaaFA69. The same owner also transferred three additional locker contracts (0x81E0eF68, 0x2D045410, 0x5b5e9448) to the same attacker address. Transaction: 0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41.\n\n3. INITIAL FUNDING (May 27, 2026): Attacker wallet 0xC4574D received 104 BNB (~$67K) from Bybit as operational funding for gas fees and contract deployments.\n\n4. EIP-7702 DELEGATION SETUP (May 28, 2026): Attacker deployed multiple exploit contracts (0x74Ad1E, 0xc2efbD94, 0x996521B5, 0xd6c7d6b1, 0xA0795423) and upgraded EOA 0xC4574D via EIP-7702 delegation, setting the Delegator to point to the exploit contracts. Transaction: 0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06. This allowed the EOA to execute arbitrary contract logic, bypassing normal EOA limitations.\n\n5. BATCH DRAIN EXPLOIT (May 28, 2026 03:45:50 UTC): Attacker invoked unlockToken on the locker contract using owner privileges. The closed-source contract's verification bug — failure to rollback when lock period was unexpired — allowed unauthorized token unlocking. Using EIP-7702 delegation, the attacker batch-executed this across 1,400+ LP pools in a single transaction flow (0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6), generating 667,465 unlock events. Individual unlock transactions (e.g., 0xb107f19af1a8ff90d19cbb40d935f8be5d79f5fb9b497824e4ed28b9e7555fe9) were executed in rapid sequence.\n\n6. LIQUIDITY REMOVAL & LAUNDERING: After unlocking LP tokens, the attacker removed liquidity from DEX pools (example: 0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459), converting LP tokens to underlying assets. Funds were routed through intermediate aggregation addresses (0x47F80D09, 0xF19acAD8) and 80+ wallet hops before reaching secondary transfer wallets (0xb71c1C2A, 0x4c5ee970) and ultimately multiple Binance deposit addresses.",
+  "lessons": [
+    "Critical admin functions (transferOwnership, unlockToken) must be protected by timelocks with minimum 48-hour delay, giving affected users time to detect and respond to unauthorized ownership changes.",
+    "Single-owner admin models are fundamentally unsafe for contracts holding millions in third-party assets. Owner privileges must require multisig wallets (minimum 3-of-5) or DAO governance with multi-party approval.",
+    "All ownership changes on infrastructure contracts must trigger automated monitoring alerts via on-chain event listeners and off-chain notification systems (Telegram, Discord, email) to affected projects and security communities.",
+    "EIP-7702 delegation introduces a powerful new attack surface: it allows EOAs to execute arbitrary contract logic and batch operations across hundreds of contracts. Admin functions must include checks that prevent delegation-based privilege escalation.",
+    "Closed-source (unverified) smart contracts holding user funds are an unacceptable security practice. All infrastructure contracts — especially token lockers — must be open-source with published audit reports to enable community review and independent verification.",
+    "Legacy DeFi infrastructure contracts require active maintenance, periodic security re-audits, and sunset/migration plans. The 2021-era DxSale locker sat unmaintained for 5 years while accumulating tens of millions in locked value.",
+    "Token locker contracts should implement emergency circuit-breaker mechanisms: if ownership changes, a mandatory delay period should auto-trigger, and affected LP providers should have a withdrawal window before new owner can execute privileged functions.",
+    "Exchanges (CEXs) play a critical role in incident response. Bybit should trace the initial 104 BNB funding source via KYC records. Binance should freeze attacker-linked deposit addresses identified through on-chain forensic analysis.",
+    "Pre-incident threat intelligence matters: the Telegram channels advertising 'DxSale insider LP unlock services' since August 2025 were an early warning that went unheeded. Security monitoring of dark-web and social-media channels for protocol-specific threats should be standard practice.",
+    "Protocol teams must maintain incident response capability. DxSale's complete silence after a $7.3M exploit draining user funds is unacceptable — projects holding third-party assets have a duty to communicate transparently during security incidents."
+  ],
+  "references": [
+    "https://x.com/GoPlusSecurity/status/2060238412263657665",
+    "https://x.com/GoPlusZH/status/2060225682958086408",
+    "https://x.com/exvulsec/status/2060180654017396873",
+    "https://x.com/PeckShieldAlert/status/2060188553079054351",
+    "https://x.com/Defi_Nerd_sec/status/2060243139223490705",
+    "https://x.com/ACai_sec/status/2060211028110242052",
+    "https://bscscan.com/address/0xeb3a9c56d963b971d320f889be2fb8b59853e449",
+    "https://bscscan.com/tx/0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6",
+    "https://bscscan.com/tx/0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41",
+    "https://bscscan.com/tx/0xb107f19af1a8ff90d19cbb40d935f8be5d79f5fb9b497824e4ed28b9e7555fe9",
+    "https://bscscan.com/address/0xC4574DDEF299e7E563971e200433e592EeaaFA69"
+  ],
+  "metadata": {
+    "dateAdded": "2026-05-29",
+    "lastUpdated": "2026-05-30",
+    "human_verified": false,
+    "models": ["deepseek-v4-pro", "kimi-k2.6"]
+  },
+  "date": "2026-05-28",
+  "locales": {
+    "zh-TW": {
+      "title": "DxSale Legacy Locker 漏洞攻擊事件",
+      "description": "2026 年 5 月 26 至 28 日，BNB Chain 上的 DxSale Legacy Locker 基礎設施遭受複雜的兩階段攻擊，結合了存取控制破壞與業務邏輯漏洞利用，導致超過 1,400 個 LP 池中約 730 萬美元被盜。另外三個鎖倉合約中約 1,550 萬美元的鎖定 LP 資產仍面臨風險。\n\n第一階段——存取控制破壞（5 月 26 日）：DxSale Legacy Locker 合約的原始所有者（0x47BAcf93）於 UTC 時間 01:08 調用 transferOwnership，將合約 0xEb3a9C56 的完全控制權轉移給攻擊者地址 0xC4574D。這個 2021 年部署的舊版鎖倉合約缺乏時間鎖、多簽保護和監控機制——標準的 Ownable 模式允許單方面、即時、無安全措施的權限轉移。另外三個鎖倉合約（0x81E0eF68、0x2D045410、0x5b5e9448）的所有權也被轉移給同一攻擊者。\n\n第二階段——業務邏輯漏洞利用（5 月 28 日）：5 月 27 日，攻擊者錢包從 Bybit 收到 104 BNB（約 6.7 萬美元）的初始資金。5 月 28 日，攻擊者部署了多個 EIP-7702 委託合約，並將 EOA 0xC4574D 升級為委託執行模式。UTC 時間 03:45:50，攻擊者執行了一筆批量清空交易，利用了閉源鎖倉合約中的關鍵驗證漏洞：unlockToken 函數未能正確驗證鎖定期是否已到期。當鎖定期未到期時，合約不會回滾——而是繼續執行，允許未經授權的 LP 代幣解鎖。Defi Nerd / DarkNavy 的鏈上分析觀察到 667,465 次攻擊者主導的解鎖事件。\n\n此攻擊呈現強烈的預謀內部作案特徵。Telegram 頻道自 2025 年 8 月起就公開宣傳「DxSale 內部關係 LP 解鎖服務」——距攻擊發生足足九個月。DxSale 與 SAFEMOON 等項目（其團隊成員後來被刑事起訴）的歷史基礎設施關聯，進一步支持了內部作案論點。截至 2026 年 5 月 29 日，DxSale 尚未發布任何公開的事件回應聲明。\n\n攻擊後，資金通過 80 多次錢包跳轉進行洗錢，最終到達多個 Binance 存款地址。PeckShield 報告稱，2,958 BNB（約 187 萬美元）被轉移到兩個主要錢包，隨後存入 Binance。安全公司（GoPlus、ExVul、PeckShield）已建議受影響的項目立即驗證 LP 鎖定狀態並提取資金，並敦促交易所（Bybit 追蹤資金來源 KYC，Binance 追蹤兌現路徑）凍結攻擊者相關帳戶。",
+      "rootCause": "DxSale Legacy Locker 合約（2021 年部署，BSCScan 上閉源/未驗證）存在兩個關鍵安全缺陷，結合起來導致了此次攻擊：\n\n1. 存取控制：從 OpenZeppelin 標準 Ownable 模式繼承的 transferOwnership 函數缺乏任何時間鎖、多簽要求或監控告警機制。單一所有者 EOA 可以隨時單方面將完全合約控制權轉移給任何地址，無延遲、無多方批准、無自動通知。一旦所有者私鑰被洩露（或所有者本身惡意行為），所有約 730 萬美元的鎖定 LP 資產立即面臨風險。\n\n2. 業務邏輯：閉源鎖倉合約中的 unlockToken 函數存在驗證漏洞，未能正確強制執行鎖定期到期檢查。根據 ACai_sec 的分析，合約在鎖定期未到期時未能回滾——而是繼續執行，允許代幣解鎖。這使得攻擊者能夠批量解鎖所有 1,400 多個 LP 池，無視其各自的鎖定時間表。合約的閉源性質意味著此漏洞對用戶不可見，也無法被外部安全研究人員審計。\n\n加重因素：(a) 合約自 2021 年以來一直未維護，無審計更新；(b) 未設置安全監控以檢測所有權變更；(c) EIP-7702 的委託機制被濫用，在單筆交易中批量執行 1,400 多個池的解鎖操作，大幅縮短了干預窗口；(d) 證據表明預謀內部規劃可追溯到 2025 年 8 月。",
+      "attackVector": "1. 準備階段（2025 年 8 月 – 2026 年 5 月）：Telegram 頻道於 2025 年 8 月開始公開宣傳「DxSale 內部關係 LP 解鎖服務」，表明攻擊者在執行前至少九個月就已識別出舊版鎖倉合約所有者權限的可利用性。攻擊者監控鎖倉合約，累積受影響 LP 池的知識，並準備了 EIP-7702 委託合約。\n\n2. 所有權轉移（2026 年 5 月 26 日 01:08 UTC）：原始所有者 EOA 0x47BAcf93 調用鎖倉合約 0xEb3a9C56d963b971d320f889be2fb8b59853e449 上的 transferOwnership，將控制權轉移給攻擊者 EOA 0xC4574DDEF299e7E563971e200433e592EeaaFA69。同一所有者還將另外三個鎖倉合約（0x81E0eF68、0x2D045410、0x5b5e9448）轉移給同一攻擊者地址。交易哈希：0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41。\n\n3. 初始資金（2026 年 5 月 27 日）：攻擊者錢包 0xC4574D 從 Bybit 收到 104 BNB（約 6.7 萬美元）作為 Gas 費和合約部署的操作資金。\n\n4. EIP-7702 委託設置（2026 年 5 月 28 日）：攻擊者部署了多個攻擊合約（0x74Ad1E、0xc2efbD94、0x996521B5、0xd6c7d6b1、0xA0795423），並通過 EIP-7702 委託升級了 EOA 0xC4574D，將 Delegator 指向攻擊合約。交易哈希：0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06。這使得 EOA 能夠執行任意合約邏輯，繞過正常的 EOA 限制。\n\n5. 批量清空攻擊（2026 年 5 月 28 日 03:45:50 UTC）：攻擊者利用所有者權限調用鎖倉合約上的 unlockToken。閉源合約的驗證漏洞——鎖定期未到期時未能回滾——允許未經授權的代幣解鎖。利用 EIP-7702 委託，攻擊者在單筆交易流程中批量執行此操作（0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6），產生了 667,465 次解鎖事件。\n\n6. 流動性移除與洗錢：解鎖 LP 代幣後，攻擊者從 DEX 池中移除流動性（例如：0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459），將 LP 代幣轉換為底層資產。資金通過中間聚合地址（0x47F80D09、0xF19acAD8）和 80 多次錢包跳轉，最終到達次級轉移錢包（0xb71c1C2A、0x4c5ee970）和多個 Binance 存款地址。",
+      "transactions": [
+        {
+          "txHash": "0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41",
+          "chain": "bsc",
+          "role": "setup",
+          "description": "所有權轉移：原始所有者 0x47BAcf93 調用 DxSale Legacy Locker 合約 0xEb3a9C56 上的 transferOwnership，將完全控制權轉移給攻擊者地址 0xC4574D。於 2026 年 5 月 26 日 01:08 UTC 上鏈。這是促成所有後續攻擊的關鍵存取控制破壞。"
+        },
+        {
+          "txHash": "0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06",
+          "chain": "bsc",
+          "role": "prepare",
+          "description": "EIP-7702 委託設置：攻擊者部署攻擊合約（如 0x74Ad1E），並使用 EIP-7702 升級 EOA 0xC4574D，將 Delegator 指向攻擊合約。這使攻擊者 EOA 能夠通過委託機制執行任意合約邏輯，繞過正常的 EOA 限制。"
+        },
+        {
+          "txHash": "0xb107f19af1a8ff90d19cbb40d935f8be5d79f5fb9b497824e4ed28b9e7555fe9",
+          "chain": "bsc",
+          "role": "exploit",
+          "description": "unlockToken 攻擊：攻擊者利用新獲得的所有者權限直接調用 DxSale Legacy Locker 合約中的 unlockToken 函數。閉源鎖倉合約存在驗證漏洞——未能正確檢查鎖定期到期，當鎖定期未到期時合約不回滾而是繼續執行，允許未經授權的 LP 代幣解鎖。這是核心業務邏輯漏洞。"
+        },
+        {
+          "txHash": "0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6",
+          "chain": "bsc",
+          "role": "exploit",
+          "description": "EIP-7702 委託批量清空：攻擊者利用 EIP-7702 委託機制在單筆交易流程中批量清空超過 1,400 個 LP 池（於 2026 年 5 月 28 日 03:45:50 UTC 上鏈）。0xC4574D（委託給攻擊合約）執行調用方法 0x84d3326c。鏈上分析觀察到 667,465 次攻擊者主導的解鎖事件。"
+        },
+        {
+          "txHash": "0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459",
+          "chain": "bsc",
+          "role": "consolidate",
+          "description": "LP 流動性移除：獲取解鎖的 LP 代幣後，攻擊者從 DEX 池中移除流動性，將 LP 代幣轉換為底層資產（主要為 BNB 和配對代幣）。這是批量清空之後的眾多資金整合交易之一。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0xC4574DDEF299e7E563971e200433e592EeaaFA69",
+          "chain": "bsc",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA，通過 transferOwnership 接收鎖倉合約所有權，於 5 月 27 日從 Bybit 收到 104 BNB 初始資金，執行 EIP-7702 委託升級，並策劃批量清空 1,400 多個 LP 池。將 2,958 BNB（約 187 萬美元）轉移到兩個主要錢包後，通過 80 多次錢包跳轉存入多個 Binance 地址。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x47BAcf935066b802EAA0067eC14AB035B24eB78b",
+          "chain": "bsc",
+          "role": "original_owner",
+          "description": "DxSale Legacy Locker 合約 0xEb3a9C56 的原始所有者。於 2026 年 5 月 26 日 01:08 UTC 調用 transferOwnership，將控制權轉移給攻擊者 0xC4574D。可能是私鑰洩露或惡意內部人員——Telegram 頻道自 2025 年 8 月起就提供「DxSale 內部關係 LP 解鎖服務」，暗示這是一起預謀的內部作案而非機會主義的密鑰盜竊。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x74Ad1Ef17Fbb3e494c31c72F7ec730A27FEf0310",
+          "chain": "bsc",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的 EIP-7702 委託合約。用作 0xC4574D EOA 的委託目標，實現跨 1,400 多個 LP 池的批量解鎖和清空操作。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xc2efbD94aeDFf1555b97ddCb216646DFC01e4718",
+          "chain": "bsc",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的 EIP-7702 委託合約。ExVul 將其標識為批量清空交易中使用的主要「Drainer / EIP-7702 delegate」合約。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x47F80D09d1Bd0BB675ac627BDC1d1244731F66bf",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "中間聚合地址，用於在將被盜資金路由至 Binance 存款地址之前進行整合。80 多次錢包跳轉洗錢鏈的一部分。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xF19acAD8EDCd733A8bF9175C93da9AB660afC747",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "洗錢鏈中的中間中繼地址。從聚合地址接收資金，並在到達 Binance 之前轉發給次級轉移錢包。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xb71c1C2A0cD7A88f1317f9A996e4d121E7db5E92",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "次級轉移錢包，用於存入 Binance 前的最終洗錢階段。接收 2,958 BNB 的兩個主要錢包之一。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x4c5ee9703653C8e7725C65593bff372655e0453C",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "次級轉移錢包，用於存入 Binance 前的最終洗錢階段。接收 2,958 BNB 的兩個主要錢包之一。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xeb3a9c56d963b971d320f889be2fb8b59853e449",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "DxSale Legacy Locker 智能合約——2021 年部署的主要被攻擊鎖倉合約。持有來自 1,400 多個早期 BNB Chain 項目的 LP 代幣。閉源（未驗證）Solidity 合約。所有權於 5 月 26 日轉移給攻擊者 0xC4574D，LP 代幣於 5 月 28 日通過 EIP-7702 委託批量清空，利用了鎖定期驗證漏洞。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x81E0eF68e103Ee65002d3Cf766240eD1c070334d",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "額外的 DxSale Legacy Locker 合約，其所有權也被轉移給攻擊者 0xC4574D。持有約 1,320 萬美元的鎖定 LP 資產，仍面臨風險，等待緊急提取。受影響的項目已被敦促立即驗證並提取資金。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x2D045410f002A95EFcEE67759A92518fA3FcE677",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "額外的 DxSale Legacy Locker 合約，其所有權被轉移給攻擊者 0xC4574D。持有約 220 萬美元的鎖定 LP 資產，仍面臨風險。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x5b5e94485c9628793B01A38762921Dc37B6829b6",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "額外的 DxSale Legacy Locker 合約，其所有權被轉移給攻擊者 0xC4574D。持有約 1,300 美元的鎖定資產。",
+          "accountType": "contract_close_source"
+        }
+      ],
+      "lessons": [
+        "關鍵管理功能（transferOwnership、unlockToken）必須受到至少 48 小時延遲的時間鎖保護，讓受影響用戶有時間檢測和應對未經授權的所有權變更。",
+        "單一所有者管理模式對於持有數百萬第三方資產的合約根本不安全。所有者權限必須使用多簽錢包（最低 3-of-5）或具有多方批准的 DAO 治理。",
+        "基礎設施合約上的所有所有權變更必須通過鏈上事件監聽器和鏈下通知系統（Telegram、Discord、電子郵件）觸發自動監控告警，通知受影響的項目和安全社群。",
+        "EIP-7702 委託引入了強大的新攻擊面：它允許 EOA 執行任意合約邏輯並跨數百個合約進行批量操作。管理功能必須包含防止基於委託的權限升級的檢查。",
+        "持有用戶資金的閉源（未驗證）智能合約是不可接受的安全實踐。所有基礎設施合約——尤其是代幣鎖倉合約——必須開源並附有已發布的審計報告，以實現社群審查和獨立驗證。",
+        "舊版 DeFi 基礎設施合約需要持續維護、定期安全再審計和日落/遷移計劃。2021 年的 DxSale 鎖倉合約在累積數千萬鎖定價值的同時，閒置了 5 年未維護。",
+        "代幣鎖倉合約應實施緊急熔斷機制：如果所有權發生變更，強制延遲期應自動觸發，受影響的 LP 提供者應在新所有者執行特權功能之前獲得提款窗口。",
+        "交易所（CEX）在事件響應中扮演關鍵角色。Bybit 應通過 KYC 記錄追蹤初始 104 BNB 資金來源。Binance 應凍結通過鏈上取證分析識別的攻擊者關聯存款地址。",
+        "事件前威脅情報至關重要：自 2025 年 8 月以來在 Telegram 頻道宣傳「DxSale 內部 LP 解鎖服務」是一個未被重視的早期預警。對暗網和社交媒體渠道進行協議特定威脅的安全監控應成為標準實踐。",
+        "協議團隊必須保持事件響應能力。DxSale 在 730 萬美元攻擊導致用戶資金被盜後的完全沉默是不可接受的——持有第三方資產的項目有義務在安全事件期間進行透明的溝通。"
+      ]
+    },
+    "ja": {
+      "title": "DxSale Legacy Locker 脆弱性攻撃事件",
+      "description": "2026年5月26日〜28日、BNB Chain上のDxSale Legacy Lockerインフラストラクチャが、アクセス制御侵害とビジネスロジック悪用を組み合わせた高度な二段階攻撃を受け、1,400以上のLPプールから約730万ドルが流出しました。さらに3つのロッカーコントラクトにロックされた約1,550万ドルのLP資産が依然としてリスクにさらされています。\n\n第一段階——アクセス制御侵害（5月26日）：DxSale Legacy Lockerコントラクトの元の所有者（0x47BAcf93）がUTC 01:08にtransferOwnershipを呼び出し、コントラクト0xEb3a9C56の完全な制御を攻撃者アドレス0xC4574Dに移転しました。この2021年にデプロイされたレガシーロッカーコントラクトには、タイムロック、マルチシグ保護、監視メカニズムが欠如しており——標準的なOwnableパターンが一方的かつ即時の無防備な権限移転を許していました。さらに3つのロッカーコントラクト（0x81E0eF68、0x2D045410、0x5b5e9448）の所有権も同じ攻撃者に移転されました。\n\n第二段階——ビジネスロジック悪用（5月28日）：5月27日、攻撃者のウォレットはBybitから運用資金として104 BNB（約6.7万ドル）を受領。5月28日、攻撃者は複数のEIP-7702デリゲーターコントラクトをデプロイし、EOA 0xC4574Dを委任実行モードにアップグレードしました。UTC 03:45:50、攻撃者はクローズドソースのロッカーコントラクトに存在する重大な検証バグを悪用した一括ドレイン取引を実行しました：unlockToken関数がロック期間の満了を適切に検証できず、ロック期間が未了の場合でもロールバックせずに実行を継続し、不正なLPトークンのロック解除を許していました。Defi Nerd / DarkNavyによるオンチェーン分析では、影響を受けたロッカー全体で667,465件の攻撃者主導のロック解除イベントが観測されました。\n\nこの攻撃は計画的な内部犯行の強い兆候を示しています。Telegramチャンネルでは2025年8月から「DxSaleインサイダーコネクションLPロック解除サービス」が公然と宣伝されており——攻撃実行の9ヶ月も前からです。DxSaleとSAFEMOON（チームメンバーが後に刑事起訴された）などのプロジェクトとの歴史的インフラストラクチャ上の関連性が、内部犯行説をさらに裏付けています。2026年5月29日現在、DxSaleは公式のインシデント対応声明を一切発表していません。\n\n攻撃後、資金は80以上のウォレットホップを経て洗浄され、最終的に複数のBinance預金アドレスに到達しました。PeckShieldの報告によると、2,958 BNB（約187万ドル）が2つの主要ウォレットに送金された後、Binanceに入金されました。セキュリティ企業（GoPlus、ExVul、PeckShield）は、影響を受けたプロジェクトに対してLPロック状況の即時確認と資金引き出しを推奨し、取引所（Bybit：資金ソースKYC追跡、Binance：現金化経路追跡）に対して攻撃者関連口座の凍結を要請しています。",
+      "rootCause": "DxSale Legacy Lockerコントラクト（2021年デプロイ、BSCScan上でクローズドソース/未検証）には、攻撃を可能にした2つの重大なセキュリティ欠陥が組み合わさっていました：\n\n1. アクセス制御：OpenZeppelinの標準Ownableパターンから継承されたtransferOwnership関数には、タイムロック、マルチシグ要件、監視・アラートメカニズムが一切ありませんでした。単一の所有者EOAが、遅延なし、複数当事者の承認なし、自動通知なしで、いつでも任意のアドレスに完全なコントラクト制御を一方的に移転できました。所有者の秘密鍵が侵害された（または所有者自身が悪意を持って行動した）瞬間、ロックされた約730万ドルのLP資産すべてが即座に危険にさらされました。\n\n2. ビジネスロジック：クローズドソースのロッカーコントラクト内のunlockToken関数に検証バグが存在し、ロック期間の満了を適切に強制できませんでした。ACai_secの分析によると、ロック期間が未了の場合にコントラクトがロールバックせず、実行を継続してトークンのロック解除を許していました。これにより、攻撃者は個別のロックスケジュールに関係なく、1,400以上のLPプールすべてを一括でロック解除することができました。コントラクトがクローズドソースであったため、この脆弱性はユーザーから見えず、外部のセキュリティ研究者による監査も不可能でした。\n\n悪化要因：(a) コントラクトは2021年以降メンテナンスされておらず、監査更新もなし；(b) 所有権変更を検出するセキュリティ監視が未設置；(c) EIP-7702の委任メカニズムが悪用され、1回の取引で1,400以上のプールのロック解除を一括実行し、介入の窓を劇的に縮小；(d) 2025年8月まで遡る計画的な内部準備の証拠。",
+      "attackVector": "1. 準備段階（2025年8月～2026年5月）：Telegramチャンネルが2025年8月に「DxSaleインサイダーコネクションLPロック解除サービス」の宣伝を開始し、攻撃者が実行の少なくとも9ヶ月前からレガシーロッカーの所有者権限の悪用可能性を特定していたことを示しています。攻撃者はロッカーコントラクトを監視し、影響を受けるLPプールの知識を蓄積し、EIP-7702デリゲーターコントラクトを準備しました。\n\n2. 所有権移転（2026年5月26日 01:08 UTC）：元の所有者EOA 0x47BAcf93がロッカーコントラクト0xEb3a9C56d963b971d320f889be2fb8b59853e449上のtransferOwnershipを呼び出し、制御を攻撃者EOA 0xC4574DDEF299e7E563971e200433e592EeaaFA69に移転。同じ所有者はさらに3つのロッカーコントラクト（0x81E0eF68、0x2D045410、0x5b5e9448）も同じ攻撃者アドレスに移転しました。TX: 0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41。\n\n3. 初期資金調達（2026年5月27日）：攻撃者ウォレット0xC4574DがBybitからガス代とコントラクトデプロイの運用資金として104 BNB（約6.7万ドル）を受領。\n\n4. EIP-7702委任設定（2026年5月28日）：攻撃者が複数のエクスプロイトコントラクト（0x74Ad1E、0xc2efbD94、0x996521B5、0xd6c7d6b1、0xA0795423）をデプロイし、EIP-7702委任を通じてEOA 0xC4574Dをアップグレード、デリゲーターをエクスプロイトコントラクトに設定。TX: 0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06。これによりEOAが任意のコントラクトロジックを実行可能になり、通常のEOA制限を回避。\n\n5. 一括ドレイン攻撃（2026年5月28日 03:45:50 UTC）：攻撃者が所有者権限を使用してロッカーコントラクト上のunlockTokenを呼び出し。クローズドソースコントラクトの検証バグ（ロック期間未了時にロールバックしない）により不正なトークンロック解除が可能に。EIP-7702委任を利用し、攻撃者は1回のトランザクションフローで1,400以上のLPプールにこれを一括実行（0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6）、667,465件のロック解除イベントを生成。\n\n6. 流動性除去と資金洗浄：LPトークンのロック解除後、攻撃者はDEXプールから流動性を除去し（例：0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459）、LPトークンを原資産に変換。資金は中間集約アドレス（0x47F80D09、0xF19acAD8）と80以上のウォレットホップを経由し、最終的に二次転送ウォレット（0xb71c1C2A、0x4c5ee970）と複数のBinance預金アドレスに到達。",
+      "transactions": [
+        {
+          "txHash": "0x23e331a81e496890c8f6147a672c6bc45cc2d2dd17547e72713b6ee070b38d41",
+          "chain": "bsc",
+          "role": "setup",
+          "description": "所有権移転：元の所有者0x47BAcf93がDxSale Legacy Lockerコントラクト0xEb3a9C56上のtransferOwnershipを呼び出し、完全な制御を攻撃者アドレス0xC4574Dに移転。2026年5月26日 01:08 UTCに採掘。これが後続のすべての攻撃を可能にした重大なアクセス制御侵害。"
+        },
+        {
+          "txHash": "0xe6d29d066a9dab541bc5d2ded34696513e777ca79e615e71f036c8bb6ac6ac06",
+          "chain": "bsc",
+          "role": "prepare",
+          "description": "EIP-7702委任設定：攻撃者がエクスプロイトコントラクト（例：0x74Ad1E）をデプロイし、EIP-7702を使用してEOA 0xC4574Dをアップグレード、デリゲーターをエクスプロイトコントラクトに設定。これにより攻撃者EOAが委任メカニズムを通じて任意のコントラクトロジックを実行可能に。"
+        },
+        {
+          "txHash": "0xb107f19af1a8ff90d19cbb40d935f8be5d79f5fb9b497824e4ed28b9e7555fe9",
+          "chain": "bsc",
+          "role": "exploit",
+          "description": "unlockToken攻撃：攻撃者が新たに取得した所有者権限を使用してDxSale Legacy LockerコントラクトのunlockToken関数を直接呼び出し。クローズドソースのロッカーコントラクトに検証バグが存在——ロック期間満了を適切にチェックできず、期間未了時にロールバックせず実行を継続、不正なLPトークンロック解除を許容。これが中核的なビジネスロジック脆弱性。"
+        },
+        {
+          "txHash": "0x16a932b7eb06b9d333c895011a4dceb7e73f0c0151acf75d0e43616335e802a6",
+          "chain": "bsc",
+          "role": "exploit",
+          "description": "EIP-7702委任による一括ドレイン：攻撃者がEIP-7702委任メカニズムを活用し、1回のトランザクションフローで1,400以上のLPプールを一括ドレイン（2026年5月28日 03:45:50 UTCに採掘）。0xC4574D（エクスプロイトコントラクトに委任）がメソッド0x84d3326cを実行。オンチェーン分析で667,465件の攻撃者主導ロック解除イベントを観測。"
+        },
+        {
+          "txHash": "0xb0ee7388ab64f6bafc3b8734ccb7c7dc2bb409723d57c98dc132c8851e2c4459",
+          "chain": "bsc",
+          "role": "consolidate",
+          "description": "LP流動性除去：ロック解除されたLPトークンを取得後、攻撃者がDEXプールから流動性を除去し、LPトークンを原資産（主にBNBとペアトークン）に変換。一括ドレイン後に続いた多数の資金統合取引の1つ。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0xC4574DDEF299e7E563971e200433e592EeaaFA69",
+          "chain": "bsc",
+          "role": "primary_attacker",
+          "description": "主要攻撃者EOA。transferOwnershipを通じてロッカーコントラクトの所有権を受領し、5月27日にBybitから104 BNBの初期資金を受領、EIP-7702委任アップグレードを実行し、1,400以上のLPプールの一括ドレインを指揮。2,958 BNB（約187万ドル）を2つの主要ウォレットに転送後、80以上のウォレットホップを経て複数のBinanceアドレスに入金。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x47BAcf935066b802EAA0067eC14AB035B24eB78b",
+          "chain": "bsc",
+          "role": "original_owner",
+          "description": "DxSale Legacy Lockerコントラクト0xEb3a9C56の元の所有者。2026年5月26日 01:08 UTCにtransferOwnershipを呼び出し、制御を攻撃者0xC4574Dに移転。秘密鍵の侵害または悪意のある内部関係者の可能性——Telegramチャンネルでは2025年8月から「DxSaleインサイダーLPロック解除サービス」が提供されており、日和見的な鍵盗難ではなく計画的な内部犯行を示唆。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x74Ad1Ef17Fbb3e494c31c72F7ec730A27FEf0310",
+          "chain": "bsc",
+          "role": "exploit_contract",
+          "description": "攻撃者がデプロイしたEIP-7702デリゲーターコントラクト。0xC4574D EOAの委任ターゲットとして使用され、1,400以上のLPプールにわたる一括ロック解除とドレイン操作を実行。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0xc2efbD94aeDFf1555b97ddCb216646DFC01e4718",
+          "chain": "bsc",
+          "role": "exploit_contract",
+          "description": "攻撃者がデプロイしたEIP-7702デリゲーターコントラクト。ExVulにより一括ドレイン取引で使用された主要な「Drainer / EIP-7702 delegate」コントラクトとして特定。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x47F80D09d1Bd0BB675ac627BDC1d1244731F66bf",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "中間集約アドレス。Binance預金アドレスにルーティングする前に盗難資金を統合するために使用。80以上のウォレットホップ洗浄チェーンの一部。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xF19acAD8EDCd733A8bF9175C93da9AB660afC747",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "洗浄チェーン内の中間中継アドレス。集約アドレスから資金を受領し、Binance到達前に二次転送ウォレットに転送。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0xb71c1C2A0cD7A88f1317f9A996e4d121E7db5E92",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "二次転送ウォレット。Binance入金前の最終洗浄段階で使用。2,958 BNBを受領した2つの主要ウォレットの1つ。",
+          "accountType": "eoa"
+        },
+        {
+          "address": "0x4c5ee9703653C8e7725C65593bff372655e0453C",
+          "chain": "bsc",
+          "role": "money_mule",
+          "description": "二次転送ウォレット。Binance入金前の最終洗浄段階で使用。2,958 BNBを受領した2つの主要ウォレットの1つ。",
+          "accountType": "eoa"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xeb3a9c56d963b971d320f889be2fb8b59853e449",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "DxSale Legacy Lockerスマートコントラクト——2021年にデプロイされた主要な被害ロッカー。1,400以上の初期BNB ChainプロジェクトのLPトークンを保有。クローズドソース（未検証）Solidityコントラクト。所有権は5月26日に攻撃者0xC4574Dに移転され、LPトークンは5月28日にEIP-7702委任を通じて一括ドレインされ、ロック期間検証バグが悪用された。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x81E0eF68e103Ee65002d3Cf766240eD1c070334d",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "追加のDxSale Legacy Lockerコントラクト。所有権も攻撃者0xC4574Dに移転。約1,320万ドルのロックされたLP資産を保有し、緊急引き出し待ちのリスク状態。影響を受けたプロジェクトは即時確認と資金引き出しを要請されている。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x2D045410f002A95EFcEE67759A92518fA3FcE677",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "追加のDxSale Legacy Lockerコントラクト。所有権が攻撃者0xC4574Dに移転。約220万ドルのロックされたLP資産がリスク状態。",
+          "accountType": "contract_close_source"
+        },
+        {
+          "address": "0x5b5e94485c9628793B01A38762921Dc37B6829b6",
+          "chain": "bsc",
+          "role": "protocol_contract",
+          "description": "追加のDxSale Legacy Lockerコントラクト。所有権が攻撃者0xC4574Dに移転。約1,300ドルのロックされた資産を保有。",
+          "accountType": "contract_close_source"
+        }
+      ],
+      "lessons": [
+        "重要な管理者機能（transferOwnership、unlockToken）は、最低48時間の遅延を持つタイムロックで保護し、影響を受けるユーザーが不正な所有権変更を検出・対応できる時間を確保すべき。",
+        "単一所有者の管理者モデルは、数百万ドルの第三者資産を保有するコントラクトにとって根本的に不安全。所有者権限にはマルチシグウォレット（最低3-of-5）または複数当事者承認のあるDAOガバナンスが必要。",
+        "インフラストラクチャコントラクト上のすべての所有権変更は、オンチェーンイベントリスナーとオフチェーン通知システム（Telegram、Discord、メール）を通じて、影響を受けるプロジェクトとセキュリティコミュニティに自動監視アラートをトリガーすべき。",
+        "EIP-7702委任は強力な新たな攻撃ベクターを導入：EOAが任意のコントラクトロジックを実行し、数百のコントラクトにわたる一括操作を可能にする。管理者機能には委任ベースの権限昇格を防ぐチェックを含める必要がある。",
+        "ユーザー資金を保有するクローズドソース（未検証）のスマートコントラクトは許容できないセキュリティ慣行。すべてのインフラストラクチャコントラクト——特にトークンロッカー——は公開された監査報告書付きでオープンソース化し、コミュニティレビューと独立検証を可能にすべき。",
+        "レガシーDeFiインフラストラクチャコントラクトには、継続的なメンテナンス、定期的なセキュリティ再監査、サンセット/移行計画が必要。2021年製のDxSaleロッカーは、数千万ドルのロックされた価値を蓄積しながら5年間メンテナンスされずに放置された。",
+        "トークンロッカーコントラクトは緊急サーキットブレーカーメカニズムを実装すべき：所有権が変更された場合、強制遅延期間が自動的にトリガーされ、影響を受けるLP提供者は新しい所有者が特権機能を実行する前に引き出しウィンドウを得られるようにする。",
+        "取引所（CEX）はインシデント対応で重要な役割を果たす。BybitはKYC記録を通じて初期104 BNBの資金ソースを追跡すべき。Binanceはオンチェーンフォレンジック分析で特定された攻撃者関連の預金アドレスを凍結すべき。",
+        "インシデント前の脅威インテリジェンスが重要：2025年8月からTelegramチャンネルで宣伝されていた「DxSaleインサイダーLPロック解除サービス」は見過ごされた早期警告だった。ダークウェブやソーシャルメディアチャンネルでのプロトコル固有の脅威に対するセキュリティ監視を標準慣行とすべき。",
+        "プロトコルチームはインシデント対応能力を維持しなければならない。730万ドルの攻撃でユーザー資金が流出した後のDxSaleの完全な沈黙は受け入れられない——第三者資産を保有するプロジェクトには、セキュリティインシデント中に透明性のあるコミュニケーションを行う義務がある。"
+      ]
+    }
+  }
+}
