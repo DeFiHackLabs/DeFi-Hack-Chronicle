@@ -13,7 +13,8 @@
     "neptunemutual",
     "exvulsec",
     "GoPlusZH",
-    "TenArmorAlert"
+    "TenArmorAlert",
+    "DefimonAlerts"
   ],
   "lookbackHours": 24,
   "concurrency": 1,
