@@ -292,6 +292,9 @@ export default function HomePage() {
         categories={data.categories}
         blockchains={data.blockchains}
         accountTypes={data.accountTypes}
+        attackerRoles={data.attackerRoles}
+        victimRoles={data.victimRoles}
+        transactionRoles={data.transactionRoles}
         currentLang={currentLang}
         t={t}
         onEventSelect={handleEventSelect}

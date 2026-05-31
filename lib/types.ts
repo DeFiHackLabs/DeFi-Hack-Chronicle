@@ -23,12 +23,20 @@ export interface Language extends FilterOption {}
 export interface Ecosystem extends FilterOption {}
 export interface AccountType extends FilterOption {}
 
+/** Role metadata — same shape as filter options, used for role color lookups */
+export interface RoleInfo {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+}
+
 // ─── Account Base ────────────────────────────────────────────────────
 
 /** Shared fields for attackers and victims */
 export interface Account {
   address: string;
-  chain: string;
+  blockchain: string;
   role: string;
   description?: string;
   accountType?: string;
@@ -62,7 +70,7 @@ export interface AttackTime {
 
 export interface Transaction {
   txHash: string;
-  chain: string;
+  blockchain: string;
   role: string;
   description?: string;
 }
@@ -83,7 +91,7 @@ export interface HackEvent {
   blockchain: string[];
   category: string[];
   ecosystem: string;
-  language: string;
+  language: string[];
   estimatedLoss: EstimatedLoss;
   attackTime: AttackTime;
   description: string;
@@ -135,6 +143,9 @@ export interface SchemaData {
     ecosystems: Ecosystem[];
     blockchains: Blockchain[];
     accountTypes: AccountType[];
+    attackerRoles: RoleInfo[];
+    victimRoles: RoleInfo[];
+    transactionRoles: RoleInfo[];
   };
 }
 

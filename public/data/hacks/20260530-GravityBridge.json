@@ -1,11 +1,20 @@
 {
-  "id": "gravitybridge-2026",
+  "id": "GravityBridge-20260530",
+  "date": "2026-05-30",
   "title": "Gravity Bridge Validator Key Compromise",
   "protocol": "Gravity Bridge",
-  "blockchain": ["ethereum", "cosmos"],
-  "category": ["key_compromise", "bridge"],
+  "blockchain": [
+    "ethereum",
+    "cosmos"
+  ],
+  "category": [
+    "key_compromise",
+    "bridge"
+  ],
   "ecosystem": "cosmos",
-  "language": "default",
+  "language": [
+    "N/A"
+  ],
   "estimatedLoss": {
     "totalUSD": "5400000",
     "breakdown": [
@@ -39,8 +48,96 @@
     "note": "Funding tx at 00:51:35 UTC via Arbitrum bridge. Four fraudulent batch submissions between 02:27:59 and 02:31:11 UTC. Post-exploit consolidation and laundering continued through ~03:25 UTC.",
     "date": "2026-05-30"
   },
-  "date": "2026-05-30",
   "description": "On May 30, 2026, Gravity Bridge—a cross-chain bridge connecting Ethereum and Cosmos—was drained of approximately $5.4M through a validator key compromise. The attacker compromised validator signing keys for the Gravity Bridge relayer network, enabling them to submit four fraudulent batch transactions via two different relayer addresses that transferred locked bridge assets to attacker-controlled addresses. The drained assets included 4,349,701.31 USDC (~$4.35M), 274.35 WETH (~$552K), 434,072.40 USDT (~$434K), and 14.16 PAXG (~$64K). Each batch transaction used a different submit method: the USDC, PAXG, and USDT batches used submitBatch() (selector 0xc35d5cb3) via relayer 0xf1d1..., while the WETH batch used a different method (selector 0x8690ff98) via relayer 0x97a958..., suggesting the attacker cycled through multiple compromised validator keys. The stolen assets were consolidated and swapped to native ETH, with portions laundered through ChangeNow, Binance, and KuCoin. AMLBot analysis revealed the Binance deposit address used by the attacker was active a year before the exploit, suggesting premeditation. At time of reporting, the attacker was still holding approximately 2,102 ETH (~$4.23M) in consolidation wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47.",
+  "transactions": [
+    {
+      "txHash": "0x68b293793c8f551b1e60345e59fb54de9d2e439a8b461d8fae5dea7d273f6c5c",
+      "role": "funding",
+      "description": "Funding transaction from Arbitrum bridge (0x4976a4a02f38326660d17bf34b431dc6e2eb2327) to attacker EOA 0x7B58... at block 25204721. Value: 0.9988201 ETH. Timestamp: 2026-05-30 00:51:35 UTC.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0xfce883a8f9a4f3479cce1368b99287973ab40451ac092f5a41e1e09eecab5044",
+      "role": "exploit",
+      "description": "Fraudulent USDC batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205201, timestamp 02:27:59 UTC. Drained 4,349,701.31 USDC (4,349,701,311,883 base units) from bridge contract 0xa410... to attacker 0x7B58..., with 50 USDC relay fee. Gas: 326,561.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0xd3cdfa10be4f0cde6b3f294856a8bdd840983dcef29a5dc24c70c36e2d7f9ef0",
+      "role": "exploit",
+      "description": "Fraudulent PAXG batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205207, timestamp 02:29:11 UTC. Drained 14.163836420887595822 PAXG (Paxos Gold, contract 0x45804880de22913dafe09f4980848ece6ecbaf78) from bridge to attacker 0x7B58..., with 0.02 PAXG relay fee. Relayer immediately swapped fee for ~90.54 USDC via Uniswap V2. Gas: 433,779.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x59e52302c53e862fcf833b61eb851ff66e098e3d29db19fd66e5a04734eeb84b",
+      "role": "exploit",
+      "description": "Fraudulent WETH batch submitted via a SECOND compromised validator relayer 0x97a95886941ea818a2d102b865886ec7eee6cdf2 (not 0xf1d1...). Uses different submission method (selector 0x8690ff98 vs 0xc35d5cb3). Block 25205212, timestamp 02:30:11 UTC. Drained 274.3459395778221 WETH from bridge to attacker 0x7B58..., with 0.02 WETH relay fee. Gas: 218,033. Crucial evidence that multiple distinct validator keys were compromised.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x469274f4edd45ec3284bf60de8eb30086222745f8f8c8b6a955137feed41281d",
+      "role": "exploit",
+      "description": "Fraudulent USDT batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205217, timestamp 02:31:11 UTC. Drained 434,072.402068 USDT from bridge to attacker 0x7B58..., with 50 USDT relay fee. Relayer immediately swapped fee for ~0.025 WETH via Uniswap V2. Gas: 326,257.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x24b47d820f30c6cd77599a05d306f6143f23ebde7abadb5a9df5b7265fd901f8",
+      "role": "consolidation",
+      "description": "Attacker 0x7B58... sent 500 ETH to consolidation wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47 at block 25205342, timestamp 02:56:11 UTC.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x226947287f6c2a2bd93e6130335680a45632dff6b5163f6227dfb47bcf219bc7",
+      "role": "consolidation",
+      "description": "Attacker 0x7B58... sent another 500 ETH to consolidation wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47 at block 25205363, timestamp 03:00:23 UTC. Total consolidated: 1,000 ETH.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x98dbf264219a17ac510e5c7cbd0b84a4d0690c723ccfa9e96e077d18cfbfcaa6",
+      "role": "laundering",
+      "description": "Attacker dispersed stolen funds in ~6-7 ETH chunks across multiple subsequent transactions (blocks 25205345-25205488), consistent with mixer or exchange deposit patterns. Representative consolidation/laundering tx.",
+      "blockchain": "ethereum"
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x7B582033061b96cC3F9421e73a749ED7C62da1F9",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA. Received all stolen bridge assets (4,349,701 USDC + 274.35 WETH + 434,072 USDT + 14.16 PAXG) across 4 fraudulent batch submissions. Funded via Arbitrum bridge (0.9988 ETH) 1 hour 36 minutes before first exploit. Total tx count: 55+. Swapped stolen stablecoins for ETH via Uniswap V2, then sent 1,000 ETH to consolidation wallet 0x4d3c... and dispersed remainder in ~6 ETH chunks. Verified as EOA via eth_getCode (empty code byte).",
+      "accountType": "EOA",
+      "blockchain": "ethereum"
+    },
+    {
+      "address": "0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47",
+      "role": "consolidation",
+      "description": "Consolidation wallet. Received 1,000 ETH from primary attacker in two 500 ETH transfers at blocks 25205342 and 25205363. Holdings at time of reporting: ~2,014 ETH (~$4.0-4.23M). Likely main holding address for stolen funds. Verified as EOA via eth_getCode.",
+      "accountType": "EOA",
+      "blockchain": "ethereum"
+    },
+    {
+      "address": "0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410",
+      "role": "primary_attacker",
+      "description": "Compromised validator/relayer contract used to submit fraudulent USDC, PAXG, and USDT batch transactions. Uses self-call pattern (From==To) typical of bridge relayer architecture. submitBatch() selector 0xc35d5cb3. Also received and immediately swapped relayer fees via Uniswap V2. The attacker controlled this relayer's validator signing key.",
+      "accountType": "Contract",
+      "blockchain": "ethereum"
+    },
+    {
+      "address": "0x97a95886941ea818a2d102b865886ec7eee6cdf2",
+      "role": "primary_attacker",
+      "description": "Second compromised validator/relayer address used ONLY for the WETH batch submission. Uses different method selector (0x8690ff98) than the main relayer (0xf1d1...), suggesting a distinct validator role or key. Received 0.02 WETH relay fee. Critical evidence that at least TWO distinct validator keys were compromised.",
+      "accountType": "EOA",
+      "blockchain": "ethereum"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xa4108aA1Ec4967F8b52220a4f7e94A8201F2D906",
+      "role": "vulnerable_contract",
+      "description": "Gravity Bridge contract on Ethereum mainnet. Entry point for cross-chain batch settlement. Implementation accepts batch submissions from multiple validator relayers (0xf1d1... and 0x97a958...) with different method selectors (0xc35d5cb3 and 0x8690ff98). Held locked bridge assets that were drained across 4 fraudulent batch submissions. Open-source contract.",
+      "accountType": "Contract",
+      "blockchain": "ethereum"
+    }
+  ],
   "rootCause": "Validator signing key compromise on the Cosmos-side Gravity Bridge relayer network. The Gravity Bridge uses a threshold signature scheme where validators sign batch transactions to authorize cross-chain asset releases. An attacker who controls one or more validator signing keys can submit fraudulent batch transactions with valid signatures, bypassing the bridge's security model entirely. The attack used TWO different relayer submitter addresses (0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 and 0x97a95886941ea818a2d102b865886ec7eee6cdf2), pointing to at least two compromised validator identities. The use of different submission methods suggests multiple validators or distinct validator roles were compromised.",
   "attackVector": "The attacker compromised Cosmos-side validator signing keys and submitted four fraudulent batch transactions to the Gravity Bridge contract (0xa4108aA1Ec4967F8b52220a4f7e94A8201F2D906) on Ethereum. Attack flow: (1) Attacker funded gas costs with 0.9988 ETH via Arbitrum bridge at 00:51:35 UTC (tx 0x68b293...); (2) At 02:27:59 UTC, submitted fraudulent USDC batch (tx 0xfce883..., block 25205201) draining 4,349,701.31 USDC via relayer 0xf1d1...; (3) At 02:29:11 UTC, submitted fraudulent PAXG batch (tx 0xd3cdfa..., block 25205207) draining 14.16 PAXG via relayer 0xf1d1...; (4) At 02:30:11 UTC, submitted fraudulent WETH batch (tx 0x59e523..., block 25205212) draining 274.35 WETH via a second relayer 0x97a958... with a different submission method (0x8690ff98); (5) At 02:31:11 UTC, submitted fraudulent USDT batch (tx 0x469274..., block 25205217) draining 434,072.40 USDT via relayer 0xf1d1...; (6) Post-exploit, attacker swapped stolen assets to ETH via Uniswap V2 pools and consolidated into wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47; (7) Portions laundered through ChangeNow, Binance, and KuCoin.",
   "lessons": [
@@ -61,101 +158,6 @@
     "https://x.com/GoPlusZH/status/2060676492431065430",
     "https://x.com/AMLBotHQ/status/2060813497659806039"
   ],
-  "transactions": [
-    {
-      "txHash": "0x68b293793c8f551b1e60345e59fb54de9d2e439a8b461d8fae5dea7d273f6c5c",
-      "chain": "ethereum",
-      "role": "funding",
-      "description": "Funding transaction from Arbitrum bridge (0x4976a4a02f38326660d17bf34b431dc6e2eb2327) to attacker EOA 0x7B58... at block 25204721. Value: 0.9988201 ETH. Timestamp: 2026-05-30 00:51:35 UTC."
-    },
-    {
-      "txHash": "0xfce883a8f9a4f3479cce1368b99287973ab40451ac092f5a41e1e09eecab5044",
-      "chain": "ethereum",
-      "role": "exploit",
-      "description": "Fraudulent USDC batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205201, timestamp 02:27:59 UTC. Drained 4,349,701.31 USDC (4,349,701,311,883 base units) from bridge contract 0xa410... to attacker 0x7B58..., with 50 USDC relay fee. Gas: 326,561."
-    },
-    {
-      "txHash": "0xd3cdfa10be4f0cde6b3f294856a8bdd840983dcef29a5dc24c70c36e2d7f9ef0",
-      "chain": "ethereum",
-      "role": "exploit",
-      "description": "Fraudulent PAXG batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205207, timestamp 02:29:11 UTC. Drained 14.163836420887595822 PAXG (Paxos Gold, contract 0x45804880de22913dafe09f4980848ece6ecbaf78) from bridge to attacker 0x7B58..., with 0.02 PAXG relay fee. Relayer immediately swapped fee for ~90.54 USDC via Uniswap V2. Gas: 433,779."
-    },
-    {
-      "txHash": "0x59e52302c53e862fcf833b61eb851ff66e098e3d29db19fd66e5a04734eeb84b",
-      "chain": "ethereum",
-      "role": "exploit",
-      "description": "Fraudulent WETH batch submitted via a SECOND compromised validator relayer 0x97a95886941ea818a2d102b865886ec7eee6cdf2 (not 0xf1d1...). Uses different submission method (selector 0x8690ff98 vs 0xc35d5cb3). Block 25205212, timestamp 02:30:11 UTC. Drained 274.3459395778221 WETH from bridge to attacker 0x7B58..., with 0.02 WETH relay fee. Gas: 218,033. Crucial evidence that multiple distinct validator keys were compromised."
-    },
-    {
-      "txHash": "0x469274f4edd45ec3284bf60de8eb30086222745f8f8c8b6a955137feed41281d",
-      "chain": "ethereum",
-      "role": "exploit",
-      "description": "Fraudulent USDT batch submitted via relayer 0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410 (self-call). submitBatch() selector 0xc35d5cb3. Block 25205217, timestamp 02:31:11 UTC. Drained 434,072.402068 USDT from bridge to attacker 0x7B58..., with 50 USDT relay fee. Relayer immediately swapped fee for ~0.025 WETH via Uniswap V2. Gas: 326,257."
-    },
-    {
-      "txHash": "0x24b47d820f30c6cd77599a05d306f6143f23ebde7abadb5a9df5b7265fd901f8",
-      "chain": "ethereum",
-      "role": "consolidate",
-      "description": "Attacker 0x7B58... sent 500 ETH to consolidation wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47 at block 25205342, timestamp 02:56:11 UTC."
-    },
-    {
-      "txHash": "0x226947287f6c2a2bd93e6130335680a45632dff6b5163f6227dfb47bcf219bc7",
-      "chain": "ethereum",
-      "role": "consolidate",
-      "description": "Attacker 0x7B58... sent another 500 ETH to consolidation wallet 0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47 at block 25205363, timestamp 03:00:23 UTC. Total consolidated: 1,000 ETH."
-    },
-    {
-      "txHash": "0x98dbf264219a17ac510e5c7cbd0b84a4d0690c723ccfa9e96e077d18cfbfcaa6",
-      "chain": "ethereum",
-      "role": "laundering",
-      "description": "Attacker dispersed stolen funds in ~6-7 ETH chunks across multiple subsequent transactions (blocks 25205345-25205488), consistent with mixer or exchange deposit patterns. Representative consolidation/laundering tx."
-    }
-  ],
-  "attackers": [
-    {
-      "address": "0x7B582033061b96cC3F9421e73a749ED7C62da1F9",
-      "chain": "ethereum",
-      "role": "primary_attacker",
-      "description": "Primary attacker EOA. Received all stolen bridge assets (4,349,701 USDC + 274.35 WETH + 434,072 USDT + 14.16 PAXG) across 4 fraudulent batch submissions. Funded via Arbitrum bridge (0.9988 ETH) 1 hour 36 minutes before first exploit. Total tx count: 55+. Swapped stolen stablecoins for ETH via Uniswap V2, then sent 1,000 ETH to consolidation wallet 0x4d3c... and dispersed remainder in ~6 ETH chunks. Verified as EOA via eth_getCode (empty code byte).",
-      "accountType": "eoa"
-    },
-    {
-      "address": "0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47",
-      "chain": "ethereum",
-      "role": "consolidation",
-      "description": "Consolidation wallet. Received 1,000 ETH from primary attacker in two 500 ETH transfers at blocks 25205342 and 25205363. Holdings at time of reporting: ~2,014 ETH (~$4.0-4.23M). Likely main holding address for stolen funds. Verified as EOA via eth_getCode.",
-      "accountType": "eoa"
-    },
-    {
-      "address": "0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410",
-      "chain": "ethereum",
-      "role": "primary_attacker",
-      "description": "Compromised validator/relayer contract used to submit fraudulent USDC, PAXG, and USDT batch transactions. Uses self-call pattern (From==To) typical of bridge relayer architecture. submitBatch() selector 0xc35d5cb3. Also received and immediately swapped relayer fees via Uniswap V2. The attacker controlled this relayer's validator signing key.",
-      "accountType": "contract_open_source"
-    },
-    {
-      "address": "0x97a95886941ea818a2d102b865886ec7eee6cdf2",
-      "chain": "ethereum",
-      "role": "primary_attacker",
-      "description": "Second compromised validator/relayer address used ONLY for the WETH batch submission. Uses different method selector (0x8690ff98) than the main relayer (0xf1d1...), suggesting a distinct validator role or key. Received 0.02 WETH relay fee. Critical evidence that at least TWO distinct validator keys were compromised.",
-      "accountType": "eoa"
-    }
-  ],
-  "victims": [
-    {
-      "address": "0xa4108aA1Ec4967F8b52220a4f7e94A8201F2D906",
-      "chain": "ethereum",
-      "role": "vulnerable_contract",
-      "description": "Gravity Bridge contract on Ethereum mainnet. Entry point for cross-chain batch settlement. Implementation accepts batch submissions from multiple validator relayers (0xf1d1... and 0x97a958...) with different method selectors (0xc35d5cb3 and 0x8690ff98). Held locked bridge assets that were drained across 4 fraudulent batch submissions. Open-source contract.",
-      "accountType": "contract_open_source"
-    }
-  ],
-  "metadata": {
-    "dateAdded": "2026-05-31",
-    "lastUpdated": "2026-05-31",
-    "human_verified": false,
-    "models": ["deepseek-v4-pro"]
-  },
   "locales": {
     "zh-TW": {
       "title": "Gravity Bridge 驗證器金鑰遭入侵事件",
@@ -175,85 +177,85 @@
       "transactions": [
         {
           "txHash": "0x68b293793c8f551b1e60345e59fb54de9d2e439a8b461d8fae5dea7d273f6c5c",
-          "chain": "ethereum",
           "role": "funding",
-          "description": "來自 Arbitrum 橋（0x4976...）的資金交易，向攻擊者 EOA 0x7B58... 轉帳 0.9988201 ETH，區塊 25204721。時間戳：2026-05-30 00:51:35 UTC。此交易支付了攻擊者的 Gas 費用。"
+          "description": "來自 Arbitrum 橋（0x4976...）的資金交易，向攻擊者 EOA 0x7B58... 轉帳 0.9988201 ETH，區塊 25204721。時間戳：2026-05-30 00:51:35 UTC。此交易支付了攻擊者的 Gas 費用。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xfce883a8f9a4f3479cce1368b99287973ab40451ac092f5a41e1e09eecab5044",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造 USDC 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205201，時間戳 02:27:59 UTC。從橋接合約轉出 4,349,701.31 USDC 至攻擊者 0x7B58...，50 USDC 中繼費。Gas：326,561。"
+          "description": "偽造 USDC 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205201，時間戳 02:27:59 UTC。從橋接合約轉出 4,349,701.31 USDC 至攻擊者 0x7B58...，50 USDC 中繼費。Gas：326,561。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xd3cdfa10be4f0cde6b3f294856a8bdd840983dcef29a5dc24c70c36e2d7f9ef0",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造 PAXG 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205207，時間戳 02:29:11 UTC。從橋接合約轉出 14.16 PAXG（Paxos Gold，合約 0x4580...）至攻擊者 0x7B58...，0.02 PAXG 中繼費。中繼器立即透過 Uniswap V2 將費用兌換為約 90.54 USDC。Gas：433,779。"
+          "description": "偽造 PAXG 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205207，時間戳 02:29:11 UTC。從橋接合約轉出 14.16 PAXG（Paxos Gold，合約 0x4580...）至攻擊者 0x7B58...，0.02 PAXG 中繼費。中繼器立即透過 Uniswap V2 將費用兌換為約 90.54 USDC。Gas：433,779。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x59e52302c53e862fcf833b61eb851ff66e098e3d29db19fd66e5a04734eeb84b",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造 WETH 批次，經由第二個遭入侵的驗證器中繼器 0x97a958...（不是 0xf1d1...）提交。使用不同的提交方法（選擇器 0x8690ff98 vs 0xc35d5cb3）。區塊 25205212，時間戳 02:30:11 UTC。從橋接合約轉出 274.35 WETH 至攻擊者 0x7B58...，0.02 WETH 中繼費。Gas：218,033。此為多個驗證器金鑰遭入侵的關鍵證據。"
+          "description": "偽造 WETH 批次，經由第二個遭入侵的驗證器中繼器 0x97a958...（不是 0xf1d1...）提交。使用不同的提交方法（選擇器 0x8690ff98 vs 0xc35d5cb3）。區塊 25205212，時間戳 02:30:11 UTC。從橋接合約轉出 274.35 WETH 至攻擊者 0x7B58...，0.02 WETH 中繼費。Gas：218,033。此為多個驗證器金鑰遭入侵的關鍵證據。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x469274f4edd45ec3284bf60de8eb30086222745f8f8c8b6a955137feed41281d",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造 USDT 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205217，時間戳 02:31:11 UTC。從橋接合約轉出 434,072.40 USDT 至攻擊者 0x7B58...，50 USDT 中繼費。中繼器立即透過 Uniswap V2 將費用兌換為約 0.025 WETH。Gas：326,257。"
+          "description": "偽造 USDT 批次，經由中繼器 0xf1d1...（自我調用）提交。submitBatch() 選擇器 0xc35d5cb3。區塊 25205217，時間戳 02:31:11 UTC。從橋接合約轉出 434,072.40 USDT 至攻擊者 0x7B58...，50 USDT 中繼費。中繼器立即透過 Uniswap V2 將費用兌換為約 0.025 WETH。Gas：326,257。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x24b47d820f30c6cd77599a05d306f6143f23ebde7abadb5a9df5b7265fd901f8",
-          "chain": "ethereum",
-          "role": "consolidate",
-          "description": "攻擊者 0x7B58... 發送 500 ETH 至整合錢包 0x4d3c...，區塊 25205342，時間戳 02:56:11 UTC。"
+          "role": "consolidation",
+          "description": "攻擊者 0x7B58... 發送 500 ETH 至整合錢包 0x4d3c...，區塊 25205342，時間戳 02:56:11 UTC。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x226947287f6c2a2bd93e6130335680a45632dff6b5163f6227dfb47bcf219bc7",
-          "chain": "ethereum",
-          "role": "consolidate",
-          "description": "攻擊者 0x7B58... 發送另 500 ETH 至整合錢包 0x4d3c...，區塊 25205363，時間戳 03:00:23 UTC。總共整合 1,000 ETH。"
+          "role": "consolidation",
+          "description": "攻擊者 0x7B58... 發送另 500 ETH 至整合錢包 0x4d3c...，區塊 25205363，時間戳 03:00:23 UTC。總共整合 1,000 ETH。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x98dbf264219a17ac510e5c7cbd0b84a4d0690c723ccfa9e96e077d18cfbfcaa6",
-          "chain": "ethereum",
           "role": "laundering",
-          "description": "攻擊者以每次約 6-7 ETH 的批量將資金分散至多個地址（區塊 25205345-25205488 之間），符合混幣器或交易所充值模式。代表性的整合/洗錢交易。"
+          "description": "攻擊者以每次約 6-7 ETH 的批量將資金分散至多個地址（區塊 25205345-25205488 之間），符合混幣器或交易所充值模式。代表性的整合/洗錢交易。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0x7B582033061b96cC3F9421e73a749ED7C62da1F9",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "主要攻擊者 EOA。透過 4 筆偽造批次提交接收了所有被盜橋接資產。在首次攻擊前 1 小時 36 分鐘透過 Arbitrum 橋獲得 0.9988 ETH 資金。總交易數 55+。透過 Uniswap V2 將被盜穩定幣兌換為 ETH，後發送 1,000 ETH 至整合錢包 0x4d3c...，其餘以約 6 ETH 的批量分散。經由 eth_getCode 確認為 EOA。"
+          "description": "主要攻擊者 EOA。透過 4 筆偽造批次提交接收了所有被盜橋接資產。在首次攻擊前 1 小時 36 分鐘透過 Arbitrum 橋獲得 0.9988 ETH 資金。總交易數 55+。透過 Uniswap V2 將被盜穩定幣兌換為 ETH，後發送 1,000 ETH 至整合錢包 0x4d3c...，其餘以約 6 ETH 的批量分散。經由 eth_getCode 確認為 EOA。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47",
-          "chain": "ethereum",
           "role": "consolidation",
-          "description": "整合錢包。在區塊 25205342 和 25205363 的兩筆各 500 ETH 轉帳中，從主要攻擊者處接收了 1,000 ETH。截至通報時持有約 2,014 ETH（約 400-423 萬美元）。可能為被盜資金的主要持有地址。經由 eth_getCode 確認為 EOA。"
+          "description": "整合錢包。在區塊 25205342 和 25205363 的兩筆各 500 ETH 轉帳中，從主要攻擊者處接收了 1,000 ETH。截至通報時持有約 2,014 ETH（約 400-423 萬美元）。可能為被盜資金的主要持有地址。經由 eth_getCode 確認為 EOA。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "遭入侵的驗證器/中繼器合約，用於提交偽造的 USDC、PAXG 和 USDT 批次交易。使用橋接中繼器架構典型的自我調用模式（From==To）。submitBatch() 選擇器 0xc35d5cb3。同時接收並立即透過 Uniswap V2 兌換中繼費。攻擊者控制了此中繼器的驗證器簽名金鑰。"
+          "description": "遭入侵的驗證器/中繼器合約，用於提交偽造的 USDC、PAXG 和 USDT 批次交易。使用橋接中繼器架構典型的自我調用模式（From==To）。submitBatch() 選擇器 0xc35d5cb3。同時接收並立即透過 Uniswap V2 兌換中繼費。攻擊者控制了此中繼器的驗證器簽名金鑰。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x97a95886941ea818a2d102b865886ec7eee6cdf2",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "第二個遭入侵的驗證器/中繼器地址，僅用於 WETH 批次提交。使用與主中繼器（0xf1d1...）不同的方法選擇器（0x8690ff98），暗示屬於不同的驗證器角色或金鑰。接收 0.02 WETH 中繼費。至少兩個不同驗證器金鑰遭入侵的關鍵證據。"
+          "description": "第二個遭入侵的驗證器/中繼器地址，僅用於 WETH 批次提交。使用與主中繼器（0xf1d1...）不同的方法選擇器（0x8690ff98），暗示屬於不同的驗證器角色或金鑰。接收 0.02 WETH 中繼費。至少兩個不同驗證器金鑰遭入侵的關鍵證據。",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0xa4108aA1Ec4967F8b52220a4f7e94A8201F2D906",
-          "chain": "ethereum",
           "role": "vulnerable_contract",
-          "description": "以太坊主網上的 Gravity Bridge 合約。跨鏈批次結算的入口點。接受來自多個驗證器中繼器（0xf1d1... 和 0x97a958...）的批次提交，使用不同的方法選擇器（0xc35d5cb3 和 0x8690ff98）。持有在 4 筆偽造批次提交中被轉出的鎖定橋接資產。開源合約。"
+          "description": "以太坊主網上的 Gravity Bridge 合約。跨鏈批次結算的入口點。接受來自多個驗證器中繼器（0xf1d1... 和 0x97a958...）的批次提交，使用不同的方法選擇器（0xc35d5cb3 和 0x8690ff98）。持有在 4 筆偽造批次提交中被轉出的鎖定橋接資產。開源合約。",
+          "blockchain": "ethereum"
         }
       ]
     },
@@ -275,87 +277,95 @@
       "transactions": [
         {
           "txHash": "0x68b293793c8f551b1e60345e59fb54de9d2e439a8b461d8fae5dea7d273f6c5c",
-          "chain": "ethereum",
           "role": "funding",
-          "description": "Arbitrumブリッジ（0x4976...）からの資金調達トランザクション。攻撃者EOA 0x7B58...に0.9988201 ETHを送金、ブロック25204721。タイムスタンプ：00:51:35 UTC。ガス代の資金調達。"
+          "description": "Arbitrumブリッジ（0x4976...）からの資金調達トランザクション。攻撃者EOA 0x7B58...に0.9988201 ETHを送金、ブロック25204721。タイムスタンプ：00:51:35 UTC。ガス代の資金調達。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xfce883a8f9a4f3479cce1368b99287973ab40451ac092f5a41e1e09eecab5044",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造USDCバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205201、02:27:59 UTC。4,349,701.31 USDCをブリッジから攻撃者0x7B58...に流出、50 USDCリレイヤー手数料。Gas: 326,561。"
+          "description": "偽造USDCバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205201、02:27:59 UTC。4,349,701.31 USDCをブリッジから攻撃者0x7B58...に流出、50 USDCリレイヤー手数料。Gas: 326,561。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xd3cdfa10be4f0cde6b3f294856a8bdd840983dcef29a5dc24c70c36e2d7f9ef0",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造PAXGバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205207、02:29:11 UTC。14.16 PAXG（Paxos Gold、コントラクト0x4580...）をブリッジから攻撃者0x7B58...に流出、0.02 PAXG手数料。リレイヤーは即座に手数料をUniswap V2で約90.54 USDCにスワップ。Gas: 433,779。"
+          "description": "偽造PAXGバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205207、02:29:11 UTC。14.16 PAXG（Paxos Gold、コントラクト0x4580...）をブリッジから攻撃者0x7B58...に流出、0.02 PAXG手数料。リレイヤーは即座に手数料をUniswap V2で約90.54 USDCにスワップ。Gas: 433,779。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x59e52302c53e862fcf833b61eb851ff66e098e3d29db19fd66e5a04734eeb84b",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造WETHバッチ、第2の侵害リレイヤー0x97a958...（0xf1d1...ではない）経由。異なるメソッド（セレクター0x8690ff98 vs 0xc35d5cb3）。ブロック25205212、02:30:11 UTC。274.35 WETHをブリッジから攻撃者0x7B58...に流出、0.02 WETH手数料。Gas: 218,033。複数バリデータ鍵侵害の重要な証拠。"
+          "description": "偽造WETHバッチ、第2の侵害リレイヤー0x97a958...（0xf1d1...ではない）経由。異なるメソッド（セレクター0x8690ff98 vs 0xc35d5cb3）。ブロック25205212、02:30:11 UTC。274.35 WETHをブリッジから攻撃者0x7B58...に流出、0.02 WETH手数料。Gas: 218,033。複数バリデータ鍵侵害の重要な証拠。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x469274f4edd45ec3284bf60de8eb30086222745f8f8c8b6a955137feed41281d",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "偽造USDTバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205217、02:31:11 UTC。434,072.40 USDTをブリッジから攻撃者0x7B58...に流出、50 USDT手数料。リレイヤーは即座に手数料をUniswap V2で約0.025 WETHにスワップ。Gas: 326,257。"
+          "description": "偽造USDTバッチ、リレイヤー0xf1d1...（自己呼出し）経由。submitBatch()セレクター0xc35d5cb3。ブロック25205217、02:31:11 UTC。434,072.40 USDTをブリッジから攻撃者0x7B58...に流出、50 USDT手数料。リレイヤーは即座に手数料をUniswap V2で約0.025 WETHにスワップ。Gas: 326,257。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x24b47d820f30c6cd77599a05d306f6143f23ebde7abadb5a9df5b7265fd901f8",
-          "chain": "ethereum",
-          "role": "consolidate",
-          "description": "攻撃者0x7B58...が統合ウォレット0x4d3c...に500 ETHを送金、ブロック25205342、02:56:11 UTC。"
+          "role": "consolidation",
+          "description": "攻撃者0x7B58...が統合ウォレット0x4d3c...に500 ETHを送金、ブロック25205342、02:56:11 UTC。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x226947287f6c2a2bd93e6130335680a45632dff6b5163f6227dfb47bcf219bc7",
-          "chain": "ethereum",
-          "role": "consolidate",
-          "description": "攻撃者0x7B58...が統合ウォレット0x4d3c...にさらに500 ETHを送金、ブロック25205363、03:00:23 UTC。合計1,000 ETHを統合。"
+          "role": "consolidation",
+          "description": "攻撃者0x7B58...が統合ウォレット0x4d3c...にさらに500 ETHを送金、ブロック25205363、03:00:23 UTC。合計1,000 ETHを統合。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x98dbf264219a17ac510e5c7cbd0b84a4d0690c723ccfa9e96e077d18cfbfcaa6",
-          "chain": "ethereum",
           "role": "laundering",
-          "description": "攻撃者が約6-7 ETHずつ複数アドレスに分散（ブロック25205345-25205488）、ミキサーまたは取引所入金パターンと一致。代表的な統合/ロンダリングトランザクション。"
+          "description": "攻撃者が約6-7 ETHずつ複数アドレスに分散（ブロック25205345-25205488）、ミキサーまたは取引所入金パターンと一致。代表的な統合/ロンダリングトランザクション。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0x7B582033061b96cC3F9421e73a749ED7C62da1F9",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "主要攻撃者EOA。4件の偽造バッチ提出で全盗難ブリッジ資産を受信。初回攻撃の1時間36分前にArbitrumブリッジ経由で0.9988 ETHの資金調達。総tx数55+。Uniswap V2で盗難ステーブルコインをETHにスワップし、1,000 ETHを統合ウォレット0x4d3c...に送金、残りを約6 ETHずつ分散。eth_getCodeでEOAと確認。"
+          "description": "主要攻撃者EOA。4件の偽造バッチ提出で全盗難ブリッジ資産を受信。初回攻撃の1時間36分前にArbitrumブリッジ経由で0.9988 ETHの資金調達。総tx数55+。Uniswap V2で盗難ステーブルコインをETHにスワップし、1,000 ETHを統合ウォレット0x4d3c...に送金、残りを約6 ETHずつ分散。eth_getCodeでEOAと確認。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x4d3ca32e687e871a58b78AcAc73bE59AC37C7A47",
-          "chain": "ethereum",
           "role": "consolidation",
-          "description": "統合ウォレット。ブロック25205342と25205363で主要攻撃者から各500 ETH（計1,000 ETH）を受信。報告時点で約2,014 ETH（約400-423万ドル）保有。盗難資金の主要保有アドレスと推定。eth_getCodeでEOAと確認。"
+          "description": "統合ウォレット。ブロック25205342と25205363で主要攻撃者から各500 ETH（計1,000 ETH）を受信。報告時点で約2,014 ETH（約400-423万ドル）保有。盗難資金の主要保有アドレスと推定。eth_getCodeでEOAと確認。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xf1d1aba8bd488c0f0b1ea4d2085b243091f9d410",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "侵害されたバリデータ/リレイヤーコントラクト。USDC・PAXG・USDTの偽造バッチ送信に使用。ブリッジリレイヤーアーキテクチャに典型的な自己呼出しパターン（From==To）。submitBatch()セレクター0xc35d5cb3。リレイヤー手数料を受信し即座にUniswap V2でスワップ。攻撃者がこのリレイヤーのバリデータ署名鍵を制御。"
+          "description": "侵害されたバリデータ/リレイヤーコントラクト。USDC・PAXG・USDTの偽造バッチ送信に使用。ブリッジリレイヤーアーキテクチャに典型的な自己呼出しパターン（From==To）。submitBatch()セレクター0xc35d5cb3。リレイヤー手数料を受信し即座にUniswap V2でスワップ。攻撃者がこのリレイヤーのバリデータ署名鍵を制御。",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x97a95886941ea818a2d102b865886ec7eee6cdf2",
-          "chain": "ethereum",
           "role": "primary_attacker",
-          "description": "第2の侵害バリデータ/リレイヤーアドレス。WETHバッチ送信のみに使用。メインリレイヤー（0xf1d1...）と異なるメソッドセレクター（0x8690ff98）を使用。異なるバリデータロールまたは鍵を示唆。0.02 WETH手数料を受信。少なくとも2つの異なるバリデータ鍵が侵害された重要な証拠。"
+          "description": "第2の侵害バリデータ/リレイヤーアドレス。WETHバッチ送信のみに使用。メインリレイヤー（0xf1d1...）と異なるメソッドセレクター（0x8690ff98）を使用。異なるバリデータロールまたは鍵を示唆。0.02 WETH手数料を受信。少なくとも2つの異なるバリデータ鍵が侵害された重要な証拠。",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0xa4108aA1Ec4967F8b52220a4f7e94A8201F2D906",
-          "chain": "ethereum",
           "role": "vulnerable_contract",
-          "description": "Ethereumメインネット上のGravity Bridgeコントラクト。クロスチェーンバッチ決済のエントリーポイント。複数のバリデータリレイヤー（0xf1d1...と0x97a958...）からのバッチ提出を異なるメソッドセレクター（0xc35d5cb3と0x8690ff98）で受け付ける。4件の偽造バッチ提出で流出したロック資産を保持していた。オープンソースコントラクト。"
+          "description": "Ethereumメインネット上のGravity Bridgeコントラクト。クロスチェーンバッチ決済のエントリーポイント。複数のバリデータリレイヤー（0xf1d1...と0x97a958...）からのバッチ提出を異なるメソッドセレクター（0xc35d5cb3と0x8690ff98）で受け付ける。4件の偽造バッチ提出で流出したロック資産を保持していた。オープンソースコントラクト。",
+          "blockchain": "ethereum"
         }
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-31",
+    "lastUpdated": "2026-05-31",
+    "human_verified": false,
+    "models": [
+      "deepseek-v4-pro"
+    ]
   }
 }
