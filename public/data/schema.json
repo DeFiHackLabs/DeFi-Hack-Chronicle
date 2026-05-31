@@ -44,73 +44,85 @@
       {
         "id": "reentrancy",
         "name": "Reentrancy",
-        "color": "#ff2e63",
+        "color": "#FF4D6A",
         "description": "Reentrancy Attack"
       },
       {
         "id": "business_logic",
         "name": "Business Logic",
-        "color": "#10b981",
+        "color": "#26D9B6",
         "description": "Logic errors, parsing bugs, calculation flaws, or incorrect state transitions"
       },
       {
         "id": "flashloan",
         "name": "Flashloan",
-        "color": "#eab308",
+        "color": "#FFD60A",
         "description": "Flash Loan Attack"
       },
       {
         "id": "access_control",
         "name": "Access Control",
-        "color": "#06b6d4",
+        "color": "#40C8E0",
         "description": "Access Control Issue"
       },
       {
         "id": "price_manipulation",
         "name": "Price Manipulation",
-        "color": "#f97316",
+        "color": "#FF8C42",
         "description": "Price Manipulation Attack"
       },
       {
         "id": "rug_pull",
         "name": "Rug Pull / Exit scam",
-        "color": "#ec4899",
+        "color": "#E040FB",
         "description": "Rug pull / Exit scam"
       },
       {
         "id": "governance_attack",
         "name": "Governance / DAO attack",
-        "color": "#8b5cf6",
+        "color": "#7C6FF7",
         "description": "Governance / DAO attack"
       },
       {
         "id": "bridge",
         "name": "Cross-chain Bridge",
-        "color": "#8b5cf6",
+        "color": "#448AFF",
         "description": "Cross-chain Bridge Attack"
+      },
+      {
+        "id": "offchain_backend_vulnerability",
+        "name": "Off-chain Backend Vulnerability",
+        "color": "#66F09E",
+        "description": "Off-chain Backend Vulnerability"
+      },
+      {
+        "id": "forged_message",
+        "name": "Forged Message",
+        "color": "#00E5FF",
+        "description": "Forged Message" 
       },
       {
         "id": "social_engineering",
         "name": "Social Engineering",
-        "color": "#f43f5e",
+        "color": "#FF5252",
         "description": "Social Engineering"
       },
       {
         "id": "signature_abuse",
         "name": "Signature Abuse Attack",
-        "color": "#f43f5e",
+        "color": "#FF80AB",
         "description": "Signature Abuse Attack"
       },
       {
         "id": "mev_front_running",
         "name": "MEV / Front-Running",
-        "color": "#f59e0b",
+        "color": "#FFB74D",
         "description": "MEV / Front-Running Attack"
       },
       {
         "id": "key_compromise",
         "name": "Private key Compromise",
-        "color": "#6366f1",
+        "color": "#B39DDB",
         "description": "Private Key Compromise"
       }
     ],
@@ -294,31 +306,31 @@
       {
         "id": "gas_funder",
         "name": "Gas Funder",
-        "color": "#ef4444",
+        "color": "#EF5350",
         "description": "Address that funded the attacker"
       },
       {
         "id": "primary_attacker",
         "name": "Primary Attacker",
-        "color": "#f97316",
+        "color": "#FF7043",
         "description": "Primary exploiter"
       },
       {
         "id": "exploit_contract",
         "name": "Exploit Contract",
-        "color": "#eab308",
+        "color": "#FFCA28",
         "description": "Exploit contract"
       },
       {
         "id": "consolidation",
         "name": "Consolidation",
-        "color": "#84cc16",
+        "color": "#42B865",
         "description": "Fund consolidation address"
       },
       {
         "id": "child_dao",
         "name": "Child Dao",
-        "color": "#22c55e",
+        "color": "#2ED5C1",
         "description": "Child DAO created by exploit"
       }
     ],
@@ -326,37 +338,37 @@
       {
         "id": "protocol",
         "name": "Protocol",
-        "color": "#ef4444",
+        "color": "#E53935",
         "description": "The attacked protocol itself"
       },
       {
         "id": "user",
         "name": "User",
-        "color": "#f97316",
+        "color": "#FB8C00",
         "description": "End users who lost funds"
       },
       {
         "id": "liquidity_pool",
         "name": "Liquidity Pool",
-        "color": "#eab308",
+        "color": "#FDD835",
         "description": "Liquidity pool"
       },
       {
         "id": "treasury",
         "name": "Treasury",
-        "color": "#84cc16",
+        "color": "#50C878",
         "description": "Protocol treasury"
       },
       {
         "id": "protocol_contract",
         "name": "Protocol Contract",
-        "color": "#22c55e",
+        "color": "#00BCD4",
         "description": "Protocol smart contract"
       },
       {
         "id": "vulnerable_contract",
         "name": "Vulnerable Contract",
-        "color": "#06b6d4",
+        "color": "#42A5F5",
         "description": "Vulnerable contract"
       }
     ],
@@ -364,31 +376,31 @@
       {
         "id": "funding",
         "name": "Funding",
-        "color": "#ef4444",
+        "color": "#D32F2F",
         "description": "Transaction that funded the attacker"
       },
       {
         "id": "setup",
         "name": "Setup",
-        "color": "#f97316",
+        "color": "#EF6C00",
         "description": "Setup for exploit"
       },
       {
         "id": "exploit",
         "name": "Exploit",
-        "color": "#eab308",
+        "color": "#F9A825",
         "description": "The main exploit transaction"
       },
       {
         "id": "consolidation",
         "name": "Consolidation",
-        "color": "#84cc16",
+        "color": "#388E3C",
         "description": "Attacker consolidation transaction"
       },
       {
         "id": "laundering",
         "name": "Laundering",
-        "color": "#22c55e",
+        "color": "#0097A7",
         "description": "Money laundering"
       }
     ],
@@ -396,31 +408,31 @@
       {
         "id": "EOA",
         "name": "EOA",
-        "color": "#6b7280",
+        "color": "#A0A0A0",
         "description": "Externally Owned Account"
       },
       {
         "id": "Contract",
         "name": "Contract",
-        "color": "#22c55e",
+        "color": "#66BB6A",
         "description": "Smart Contract"
       },
       {
         "id": "Multisig",
         "name": "Multisig",
-        "color": "#f59e0b",
+        "color": "#FFA726",
         "description": "Multi-signature Wallet"
       },
       {
         "id": "Exchange",
         "name": "Exchange",
-        "color": "#3b82f6",
+        "color": "#29B6F6",
         "description": "Exchange / Custodial"
       },
       {
         "id": "Unknown",
         "name": "Unknown",
-        "color": "#9ca3af",
+        "color": "#808080",
         "description": "Unknown / Unverified"
       }
     ]

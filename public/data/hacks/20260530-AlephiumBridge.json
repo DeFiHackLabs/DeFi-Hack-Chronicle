@@ -1,0 +1,484 @@
+{
+  "id": "AlephiumBridge-20260530",
+  "date": "2026-05-30",
+  "title": "Alephium TokenBridge Off-Chain Backend Exploit",
+  "protocol": "Alephium TokenBridge",
+  "blockchain": [
+    "ethereum",
+    "bsc",
+    "alephium"
+  ],
+  "category": [
+    "bridge",
+    "offchain_backend_vulnerability",
+    "forged_message"
+  ],
+  "ecosystem": "evm",
+  "language": [
+    "solidity"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "815000",
+    "breakdown": [
+      {
+        "asset": "USDT",
+        "amount": "237717.4162727",
+        "convertedUSD": "237717",
+        "note": "200,967.309973 USDT from Ethereum + 36,750.1062997 USDT from BNB Chain; amounts verified from ERC-20/BEP-20 Transfer logs."
+      },
+      {
+        "asset": "USDC",
+        "amount": "17594.62915",
+        "convertedUSD": "17595",
+        "note": "17,594.629150 USDC drained from Ethereum bridge custody; amount verified from ERC-20 Transfer log."
+      },
+      {
+        "asset": "WETH",
+        "amount": "5.18192421",
+        "convertedUSD": "10490",
+        "note": "5.18192421 WETH drained from Ethereum bridge custody; USD value is approximate and price-dependent."
+      },
+      {
+        "asset": "WBTC",
+        "amount": "0.33531483",
+        "convertedUSD": "28475",
+        "note": "0.33531483 WBTC drained from Ethereum bridge custody; USD value is approximate and price-dependent."
+      },
+      {
+        "asset": "WBNB",
+        "amount": "24.38620961",
+        "convertedUSD": "14632",
+        "note": "24.38620961 WBNB drained from BNB Chain bridge custody; amount verified from BEP-20 Transfer log. USD value is approximate and price-dependent."
+      },
+      {
+        "asset": "wALPH",
+        "amount": "13757076.37295",
+        "convertedUSD": "506092",
+        "note": "13,757,076.37295 wrapped ALPH minted on Ethereum from the zero address through completeTransfer(). Alephium stated that ALPH locked within the Alephium-side bridge was not drained, and that the unauthorized wrapped ALPH cannot be redeemed through the shut-down bridge. USD value is approximate and depends on ALPH price and available DEX liquidity."
+      }
+    ],
+    "note": "Total loss is reported by Alephium and multiple incident reports as approximately $815,000 across Ethereum and BNB Chain. Non-ALPH drained assets represent direct bridge-custody outflows. The 13,757,076.37295 wALPH mint was unauthorized and unbacked according to Alephium, but its realizable USD impact depends on market liquidity. Alephium stated that ALPH locked within the Alephium-side bridge was not drained and should be recoverable through a dedicated recovery process."
+  },
+  "attackTime": {
+    "startTime": "2026-05-30T02:36:23Z",
+    "endTime": "2026-05-30T09:18:03Z",
+    "isRange": true,
+    "note": "Initial attacker-controlled setup/swap activity occurred at 02:36 UTC on Ethereum (block 25205243). A test transferTokens call followed at 02:37 UTC (block 25205248), and a small test completeTransfer mint occurred at 05:31 UTC (block 25206113). The main drain occurred at 09:16:59-09:18:03 UTC: five Ethereum completeTransfer calls in blocks 25207237-25207242, followed by two BNB Chain completeTransfer calls in blocks 101280856 and 101280859. Alephium later stated that the bridge was shut down and that no new bridge transactions could be initiated.",
+    "date": "2026-05-30"
+  },
+  "description": "On May 30, 2026, the Alephium TokenBridge was exploited for approximately $815,000 across Ethereum and BNB Chain. The directly verifiable on-chain activity shows attacker address 0x6681ebC82551fE52fDB48E65872e85a3ae06921d calling completeTransfer() on the Ethereum TokenBridge proxy (0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43) and on the BNB Chain TokenBridge proxy (0x2971F580C34d3D584e0342741c6a622f69424dD8). On Ethereum, the attacker drained 200,967.309973 USDT, 17,594.629150 USDC, 5.18192421 WETH, and 0.33531483 WBTC from bridge custody, and minted 13,757,076.37295 wrapped ALPH from the zero address. On BNB Chain, the attacker drained 36,750.1062997 USDT and 24.38620961 WBNB. Early external reports, including Blockaid's initial alert, attributed the incident to a compromise of 3 out of 4 guardian keys and forged Verified Action Approval (VAA) messages. Alephium later disputed that key-compromise conclusion and stated that the exploit was not caused by compromised guardian keys, but by an off-chain vulnerability in the bridge backend that could be triggered in specific edge cases, involving malicious event/message emission. The bridge smart contracts processed the submitted messages as valid; the proven failure boundary is therefore upstream of normal token transfer execution, not an ordinary ERC-20 token bug. The attack unfolded in a test/setup phase beginning at 02:36 UTC and a main drain at 09:16:59-09:18:03 UTC. Alephium shut down the bridge after detection, stated that no new bridge transactions could be initiated, and sent an on-chain message to the attacker from h0ngcha0.eth offering a white-hat resolution: return 90% of drained assets within 72 hours to 0x238640C0F74A95485e986Fa26D434fF7B216D058 and retain 10% as a bounty. Alephium also stated that ALPH locked within the Alephium-side bridge was not drained, that users with ALPH locked in the bridge would be able to recover funds through a dedicated recovery process, and that the unauthorized wrapped ALPH cannot be redeemed back to Alephium through the shut-down bridge. Users were warned not to provide liquidity to ALPH pools on Ethereum or BNB Chain because additional liquidity could help the attacker realize value from unauthorized wrapped ALPH.",
+  "transactions": [
+    {
+      "txHash": "0xdebbeddc6958e25f8eda1d0d22360fa3818cc0a36cc770efe19fd62eab98a2c0",
+      "role": "setup",
+      "description": "Attacker-controlled setup/swap transaction at Ethereum block 25205243 (2026-05-30 02:36:23 UTC). Method: execute on UniversalRouter. The transaction routed swaps that sent 169.834203441907420394 wALPH from pool 0x9628105808... and 315.355225304587731615 wALPH from pool 0xA344855388... to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d. This is preparatory on-chain activity, not itself the bridge drain.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0xb44c2d786cb47c53e034ec8dbb7b26ed74fb7c46996e4dd7d17bfa1e8ec70a5d",
+      "role": "setup",
+      "description": "Test bridge interaction at Ethereum block 25205248 (2026-05-30 02:37:23 UTC). Method: transferTokens on NFTBridgeEntrypoint. Attacker transferred/burned 485.18942874 wALPH through the Ethereum TokenBridge proxy 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x7b2379d30cdceafa67cdead9f6907e1ee57eee8369330045b2ba6d091fddde10",
+      "role": "setup",
+      "description": "Test completeTransfer at Ethereum block 25206113 (2026-05-30 05:31:35 UTC). Method: completeTransfer. The transaction minted 1.0 wALPH from the zero address to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d, confirming that a submitted bridge message was accepted before the main drain.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x928e369e6e857c93f237356b201c97ddac31ba777e2a942928272f962c02bc40",
+      "role": "exploit",
+      "description": "Ethereum exploit transaction at block 25207237 (2026-05-30 09:16:59 UTC). Method: completeTransfer on NFTBridgeEntrypoint 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43. Transfer log: 200,967.309973 USDT moved from bridge custody to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x293c3062a133b089bc31eba910daeb6b2d508ad26e045e439b1339793f51237e",
+      "role": "exploit",
+      "description": "Ethereum exploit transaction at block 25207239 (2026-05-30 09:17:23 UTC). Method: completeTransfer. Transfer log: 0.33531483 WBTC moved from bridge custody to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x8a719311d4304ea3d1c1235eece0cf9591c2a43864ce8aa70e9ea9443aff6c37",
+      "role": "exploit",
+      "description": "Ethereum exploit transaction at block 25207240 (2026-05-30 09:17:35 UTC). Method: completeTransfer. Transfer log: 17,594.629150 USDC moved from bridge custody to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0xb5b3f089a745394d736615e9a11ea40a1ad020678e466a6f95b3a9f4d321a98f",
+      "role": "exploit",
+      "description": "Ethereum exploit transaction at block 25207241 (2026-05-30 09:17:47 UTC). Method: completeTransfer. Transfer log: 5.18192421 WETH moved from bridge custody to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0x06cc0f36159d7094359d88fe1d43cda601e8644282ba305c5ffbd013b524c6b4",
+      "role": "exploit",
+      "description": "Ethereum exploit transaction at block 25207242 (2026-05-30 09:17:59 UTC). Method: completeTransfer. Mint log: 13,757,076.37295 wALPH minted from the zero address to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "ethereum"
+    },
+    {
+      "txHash": "0xa3e8572fe524b28bce9765fcbd0b737cd6289c692970b5a1a1289b6edf95d06f",
+      "role": "exploit",
+      "description": "BNB Chain exploit transaction at block 101280856 (2026-05-30 09:18:02 UTC). Method selector: completeTransfer (0xc6878519) on BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8. Transfer log: 36,750.1062997 USDT moved from the bridge to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "bsc"
+    },
+    {
+      "txHash": "0xe38e870a3aceb8e1189d21e0734170a69fe9bfd7355d0ccb4209588ab77f0b1e",
+      "role": "exploit",
+      "description": "BNB Chain exploit transaction at block 101280859 (2026-05-30 09:18:03 UTC). Method selector: completeTransfer (0xc6878519) on BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8. Transfer log: 24.38620961 WBNB moved from the bridge to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d.",
+      "blockchain": "bsc"
+    },
+    {
+      "txHash": "0xdcc8f9c9feaffed3cf1db5930d4c69dfd5d11ed62473d108591d41e027ab2a4e",
+      "role": "white_hat_message",
+      "description": "On-chain white-hat message from h0ngcha0.eth / 0x4EaB0E005861F1561EfFb5181c279817159837b7 to attacker 0x6681ebC82551fE52fDB48E65872e85a3ae06921d at Ethereum block 25210520 (2026-05-30 20:17:23 UTC). Raw input decodes to an Alephium Team message offering to treat the incident as white-hat disclosure if 90% of drained assets were returned to 0x238640C0F74A95485e986Fa26D434fF7B216D058 within 72 hours, with 10% retained as a bounty.",
+      "blockchain": "ethereum"
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x6681ebC82551fE52fDB48E65872e85a3ae06921d",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA observed on Ethereum and BNB Chain. This address called completeTransfer() against the Alephium TokenBridge contracts and received the drained/minted assets identified in the transaction list. Confirmed as an EOA on Blockscout for Ethereum; the same address submitted the two BNB Chain completeTransfer transactions verified via public BNB Chain RPC.",
+      "accountType": "EOA",
+      "blockchain": "ethereum,bsc"
+    },
+    {
+      "address": "0x225a38bc71102999Dd13478BFaBD7c4d53f2DC17",
+      "role": "consolidation",
+      "description": "Ethereum consolidation address identified in post-drain fund movement. Public incident reports and observed transfers associate it with aggregation of stolen USDT, WBTC, and USDC after the Ethereum-side drain. Treat as attacker-controlled attribution based on transaction-flow analysis, not an identity claim.",
+      "accountType": "Unknown",
+      "blockchain": "ethereum"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43",
+      "role": "protocol_contract",
+      "description": "Alephium TokenBridge proxy on Ethereum (NFTBridgeEntrypoint). Official Alephium documentation lists this as the Ethereum TokenBridge address. Blockscout identifies it as an EIP-1967 proxy with implementation 0x0F843945075DF4EA9C8a21f0e0CcFD5eB073eEAb. The exploit transactions called completeTransfer() on this contract; the root cause should not be described as a proven bug in this contract based on currently available public evidence.",
+      "accountType": "Contract",
+      "blockchain": "ethereum"
+    },
+    {
+      "address": "0x2971F580C34d3D584e0342741c6a622f69424dD8",
+      "role": "protocol_contract",
+      "description": "Alephium TokenBridge proxy on BNB Chain. Official Alephium documentation lists this as the BNB Chain TokenBridge address. The two BNB Chain exploit transactions called completeTransfer() on this contract and emitted USDT/WBNB transfer logs to the attacker.",
+      "accountType": "Contract",
+      "blockchain": "bsc"
+    },
+    {
+      "address": "0x590F820444fA3638e022776752c5eEF34E2F89A6",
+      "role": "affected_token_contract",
+      "description": "Wrapped ALPH token contract on Ethereum. The exploit minted 13,757,076.37295 wALPH from the zero address to the attacker through the accepted bridge message. The mint is unauthorized/unbacked according to Alephium; this entry does not imply the ERC-20 token contract itself was independently exploited.",
+      "accountType": "Contract",
+      "blockchain": "ethereum"
+    },
+    {
+      "address": "0x238640C0F74A95485e986Fa26D434fF7B216D058",
+      "role": "recovery_address",
+      "description": "Recovery address designated by the Alephium Team in the on-chain white-hat message for return of 90% of drained assets.",
+      "accountType": "Unknown",
+      "blockchain": "ethereum"
+    }
+  ],
+  "rootCause": "Current public evidence separates hard on-chain facts from attribution. The on-chain facts show accepted completeTransfer() calls against Alephium TokenBridge contracts on Ethereum and BNB Chain, resulting in bridge-custody outflows and an unauthorized wrapped-ALPH mint. Early external reports attributed the incident to compromise of 3 out of 4 guardian keys. Alephium later disputed that conclusion and stated that the exploit was not caused by compromised guardian keys, but by an off-chain vulnerability in the bridge backend that could be triggered in specific edge cases, involving malicious event/message emission. Therefore, as of this record, the most legally cautious root-cause statement is: an off-chain TokenBridge backend vulnerability allowed malicious/unauthorized bridge messages or events to be accepted and relayed into on-chain completeTransfer executions. A direct guardian-private-key compromise is an early external allegation, not an established fact in the final public record available here.",
+  "attackVector": "1. The attacker-controlled EOA 0x6681ebC82551fE52fDB48E65872e85a3ae06921d performed setup/swap activity on Ethereum at 02:36 UTC and tested bridge interaction at 02:37 UTC by calling transferTokens with 485.18942874 wALPH. 2. At 05:31 UTC, the attacker submitted a test completeTransfer() call that minted 1.0 wALPH from the zero address, showing that the submitted bridge message path was accepted. 3. At 09:16:59-09:17:59 UTC, the attacker called completeTransfer() five times on the Ethereum TokenBridge proxy 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43, draining 200,967.309973 USDT, 0.33531483 WBTC, 17,594.629150 USDC, and 5.18192421 WETH, and minting 13,757,076.37295 wALPH from the zero address. 4. At 09:18:02-09:18:03 UTC, the same attacker address called completeTransfer() twice on the BNB Chain TokenBridge proxy 0x2971F580C34d3D584e0342741c6a622f69424dD8, draining 36,750.1062997 USDT and 24.38620961 WBNB. 5. Early security-firm reporting described these accepted messages as forged VAAs enabled by a 3-of-4 guardian-key compromise. Alephium later stated that guardian keys were not compromised and that the cause was an off-chain bridge-backend vulnerability triggered in specific edge cases. 6. After detection, Alephium shut down the bridge, warned users not to interact with ALPH liquidity pools on Ethereum or BNB Chain, and sent an on-chain white-hat message offering a 10% bounty if 90% of drained assets were returned within 72 hours.",
+  "lessons": [
+    "Bridge incident records must distinguish on-chain facts from preliminary attribution. Here, token amounts and transaction hashes are directly verifiable, while the exact off-chain trigger depends on Alephium and investigator disclosures.",
+    "Off-chain bridge backends, event emitters, relayers, and guardian-adjacent services are security-critical. They require the same hardening, monitoring, and incident-response rigor as smart contracts.",
+    "Small guardian or validator sets remain high-risk trust boundaries, but key compromise should not be asserted unless supported by final evidence. Reports should preserve disagreement between early third-party analysis and later protocol statements.",
+    "Bridge contracts should consider defense-in-depth controls such as rate limits, value caps, circuit breakers, and delayed settlement for large or anomalous completeTransfer operations.",
+    "Wrapped asset contracts and bridge mint paths should include supply-anomaly checks where feasible; a mint exceeding prior circulating supply is a high-signal event requiring automatic pause or human review.",
+    "Monitoring should flag small test mints, repeated completeTransfer calls, zero-address mints, and rapid multi-chain drains, especially when a test occurs hours before the main drain.",
+    "Emergency communications should be pre-planned. Alephium used an on-chain white-hat message and public liquidity warnings; future playbooks should pair these with machine-readable incident indicators.",
+    "User recovery plans should explicitly separate users with native ALPH locked in the Alephium-side bridge from holders or liquidity providers exposed to unauthorized wrapped ALPH on EVM chains."
+  ],
+  "references": [
+    "https://alephium.org/news/post/verification-of-bridge-contracts-tokens-token-lists-76e5c237bf52/",
+    "https://www.cryptotimes.io/2026/05/30/alephium-reveals-cause-of-815k-bridge-exploit-promises-compensation/",
+    "https://www.cryptotimes.io/2026/05/30/alephium-bridge-exploited-for-815k-13-76m-unbacked-alph-minted/",
+    "https://www.mexc.com/news/1120906",
+    "https://eth.blockscout.com/tx/0xdebbeddc6958e25f8eda1d0d22360fa3818cc0a36cc770efe19fd62eab98a2c0",
+    "https://eth.blockscout.com/tx/0xb44c2d786cb47c53e034ec8dbb7b26ed74fb7c46996e4dd7d17bfa1e8ec70a5d",
+    "https://eth.blockscout.com/tx/0x7b2379d30cdceafa67cdead9f6907e1ee57eee8369330045b2ba6d091fddde10",
+    "https://eth.blockscout.com/tx/0x928e369e6e857c93f237356b201c97ddac31ba777e2a942928272f962c02bc40",
+    "https://eth.blockscout.com/tx/0x293c3062a133b089bc31eba910daeb6b2d508ad26e045e439b1339793f51237e",
+    "https://eth.blockscout.com/tx/0x8a719311d4304ea3d1c1235eece0cf9591c2a43864ce8aa70e9ea9443aff6c37",
+    "https://eth.blockscout.com/tx/0xb5b3f089a745394d736615e9a11ea40a1ad020678e466a6f95b3a9f4d321a98f",
+    "https://eth.blockscout.com/tx/0x06cc0f36159d7094359d88fe1d43cda601e8644282ba305c5ffbd013b524c6b4",
+    "https://eth.blockscout.com/tx/0xdcc8f9c9feaffed3cf1db5930d4c69dfd5d11ed62473d108591d41e027ab2a4e",
+    "https://bscscan.com/tx/0xa3e8572fe524b28bce9765fcbd0b737cd6289c692970b5a1a1289b6edf95d06f",
+    "https://bscscan.com/tx/0xe38e870a3aceb8e1189d21e0734170a69fe9bfd7355d0ccb4209588ab77f0b1e"
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "Alephium TokenBridge 鏈下後端漏洞攻擊事件",
+      "description": "2026 年 5 月 30 日，Alephium TokenBridge 遭到攻擊，以太坊與 BNB Chain 合計損失約 815,000 美元。可直接由鏈上驗證的事實為：攻擊者地址 0x6681ebC82551fE52fDB48E65872e85a3ae06921d 對以太坊 TokenBridge 代理合約（0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43）與 BNB Chain TokenBridge 代理合約（0x2971F580C34d3D584e0342741c6a622f69424dD8）呼叫 completeTransfer()。在以太坊端，攻擊者從橋託管中轉出 200,967.309973 USDT、17,594.629150 USDC、5.18192421 WETH、0.33531483 WBTC，並從零地址鑄造 13,757,076.37295 枚包裝 ALPH（wALPH）。在 BNB Chain 端，攻擊者轉出 36,750.1062997 USDT 與 24.38620961 WBNB。早期外部報告（包含 Blockaid 初始警報）曾將事件歸因為 4 個 guardian keys 中 3 個遭入侵，進而簽署偽造 VAA（Verified Action Approval）訊息；但 Alephium 後續明確否認 guardian keys 遭入侵，並表示原因是橋後端在特定邊界情況下可被觸發的鏈下漏洞，涉及惡意事件／訊息產生。故本紀錄不將私鑰外洩列為已定案事實，而將其標示為早期外部歸因。攻擊流程包括 02:36 UTC 起的測試／準備階段，以及 09:16:59-09:18:03 UTC 的主攻擊。Alephium 發現後關閉橋，表示無法再發起新的橋交易，並從 h0ngcha0.eth 向攻擊者發送鏈上白帽訊息：若於 72 小時內將 90% 被盜資產歸還至 0x238640C0F74A95485e986Fa26D434fF7B216D058，可保留 10% 作為賞金。Alephium 亦表示，Alephium 端橋內鎖定的 ALPH 未被盜，相關使用者將可透過專用恢復流程取回；未授權鑄造的 wALPH 因橋已關閉而無法透過該橋兌回 Alephium。",
+      "rootCause": "目前公開證據必須區分「鏈上事實」與「事故歸因」。鏈上事實顯示，攻擊者對 Ethereum 與 BNB Chain 的 Alephium TokenBridge 合約提交並執行了 completeTransfer()，導致橋託管資產流出與未授權 wALPH 鑄造。早期外部報告曾稱此為 3-of-4 guardian key compromise；Alephium 後續否認 guardian keys 遭入侵，並表示根因是橋後端的鏈下漏洞，可在特定邊界情況下被觸發，涉及惡意事件／訊息產生。因此，法律上較審慎的根因表述為：Alephium TokenBridge 的鏈下後端漏洞使惡意或未授權的橋訊息／事件被接受並進入鏈上 completeTransfer 執行路徑；guardian 私鑰外洩僅為早期外部說法，非本紀錄採認的已定案事實。",
+      "attackVector": "1. 攻擊者 EOA 0x6681ebC82551fE52fDB48E65872e85a3ae06921d 於 02:36 UTC 在以太坊進行準備／交換活動，並於 02:37 UTC 以 485.18942874 wALPH 測試 transferTokens。2. 05:31 UTC，攻擊者提交測試性 completeTransfer()，從零地址鑄造 1.0 wALPH，證明提交的橋訊息路徑可被接受。3. 09:16:59-09:17:59 UTC，攻擊者對以太坊 TokenBridge 代理合約 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43 連續呼叫五次 completeTransfer()，轉出 200,967.309973 USDT、0.33531483 WBTC、17,594.629150 USDC、5.18192421 WETH，並從零地址鑄造 13,757,076.37295 wALPH。4. 09:18:02-09:18:03 UTC，同一攻擊者地址對 BNB Chain TokenBridge 代理合約 0x2971F580C34d3D584e0342741c6a622f69424dD8 呼叫兩次 completeTransfer()，轉出 36,750.1062997 USDT 與 24.38620961 WBNB。5. 早期安全公司報告將這些被接受的訊息描述為由 3-of-4 guardian key compromise 產生的偽造 VAA；Alephium 後續表示 guardian keys 未遭入侵，原因是特定邊界情況下可觸發的鏈下橋後端漏洞。6. 偵測後，Alephium 關閉橋、警告使用者不要與 Ethereum 或 BNB Chain 上的 ALPH 流動性池互動，並發送鏈上白帽訊息，提出 72 小時內返還 90% 資產可保留 10% 賞金的方案。",
+      "transactions": [
+        {
+          "txHash": "0xdebbeddc6958e25f8eda1d0d22360fa3818cc0a36cc770efe19fd62eab98a2c0",
+          "role": "setup",
+          "description": "攻擊者控制的準備／交換交易，採掛於以太坊區塊 25205243（2026-05-30 02:36:23 UTC）。方法：UniversalRouter.execute。交易路由交換，使 169.834203441907420394 wALPH 從 0x9628105808... 池、315.355225304587731615 wALPH 從 0xA344855388... 池轉入攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。此為準備性鏈上活動，並非橋本身的主盜取交易。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xb44c2d786cb47c53e034ec8dbb7b26ed74fb7c46996e4dd7d17bfa1e8ec70a5d",
+          "role": "setup",
+          "description": "橋互動測試交易，採掛於以太坊區塊 25205248（2026-05-30 02:37:23 UTC）。方法：NFTBridgeEntrypoint.transferTokens。攻擊者透過以太坊 TokenBridge 代理合約 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43 轉移／銷毀 485.18942874 wALPH。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x7b2379d30cdceafa67cdead9f6907e1ee57eee8369330045b2ba6d091fddde10",
+          "role": "setup",
+          "description": "測試性 completeTransfer，採掛於以太坊區塊 25206113（2026-05-30 05:31:35 UTC）。交易從零地址鑄造 1.0 wALPH 至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d，顯示提交的橋訊息已被接受。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x928e369e6e857c93f237356b201c97ddac31ba777e2a942928272f962c02bc40",
+          "role": "exploit",
+          "description": "以太坊攻擊交易，區塊 25207237（2026-05-30 09:16:59 UTC）。方法：對 NFTBridgeEntrypoint 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43 呼叫 completeTransfer。Transfer log 顯示 200,967.309973 USDT 自橋託管轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x293c3062a133b089bc31eba910daeb6b2d508ad26e045e439b1339793f51237e",
+          "role": "exploit",
+          "description": "以太坊攻擊交易，區塊 25207239（2026-05-30 09:17:23 UTC）。方法：completeTransfer。Transfer log 顯示 0.33531483 WBTC 自橋託管轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x8a719311d4304ea3d1c1235eece0cf9591c2a43864ce8aa70e9ea9443aff6c37",
+          "role": "exploit",
+          "description": "以太坊攻擊交易，區塊 25207240（2026-05-30 09:17:35 UTC）。方法：completeTransfer。Transfer log 顯示 17,594.629150 USDC 自橋託管轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xb5b3f089a745394d736615e9a11ea40a1ad020678e466a6f95b3a9f4d321a98f",
+          "role": "exploit",
+          "description": "以太坊攻擊交易，區塊 25207241（2026-05-30 09:17:47 UTC）。方法：completeTransfer。Transfer log 顯示 5.18192421 WETH 自橋託管轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x06cc0f36159d7094359d88fe1d43cda601e8644282ba305c5ffbd013b524c6b4",
+          "role": "exploit",
+          "description": "以太坊攻擊交易，區塊 25207242（2026-05-30 09:17:59 UTC）。方法：completeTransfer。Mint log 顯示 13,757,076.37295 wALPH 從零地址鑄造至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xa3e8572fe524b28bce9765fcbd0b737cd6289c692970b5a1a1289b6edf95d06f",
+          "role": "exploit",
+          "description": "BNB Chain 攻擊交易，區塊 101280856（2026-05-30 09:18:02 UTC）。方法 selector：對 BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8 呼叫 completeTransfer（0xc6878519）。Transfer log 顯示 36,750.1062997 USDT 自橋轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "bsc"
+        },
+        {
+          "txHash": "0xe38e870a3aceb8e1189d21e0734170a69fe9bfd7355d0ccb4209588ab77f0b1e",
+          "role": "exploit",
+          "description": "BNB Chain 攻擊交易，區塊 101280859（2026-05-30 09:18:03 UTC）。方法 selector：對 BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8 呼叫 completeTransfer（0xc6878519）。Transfer log 顯示 24.38620961 WBNB 自橋轉至攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d。",
+          "blockchain": "bsc"
+        },
+        {
+          "txHash": "0xdcc8f9c9feaffed3cf1db5930d4c69dfd5d11ed62473d108591d41e027ab2a4e",
+          "role": "white_hat_message",
+          "description": "h0ngcha0.eth / 0x4EaB0E005861F1561EfFb5181c279817159837b7 發送給攻擊者 0x6681ebC82551fE52fDB48E65872e85a3ae06921d 的鏈上白帽訊息，採掛於以太坊區塊 25210520（2026-05-30 20:17:23 UTC）。原始輸入解碼為 Alephium Team 訊息：若 72 小時內將 90% 被盜資產歸還至 0x238640C0F74A95485e986Fa26D434fF7B216D058，可保留 10% 作為賞金。",
+          "blockchain": "ethereum"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x6681ebC82551fE52fDB48E65872e85a3ae06921d",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA，見於 Ethereum 與 BNB Chain。該地址對 Alephium TokenBridge 合約呼叫 completeTransfer()，並接收本紀錄交易清單所列的被盜／鑄造資產。以太坊端經 Blockscout 確認為 EOA；BNB Chain 端同一地址提交的兩筆 completeTransfer 交易已透過公開 BNB Chain RPC 驗證。",
+          "accountType": "EOA",
+          "blockchain": "ethereum,bsc"
+        },
+        {
+          "address": "0x225a38bc71102999Dd13478BFaBD7c4d53f2DC17",
+          "role": "consolidation",
+          "description": "以太坊資金彙整地址，見於盜取後資金流向。公開事件報告與交易流分析將其與被盜 USDT、WBTC、USDC 的彙整相關聯。此為基於交易流的攻擊者控制歸因，不代表身份認定。",
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43",
+          "role": "protocol_contract",
+          "description": "Alephium TokenBridge 以太坊端代理合約（NFTBridgeEntrypoint）。Alephium 官方文件列此為 Ethereum TokenBridge 地址。Blockscout 將其標示為 EIP-1967 proxy，實作合約為 0x0F843945075DF4EA9C8a21f0e0CcFD5eB073eEAb。攻擊交易對此合約呼叫 completeTransfer()；依目前公開證據，不應將根因表述為此合約本身已證實存在普通合約漏洞。",
+          "accountType": "Contract",
+          "blockchain": "ethereum"
+        },
+        {
+          "address": "0x2971F580C34d3D584e0342741c6a622f69424dD8",
+          "role": "protocol_contract",
+          "description": "Alephium TokenBridge 的 BNB Chain 端代理合約。Alephium 官方文件列此為 BNB Chain TokenBridge 地址。兩筆 BNB Chain 攻擊交易對此合約呼叫 completeTransfer()，並發出 USDT/WBNB 轉移至攻擊者的事件。",
+          "accountType": "Contract",
+          "blockchain": "bsc"
+        },
+        {
+          "address": "0x590F820444fA3638e022776752c5eEF34E2F89A6",
+          "role": "affected_token_contract",
+          "description": "以太坊端 wrapped ALPH 代幣合約。攻擊透過被接受的橋訊息從零地址鑄造 13,757,076.37295 wALPH 至攻擊者。依 Alephium 說法，此鑄造未授權且無對應擔保；本項不表示 ERC-20 代幣合約本身被獨立攻破。",
+          "accountType": "Contract",
+          "blockchain": "ethereum"
+        },
+        {
+          "address": "0x238640C0F74A95485e986Fa26D434fF7B216D058",
+          "role": "recovery_address",
+          "description": "Alephium Team 在鏈上白帽訊息中指定的資金回收地址，用於接收 90% 被盜資產返還。",
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
+        }
+      ],
+      "lessons": [
+        "橋攻擊紀錄必須區分鏈上事實與初步歸因。本案中，交易雜湊與金額可直接驗證；確切鏈下觸發機制則依 Alephium 與調查者揭露而定。",
+        "鏈下橋後端、事件發送器、中繼器與 guardian 相鄰服務皆屬安全關鍵元件，應接受與智能合約同等級的加固、監控與事件回應設計。",
+        "小型 guardian 或 validator 集合仍是高風險信任邊界，但除非最終證據支持，不應斷言 key compromise。紀錄應保留早期第三方分析與後續官方說法之間的差異。",
+        "橋合約應加入縱深防禦，例如速率限制、金額上限、斷路器，以及對大額或異常 completeTransfer 操作的延遲結算。",
+        "包裝資產合約與橋鑄造路徑在可行時應加入供應量異常檢查；超過既有流通量的鑄造是高訊號事件，應自動暫停或觸發人工審查。",
+        "監控應標記小額測試鑄造、重複 completeTransfer、零地址鑄造與快速多鏈資產流出，尤其當測試交易早於主攻擊數小時發生時。",
+        "緊急溝通應預先規劃。Alephium 使用鏈上白帽訊息與公開流動性警告；未來流程應搭配機器可讀的事故指標。",
+        "使用者恢復方案應明確區分 Alephium 端橋內鎖定 native ALPH 的使用者，以及在 EVM 鏈上持有或提供未授權 wrapped ALPH 流動性的風險暴露者。"
+      ]
+    },
+    "ja": {
+      "title": "Alephium TokenBridge オフチェーンバックエンド脆弱性攻撃",
+      "description": "2026年5月30日、Alephium TokenBridgeが攻撃を受け、EthereumとBNB Chainで合計約815,000ドルの損失が発生した。オンチェーンで直接検証できる事実は、攻撃者アドレス 0x6681ebC82551fE52fDB48E65872e85a3ae06921d がEthereum TokenBridgeプロキシ（0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43）およびBNB Chain TokenBridgeプロキシ（0x2971F580C34d3D584e0342741c6a622f69424dD8）に対してcompleteTransfer()を呼び出したことである。Ethereum側では、200,967.309973 USDT、17,594.629150 USDC、5.18192421 WETH、0.33531483 WBTCがブリッジカストディから流出し、13,757,076.37295 wALPHがゼロアドレスから発行された。BNB Chain側では、36,750.1062997 USDTと24.38620961 WBNBが流出した。Blockaidの初期警告を含む初期外部報告は、4つのguardian keysのうち3つが侵害され、偽造VAA（Verified Action Approval）メッセージが署名されたと説明した。しかしAlephiumは後にguardian keysの侵害を否定し、原因は特定のエッジケースでトリガー可能なブリッジバックエンドのオフチェーン脆弱性であり、悪意あるイベント／メッセージ生成に関係すると述べた。したがって本記録では、秘密鍵漏洩を確定事実とはせず、初期外部帰属として扱う。攻撃は02:36 UTCからのテスト／準備段階と、09:16:59-09:18:03 UTCのメインドレインで構成される。Alephiumは検知後にブリッジを停止し、新規ブリッジ取引を開始できない状態にしたと述べ、h0ngcha0.ethから攻撃者へオンチェーンのホワイトハットメッセージを送信した。内容は、72時間以内に盗難資産の90%を 0x238640C0F74A95485e986Fa26D434fF7B216D058 に返還すれば10%を報奨金として保持できるというものだった。Alephiumはまた、Alephium側ブリッジ内にロックされたALPHは盗まれておらず、対象ユーザーは専用の回復プロセスで資金を回収できるとし、未承認で発行されたwALPHは停止されたブリッジを通じてAlephiumへ償還できないと述べた。",
+      "rootCause": "現在の公開証拠では、オンチェーン事実と事故帰属を分けて記述する必要がある。オンチェーン事実として、攻撃者はEthereumおよびBNB Chain上のAlephium TokenBridgeコントラクトにcompleteTransfer()を実行させ、ブリッジカストディ資産の流出と未承認wALPH発行を発生させた。初期外部報告はこれを3-of-4 guardian key compromiseと説明したが、Alephiumは後にguardian keysの侵害を否定し、特定のエッジケースでトリガー可能なブリッジバックエンドのオフチェーン脆弱性、悪意あるイベント／メッセージ生成が原因だと述べた。したがって法的に慎重な根本原因の表現は、Alephium TokenBridgeのオフチェーンバックエンド脆弱性により、悪意ある、または未承認のブリッジメッセージ／イベントが受け入れられ、オンチェーンのcompleteTransfer実行経路へ進んだ、というものである。guardian秘密鍵の漏洩は初期外部主張であり、本記録で確定事実として採用するものではない。",
+      "attackVector": "1. 攻撃者EOA 0x6681ebC82551fE52fDB48E65872e85a3ae06921d は02:36 UTCにEthereumで準備／スワップ活動を行い、02:37 UTCに485.18942874 wALPHでtransferTokensをテストした。2. 05:31 UTC、攻撃者はテスト用completeTransfer()を送信し、ゼロアドレスから1.0 wALPHを発行させ、提出したブリッジメッセージ経路が受け入れられることを確認した。3. 09:16:59-09:17:59 UTC、攻撃者はEthereum TokenBridgeプロキシ 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43 に対してcompleteTransfer()を5回呼び出し、200,967.309973 USDT、0.33531483 WBTC、17,594.629150 USDC、5.18192421 WETHを流出させ、13,757,076.37295 wALPHをゼロアドレスから発行した。4. 09:18:02-09:18:03 UTC、同じ攻撃者アドレスはBNB Chain TokenBridgeプロキシ 0x2971F580C34d3D584e0342741c6a622f69424dD8 に対してcompleteTransfer()を2回呼び出し、36,750.1062997 USDTと24.38620961 WBNBを流出させた。5. 初期セキュリティ企業の報告は、これらの受理されたメッセージを3-of-4 guardian key compromiseにより生成された偽造VAAと説明した。Alephiumは後にguardian keysは侵害されておらず、原因は特定のエッジケースで発火するオフチェーンブリッジバックエンド脆弱性だと述べた。6. 検知後、Alephiumはブリッジを停止し、EthereumまたはBNB Chain上のALPH流動性プールと取引しないよう警告し、72時間以内に90%を返還すれば10%を報奨金として保持できるというオンチェーンのホワイトハット提案を送信した。",
+      "transactions": [
+        {
+          "txHash": "0xdebbeddc6958e25f8eda1d0d22360fa3818cc0a36cc770efe19fd62eab98a2c0",
+          "role": "setup",
+          "description": "攻撃者が制御した準備／スワップ取引。Ethereumブロック25205243（2026-05-30 02:36:23 UTC）。メソッド：UniversalRouter.execute。この取引により、169.834203441907420394 wALPHが0x9628105808...プールから、315.355225304587731615 wALPHが0xA344855388...プールから攻撃者0x6681ebC82551fE52fDB48E65872e85a3ae06921dへ送られた。これは準備的オンチェーン活動であり、ブリッジ本体のメインドレインではない。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xb44c2d786cb47c53e034ec8dbb7b26ed74fb7c46996e4dd7d17bfa1e8ec70a5d",
+          "role": "setup",
+          "description": "ブリッジ相互作用のテスト取引。Ethereumブロック25205248（2026-05-30 02:37:23 UTC）。メソッド：NFTBridgeEntrypoint.transferTokens。攻撃者はEthereum TokenBridgeプロキシ0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43を通じて485.18942874 wALPHを転送／バーンした。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x7b2379d30cdceafa67cdead9f6907e1ee57eee8369330045b2ba6d091fddde10",
+          "role": "setup",
+          "description": "テスト用completeTransfer。Ethereumブロック25206113（2026-05-30 05:31:35 UTC）。ゼロアドレスから1.0 wALPHを攻撃者0x6681ebC82551fE52fDB48E65872e85a3ae06921dへ発行し、提出されたブリッジメッセージが受け入れられることを示した。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x928e369e6e857c93f237356b201c97ddac31ba777e2a942928272f962c02bc40",
+          "role": "exploit",
+          "description": "Ethereum攻撃取引。ブロック25207237（2026-05-30 09:16:59 UTC）。NFTBridgeEntrypoint 0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43にcompleteTransferを呼び出した。Transfer logでは200,967.309973 USDTがブリッジカストディから攻撃者0x6681ebC82551fE52fDB48E65872e85a3ae06921dへ移動している。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x293c3062a133b089bc31eba910daeb6b2d508ad26e045e439b1339793f51237e",
+          "role": "exploit",
+          "description": "Ethereum攻撃取引。ブロック25207239（2026-05-30 09:17:23 UTC）。メソッド：completeTransfer。Transfer logでは0.33531483 WBTCがブリッジカストディから攻撃者へ移動している。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x8a719311d4304ea3d1c1235eece0cf9591c2a43864ce8aa70e9ea9443aff6c37",
+          "role": "exploit",
+          "description": "Ethereum攻撃取引。ブロック25207240（2026-05-30 09:17:35 UTC）。メソッド：completeTransfer。Transfer logでは17,594.629150 USDCがブリッジカストディから攻撃者へ移動している。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xb5b3f089a745394d736615e9a11ea40a1ad020678e466a6f95b3a9f4d321a98f",
+          "role": "exploit",
+          "description": "Ethereum攻撃取引。ブロック25207241（2026-05-30 09:17:47 UTC）。メソッド：completeTransfer。Transfer logでは5.18192421 WETHがブリッジカストディから攻撃者へ移動している。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0x06cc0f36159d7094359d88fe1d43cda601e8644282ba305c5ffbd013b524c6b4",
+          "role": "exploit",
+          "description": "Ethereum攻撃取引。ブロック25207242（2026-05-30 09:17:59 UTC）。メソッド：completeTransfer。Mint logでは13,757,076.37295 wALPHがゼロアドレスから攻撃者へ発行されている。",
+          "blockchain": "ethereum"
+        },
+        {
+          "txHash": "0xa3e8572fe524b28bce9765fcbd0b737cd6289c692970b5a1a1289b6edf95d06f",
+          "role": "exploit",
+          "description": "BNB Chain攻撃取引。ブロック101280856（2026-05-30 09:18:02 UTC）。メソッドセレクタ：BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8へのcompleteTransfer（0xc6878519）。Transfer logでは36,750.1062997 USDTがブリッジから攻撃者へ移動している。",
+          "blockchain": "bsc"
+        },
+        {
+          "txHash": "0xe38e870a3aceb8e1189d21e0734170a69fe9bfd7355d0ccb4209588ab77f0b1e",
+          "role": "exploit",
+          "description": "BNB Chain攻撃取引。ブロック101280859（2026-05-30 09:18:03 UTC）。メソッドセレクタ：BNB Chain TokenBridge 0x2971F580C34d3D584e0342741c6a622f69424dD8へのcompleteTransfer（0xc6878519）。Transfer logでは24.38620961 WBNBがブリッジから攻撃者へ移動している。",
+          "blockchain": "bsc"
+        },
+        {
+          "txHash": "0xdcc8f9c9feaffed3cf1db5930d4c69dfd5d11ed62473d108591d41e027ab2a4e",
+          "role": "white_hat_message",
+          "description": "h0ngcha0.eth / 0x4EaB0E005861F1561EfFb5181c279817159837b7から攻撃者0x6681ebC82551fE52fDB48E65872e85a3ae06921dへのオンチェーンホワイトハットメッセージ。Ethereumブロック25210520（2026-05-30 20:17:23 UTC）。生入力はAlephium Teamのメッセージにデコードされ、72時間以内に盗難資産の90%を0x238640C0F74A95485e986Fa26D434fF7B216D058へ返還すれば10%を報奨金として保持できると提案している。",
+          "blockchain": "ethereum"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x6681ebC82551fE52fDB48E65872e85a3ae06921d",
+          "role": "primary_attacker",
+          "description": "EthereumおよびBNB Chainで観測された主要攻撃者EOA。このアドレスはAlephium TokenBridgeコントラクトにcompleteTransfer()を呼び出し、本記録の取引一覧に記載された流出／発行資産を受け取った。Ethereum側ではBlockscoutによりEOAと確認され、BNB Chain側では同じアドレスが送信した2件のcompleteTransfer取引を公開BNB Chain RPCで検証した。",
+          "accountType": "EOA",
+          "blockchain": "ethereum,bsc"
+        },
+        {
+          "address": "0x225a38bc71102999Dd13478BFaBD7c4d53f2DC17",
+          "role": "consolidation",
+          "description": "Ethereum上の資金集約アドレス。ドレイン後の資金移動で確認され、公開インシデント報告およびトランザクションフロー分析では盗難USDT、WBTC、USDCの集約と関連付けられている。これは取引フローに基づく攻撃者支配の帰属であり、身元認定ではない。",
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x579a3bDE631c3d8068CbFE3dc45B0F14EC18dD43",
+          "role": "protocol_contract",
+          "description": "Alephium TokenBridgeのEthereum側プロキシ（NFTBridgeEntrypoint）。Alephium公式文書はこれをEthereum TokenBridgeアドレスとして掲載している。BlockscoutではEIP-1967 proxy、実装は0x0F843945075DF4EA9C8a21f0e0CcFD5eB073eEAbと表示される。攻撃取引はこのコントラクトにcompleteTransfer()を呼び出したが、現在の公開証拠に基づき、このコントラクト自体の通常のスマートコントラクトバグとして根因を記述すべきではない。",
+          "accountType": "Contract",
+          "blockchain": "ethereum"
+        },
+        {
+          "address": "0x2971F580C34d3D584e0342741c6a622f69424dD8",
+          "role": "protocol_contract",
+          "description": "Alephium TokenBridgeのBNB Chain側プロキシ。Alephium公式文書はこれをBNB Chain TokenBridgeアドレスとして掲載している。2件のBNB Chain攻撃取引はこのコントラクトにcompleteTransfer()を呼び出し、USDT/WBNBが攻撃者へ転送されたログを発行した。",
+          "accountType": "Contract",
+          "blockchain": "bsc"
+        },
+        {
+          "address": "0x590F820444fA3638e022776752c5eEF34E2F89A6",
+          "role": "affected_token_contract",
+          "description": "Ethereum側のwrapped ALPHトークンコントラクト。受け入れられたブリッジメッセージにより、13,757,076.37295 wALPHがゼロアドレスから攻撃者へ発行された。Alephiumによれば、この発行は未承認かつ裏付けのないものである。本項はERC-20トークンコントラクト自体が独立して悪用されたことを意味しない。",
+          "accountType": "Contract",
+          "blockchain": "ethereum"
+        },
+        {
+          "address": "0x238640C0F74A95485e986Fa26D434fF7B216D058",
+          "role": "recovery_address",
+          "description": "Alephium Teamがオンチェーンホワイトハットメッセージで指定した資金回収アドレス。盗難資産の90%の返還先。",
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
+        }
+      ],
+      "lessons": [
+        "ブリッジインシデント記録では、オンチェーン事実と初期帰属を区別しなければならない。本件では取引ハッシュと金額は直接検証可能だが、正確なオフチェーントリガーはAlephiumおよび調査者の開示に依存する。",
+        "オフチェーンブリッジバックエンド、イベントエミッタ、リレイヤ、guardian隣接サービスはセキュリティ上重要であり、スマートコントラクトと同水準のハードニング、監視、インシデント対応が必要である。",
+        "小規模なguardianまたはvalidatorセットは高リスクな信頼境界であるが、最終証拠がない限りkey compromiseと断定すべきではない。記録は初期第三者分析と後続の公式説明の相違を保持すべきである。",
+        "ブリッジコントラクトには、レート制限、金額上限、サーキットブレーカー、大口または異常なcompleteTransfer操作の遅延決済など、多層防御を検討すべきである。",
+        "wrapped assetコントラクトとブリッジ発行経路には、可能な限り供給量異常チェックを含めるべきである。既存流通量を超える発行は高シグナル事象であり、自動停止または人手確認を要求すべきである。",
+        "監視は小額テスト発行、繰り返しのcompleteTransfer、ゼロアドレスからの発行、急速なマルチチェーンドレインを検出すべきである。特にテストがメイン攻撃の数時間前に発生した場合は重要である。",
+        "緊急コミュニケーションは事前に計画されるべきである。Alephiumはオンチェーンホワイトハットメッセージと公開流動性警告を使用したが、将来のプレイブックでは機械可読なインシデント指標も併用すべきである。",
+        "ユーザー回復計画では、Alephium側ブリッジにnative ALPHをロックしたユーザーと、EVMチェーン上の未承認wrapped ALPHを保有または流動性提供したユーザーのリスクを明確に分けるべきである。"
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-31",
+    "lastUpdated": "2026-05-31",
+    "human_verified": false,
+    "models": [
+      "gpt-5.5",
+      "deepseek-v4-pro"
+    ]
+  }
+}
