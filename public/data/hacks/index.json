@@ -96,6 +96,12 @@
       "file": "20260528-DxSale.json"
     },
     {
+      "id": "AlephiumBridge-20260530",
+      "date": "2026-05-30",
+      "protocol": "Alephium TokenBridge",
+      "file": "20260530-AlephiumBridge.json"
+    },
+    {
       "id": "GravityBridge-20260530",
       "date": "2026-05-30",
       "protocol": "Gravity Bridge",
