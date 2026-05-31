@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-30"
+    "lastUpdated": "2026-05-31"
   },
   "files": [
     {
@@ -94,6 +94,12 @@
       "date": "2026-05-28",
       "protocol": "DxSale",
       "file": "20260528-DxSale.json"
+    },
+    {
+      "id": "gravitybridge-2026",
+      "date": "2026-05-30",
+      "protocol": "Gravity Bridge",
+      "file": "20260530-GravityBridge.json"
     }
   ]
 }
