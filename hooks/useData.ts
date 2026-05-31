@@ -14,7 +14,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type {
   HackEvent, Category, Blockchain, Language, Ecosystem,
-  AccountType, ViewMode, TimeFilter, PanelViewMode
+  AccountType, RoleInfo, ViewMode, TimeFilter, PanelViewMode
 } from '@/lib/types';
 import { loadSchema, loadHackIndex, loadHackEvents } from '@/lib/data';
 import { isSameDay, getWeekStart, getEventCategories, getEventBlockchains } from '@/lib/utils';
@@ -40,6 +40,9 @@ export function useData() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [ecosystems, setEcosystems] = useState<Ecosystem[]>([]);
   const [accountTypes, setAccountTypes] = useState<AccountType[]>([]);
+  const [attackerRoles, setAttackerRoles] = useState<RoleInfo[]>([]);
+  const [victimRoles, setVictimRoles] = useState<RoleInfo[]>([]);
+  const [transactionRoles, setTransactionRoles] = useState<RoleInfo[]>([]);
 
   // ── View state ────────────────────────────────────────────────────
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -77,6 +80,9 @@ export function useData() {
         setEcosystems(meta.ecosystems);
         setBlockchains(meta.blockchains);
         setAccountTypes(meta.accountTypes);
+        setAttackerRoles(meta.attackerRoles || []);
+        setVictimRoles(meta.victimRoles || []);
+        setTransactionRoles(meta.transactionRoles || []);
 
         // Start with everything selected
         setActiveCategories(new Set(meta.categories.map((c) => c.id)));
@@ -139,7 +145,7 @@ export function useData() {
       const eventBlockchains = getEventBlockchains(event);
       const matchesBlockchain = eventBlockchains.some((bc) => activeBlockchains.has(bc));
 
-      const matchesLanguage = activeLanguages.has(event.language);
+      const matchesLanguage = event.language.some((l) => activeLanguages.has(l));
       const matchesEcosystem = activeEcosystems.has(event.ecosystem);
 
       return matchesCategory && matchesBlockchain && matchesLanguage && matchesEcosystem;
@@ -331,6 +337,9 @@ export function useData() {
     languages,
     ecosystems,
     accountTypes,
+    attackerRoles,
+    victimRoles,
+    transactionRoles,
     currentDate,
     setCurrentDate,
     viewMode,

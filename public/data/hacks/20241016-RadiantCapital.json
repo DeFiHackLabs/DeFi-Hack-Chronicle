@@ -1,5 +1,6 @@
 {
-  "id": "radiant-2024-1",
+  "id": "RadiantCapital-20241016",
+  "date": "2024-10-16",
   "title": "Radiant Capital - Rekt II",
   "protocol": "Radiant Capital",
   "blockchain": [
@@ -10,7 +11,9 @@
     "access_control"
   ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "53000000",
     "breakdown": [
@@ -29,115 +32,115 @@
     "note": "The Arbitrum exploit transaction was mined at block 264193657 (timestamp 1729027266, 2024-10-15 23:01:06 UTC). A simultaneous attack occurred on BSC. A failed reconnaissance attempt had occurred 6 days earlier on October 10, 2024 (Arbitrum block 262315309, timestamp 1728554837, 10:07:17 UTC). Ancilia first detected suspicious activity on October 16, by which point $16M had already been lost.",
     "date": "2024-10-16"
   },
+  "description": "On October 16, 2024, Radiant Capital — a multi-chain lending protocol operating across Arbitrum and BNB Smart Chain — suffered a $53 million exploit that drained user deposits simultaneously from both chains. The attacker compromised at least 3 out of 11 multi-sig signers controlling the protocol's governance, exploiting the dangerously low 3-of-11 signing threshold to gain full administrative control. With compromised signers, the attacker transferred ownership of Pool Provider contracts to pre-deployed malicious contracts, upgraded lending pool implementations via proxy patterns, and systematically withdrew funds.\n\nThe attack was orchestrated with precision over multiple days. Malicious contracts were deployed across Arbitrum, BSC, Ethereum, and Base approximately 14 days in advance. A failed reconnaissance attempt occurred on Arbitrum on October 10, 2024 (6 days before the main exploit), suggesting the attacker was testing the exploit path. On-chain analysis confirms the Arbitrum exploit transaction (0x7856552d...) was mined at block 264193657 (2024-10-15 23:01:06 UTC), while the BSC exploit (0xd97b93f6...) executed simultaneously.\n\nSecurity firm Ancilia first detected suspicious activity and publicly reported the incident on October 16, by which point approximately $16 million had already been stolen. Radiant Capital remained silent for approximately 2 hours before publicly acknowledging the breach via Twitter/X. The attacker rapidly swapped stolen assets into ETH and BNB using decentralized exchanges including 1inch, ParaSwap, PancakeSwap, and Odos to consolidate and launder proceeds.\n\nThis incident marked the second time Radiant Capital was exploited in 2024, following a $4.5 million flash loan attack on January 2, 2024. In response, Radiant partnered with blockchain security and investigation firms including SEAL911, Hypernative, ZeroShadow, and Chainalysis to investigate the breach, monitor fund movements, and strengthen security controls. At the time of the rekt.news report, no user compensation plan had been announced.",
   "transactions": [
     {
       "txHash": "0x7856552db409fe51e17339ab1e0e1ce9c85d68bf0f4de4c110fc4e372ea02fb1",
-      "chain": "arbitrum",
       "role": "exploit",
-      "description": "Primary exploit transaction on Arbitrum, mined at block 264193657 (2024-10-15 23:01:06 UTC). Attacker EOA 0x0629b104... sent this transaction to malicious contract 0x57ba8957... to execute the fund drainage after ownership transfer and proxy upgrade."
+      "description": "Primary exploit transaction on Arbitrum, mined at block 264193657 (2024-10-15 23:01:06 UTC). Attacker EOA 0x0629b104... sent this transaction to malicious contract 0x57ba8957... to execute the fund drainage after ownership transfer and proxy upgrade.",
+      "blockchain": "arbitrum"
     },
     {
       "txHash": "0xd97b93f633aee356d992b49193e60a571b8c466bf46aaf072368f975dc11841c",
-      "chain": "bsc",
       "role": "exploit",
-      "description": "Primary exploit transaction on BNB Smart Chain, executed simultaneously with the Arbitrum attack. Attacker EOA 0x0629b104... called the malicious contract on BSC to drain lending pool deposits."
+      "description": "Primary exploit transaction on BNB Smart Chain, executed simultaneously with the Arbitrum attack. Attacker EOA 0x0629b104... called the malicious contract on BSC to drain lending pool deposits.",
+      "blockchain": "bsc"
     },
     {
       "txHash": "0xab34055320676b35d4c6c5936dabc4101b45eda0d66b94ee02f10a96e8a1dd45",
-      "chain": "arbitrum",
       "role": "failed_attempt",
-      "description": "Failed reconnaissance attack on Arbitrum, mined at block 262315309 (2024-10-10 10:07:17 UTC). The same attacker EOA called the same malicious contract address 6 days before the successful exploit, indicating advance testing of the exploit path."
+      "description": "Failed reconnaissance attack on Arbitrum, mined at block 262315309 (2024-10-10 10:07:17 UTC). The same attacker EOA called the same malicious contract address 6 days before the successful exploit, indicating advance testing of the exploit path.",
+      "blockchain": "arbitrum"
     }
   ],
   "attackers": [
     {
       "address": "0x0629b1048298AE9deff0F4100A31967Fb3f98962",
-      "chain": "arbitrum",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA) on Arbitrum (and BSC). Deployed and interacted with malicious contracts to execute the exploit. Confirmed EOA via eth_getCode (no contract code).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "arbitrum"
     },
     {
       "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
-      "chain": "arbitrum",
       "role": "secondary_attacker",
       "description": "Secondary attacker EOA on Arbitrum associated with the exploit.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "arbitrum"
     },
     {
       "address": "0x8B75E47976C3C500D0148463931717001F620887",
-      "chain": "arbitrum",
       "role": "fund_receiver",
       "description": "Primary receiving address on Arbitrum where stolen funds were consolidated before swapping to ETH.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "arbitrum"
     },
     {
       "address": "0xcF47c058CC4818CE90f9315B478EB2f2d588Cc78",
-      "chain": "bsc",
       "role": "fund_receiver",
       "description": "Primary receiving address on BSC where stolen funds were consolidated before swapping to BNB.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "bsc"
     },
     {
       "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-      "chain": "arbitrum",
       "role": "exploit_contract",
       "description": "Malicious smart contract deployed on Arbitrum (and BSC, Base) approximately 14 days before the attack. Used to receive ownership of Pool Provider contracts and execute the proxy upgrade/fund drainage logic.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "arbitrum"
     },
     {
       "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-      "chain": "bsc",
       "role": "exploit_contract",
       "description": "Identical malicious smart contract deployed on BSC.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "bsc"
     },
     {
       "address": "0x3C2Bc83Dcd293Cc8a23526A37aaeEdD83eBd62de",
-      "chain": "ethereum",
       "role": "exploit_contract",
       "description": "Malicious contract deployed on Ethereum mainnet as part of the multi-chain preparation, though the attack was not executed on Ethereum.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-      "chain": "base",
       "role": "exploit_contract",
       "description": "Malicious contract deployed on Base as part of the multi-chain preparation, though the attack was not executed on Base.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "base"
     }
   ],
   "victims": [
     {
       "address": "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
-      "chain": "arbitrum",
       "role": "lending_pool",
       "description": "Radiant Capital lending pool contract on Arbitrum. Users were advised to revoke approvals to this contract following the exploit.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "arbitrum"
     },
     {
       "address": "0xd50Cf00b6e600Dd036Ba8eF475677d816d6c4281",
-      "chain": "bsc",
       "role": "lending_pool",
       "description": "Radiant Capital lending pool contract on BNB Smart Chain. Users were advised to revoke approvals to this contract following the exploit.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "bsc"
     },
     {
       "address": "0x30798cFe2CCa822321ceed7e6085e633aAbC492F",
-      "chain": "base",
       "role": "lending_pool",
       "description": "Radiant Capital lending pool contract on Base. No funds were stolen from Base, but users were advised to revoke approvals as a precaution.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "base"
     },
     {
       "address": "0xA950974f64aA33f27F6C5e017eEE93BF7588ED07",
-      "chain": "ethereum",
       "role": "lending_pool",
       "description": "Radiant Capital lending pool contract on Ethereum mainnet. No funds were stolen from Ethereum, but users were advised to revoke approvals as a precaution.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     }
   ],
-  "description": "On October 16, 2024, Radiant Capital — a multi-chain lending protocol operating across Arbitrum and BNB Smart Chain — suffered a $53 million exploit that drained user deposits simultaneously from both chains. The attacker compromised at least 3 out of 11 multi-sig signers controlling the protocol's governance, exploiting the dangerously low 3-of-11 signing threshold to gain full administrative control. With compromised signers, the attacker transferred ownership of Pool Provider contracts to pre-deployed malicious contracts, upgraded lending pool implementations via proxy patterns, and systematically withdrew funds.\n\nThe attack was orchestrated with precision over multiple days. Malicious contracts were deployed across Arbitrum, BSC, Ethereum, and Base approximately 14 days in advance. A failed reconnaissance attempt occurred on Arbitrum on October 10, 2024 (6 days before the main exploit), suggesting the attacker was testing the exploit path. On-chain analysis confirms the Arbitrum exploit transaction (0x7856552d...) was mined at block 264193657 (2024-10-15 23:01:06 UTC), while the BSC exploit (0xd97b93f6...) executed simultaneously.\n\nSecurity firm Ancilia first detected suspicious activity and publicly reported the incident on October 16, by which point approximately $16 million had already been stolen. Radiant Capital remained silent for approximately 2 hours before publicly acknowledging the breach via Twitter/X. The attacker rapidly swapped stolen assets into ETH and BNB using decentralized exchanges including 1inch, ParaSwap, PancakeSwap, and Odos to consolidate and launder proceeds.\n\nThis incident marked the second time Radiant Capital was exploited in 2024, following a $4.5 million flash loan attack on January 2, 2024. In response, Radiant partnered with blockchain security and investigation firms including SEAL911, Hypernative, ZeroShadow, and Chainalysis to investigate the breach, monitor fund movements, and strengthen security controls. At the time of the rekt.news report, no user compensation plan had been announced.",
   "rootCause": "The root cause was a catastrophic access control failure stemming from Radiant Capital's multi-signature wallet configuration and operational security practices. The protocol used an 11-signer multi-sig with a threshold of only 3 signatures required to execute privileged governance transactions. This 3-of-11 configuration meant that compromising just 27% of signers (3 out of 11) was sufficient to gain complete administrative control over the protocol, including the ability to transfer contract ownership and execute proxy upgrades.\n\nThe attacker successfully compromised the private keys of at least 3 signers. While the exact mechanism of compromise was not publicly disclosed by Radiant Capital, typical attack vectors for multi-sig key compromises include targeted phishing, malware infections on signer devices, social engineering, or supply chain attacks on communication tools used by signers. The low signing threshold violated industry best practices for DeFi protocols managing tens of millions in user funds, which typically require 4-of-7, 5-of-9, or even higher thresholds with hardware-backed signers distributed across independent organizations and geographies.\n\nThe governance structure allowed immediate, unilateral execution of the most sensitive operations — ownership transfer and implementation upgrades — without time-locks, multi-day review periods, or emergency pause mechanisms. Once 3 signers were compromised, no additional checks or balances existed to prevent the attacker from executing arbitrary administrative actions.",
   "attackVector": "1. RECONNAISSANCE & CONTRACT DEPLOYMENT (~14 days before exploit): The attacker deployed identical malicious contracts across Arbitrum (0x57ba8957...), BSC (same address), Ethereum (0x3C2Bc83D...), and Base (same as Arbitrum/BSC). This multi-chain preparation ensured readiness regardless of which chain presented the most favorable conditions.\n\n2. FAILED RECONNAISSANCE ATTEMPT (October 10, 2024, 10:07:17 UTC): A preliminary attack transaction on Arbitrum (0xab340553..., block 262315309) was executed by the same attacker EOA calling the same malicious contract. The transaction failed, indicating the attacker was actively testing the exploit path, calibrating parameters, or verifying that the malicious contract could successfully interact with Radiant's contracts before the main event.\n\n3. MULTI-SIG SIGNER COMPROMISE (timing unknown): The attacker gained control of private keys for at least 3 of the 11 multi-sig signers. The specific attack vector used to compromise these keys (phishing, malware, social engineering, or insider threat) was not publicly disclosed.\n\n4. OWNERSHIP TRANSFER (October 15, 2024, ~23:01 UTC): Using the compromised signer keys, the attacker submitted and executed governance transactions to transfer ownership of the Pool Provider contracts on both Arbitrum and BSC from the legitimate multi-sig to the pre-deployed malicious contracts (0x57ba8957...).\n\n5. PROXY UPGRADE & IMPLEMENTATION SWAP: The attacker called upgrade functions on Radiant's proxy-based lending pools, replacing the legitimate implementation contracts with malicious logic designed to allow unrestricted withdrawal of user deposits.\n\n6. SIMULTANEOUS FUND DRAINAGE: The attacker systematically withdrew user deposits from multiple lending pools. On Arbitrum, the exploit transaction (0x7856552d..., block 264193657, 2024-10-15 23:01:06 UTC) executed the drainage logic. A simultaneous transaction on BSC (0xd97b93f6...) performed the same operation on the BSC deployment.\n\n7. LIQUIDATION & ASSET CONSOLIDATION: The attacker swapped stolen tokens into ETH (on Arbitrum) and BNB (on BSC) using 1inch, ParaSwap, PancakeSwap, and Odos. This consolidation into native gas tokens simplified cross-chain bridging and laundering operations.",
   "lessons": [
@@ -169,12 +172,6 @@
     "https://cointelegraph.com/news/radiant-capital-loses-50-million-exploit",
     "https://www.coindesk.com/markets/2024/10/16/radiant-capital-suffers-50m-exploit-second-attack-this-year"
   ],
-  "metadata": {
-    "dateAdded": "2025-01-15",
-    "lastUpdated": "2026-05-23",
-    "human_verified": false
-  },
-  "date": "2024-10-16",
   "locales": {
     "zh-TW": {
       "title": "Radiant Capital 第二次被駭事件（Rekt II）",
@@ -184,109 +181,109 @@
       "transactions": [
         {
           "txHash": "0x7856552db409fe51e17339ab1e0e1ce9c85d68bf0f4de4c110fc4e372ea02fb1",
-          "chain": "arbitrum",
           "role": "exploit",
-          "description": "Arbitrum 上的主要攻擊交易，採掛於區塊 264193657（2024-10-15 23:01:06 UTC）。攻擊者 EOA 0x0629b104... 在所有權轉移與代理升級後，向惡意合約 0x57ba8957... 發送此交易以執行資金抽走。"
+          "description": "Arbitrum 上的主要攻擊交易，採掛於區塊 264193657（2024-10-15 23:01:06 UTC）。攻擊者 EOA 0x0629b104... 在所有權轉移與代理升級後，向惡意合約 0x57ba8957... 發送此交易以執行資金抽走。",
+          "blockchain": "arbitrum"
         },
         {
           "txHash": "0xd97b93f633aee356d992b49193e60a571b8c466bf46aaf072368f975dc11841c",
-          "chain": "bsc",
           "role": "exploit",
-          "description": "BNB Smart Chain 上的主要攻擊交易，與 Arbitrum 攻擊同步執行。攻擊者 EOA 0x0629b104... 呼叫 BSC 上的惡意合約以 drained 借貸池存款。"
+          "description": "BNB Smart Chain 上的主要攻擊交易，與 Arbitrum 攻擊同步執行。攻擊者 EOA 0x0629b104... 呼叫 BSC 上的惡意合約以 drained 借貸池存款。",
+          "blockchain": "bsc"
         },
         {
           "txHash": "0xab34055320676b35d4c6c5936dabc4101b45eda0d66b94ee02f10a96e8a1dd45",
-          "chain": "arbitrum",
           "role": "failed_attempt",
-          "description": "Arbitrum 上的失敗偵察攻擊，採掛於區塊 262315309（2024-10-10 10:07:17 UTC）。同一攻擊者 EOA 在主攻擊前 6 天呼叫了相同的惡意合約地址，顯示攻擊者正在預先測試攻擊路徑。"
+          "description": "Arbitrum 上的失敗偵察攻擊，採掛於區塊 262315309（2024-10-10 10:07:17 UTC）。同一攻擊者 EOA 在主攻擊前 6 天呼叫了相同的惡意合約地址，顯示攻擊者正在預先測試攻擊路徑。",
+          "blockchain": "arbitrum"
         }
       ],
       "attackers": [
         {
           "address": "0x0629b1048298AE9deff0F4100A31967Fb3f98962",
-          "chain": "arbitrum",
           "role": "primary_attacker",
           "description": "Arbitrum（與 BSC）上的攻擊者外部擁有帳戶（EOA）。部署並與惡意合約互動以執行攻擊。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
-          "chain": "arbitrum",
           "role": "secondary_attacker",
           "description": "Arbitrum 上與攻擊相關的次要攻擊者 EOA。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x8B75E47976C3C500D0148463931717001F620887",
-          "chain": "arbitrum",
           "role": "fund_receiver",
           "description": "Arbitrum 上的主要收款地址，被盜資金在此整合後兌換為 ETH。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0xcF47c058CC4818CE90f9315B478EB2f2d588Cc78",
-          "chain": "bsc",
           "role": "fund_receiver",
           "description": "BSC 上的主要收款地址，被盜資金在此整合後兌換為 BNB。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "bsc"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "arbitrum",
           "role": "exploit_contract",
           "description": "約在攻擊前 14 天部署於 Arbitrum（與 BSC、Base）上的惡意智能合約。用於接收 Pool Provider 合約的所有權並執行代理升級與資金抽走邏輯。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "bsc",
           "role": "exploit_contract",
           "description": "部署於 BSC 的相同惡意智能合約。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "bsc"
         },
         {
           "address": "0x3C2Bc83Dcd293Cc8a23526A37aaeEdD83eBd62de",
-          "chain": "ethereum",
           "role": "exploit_contract",
           "description": "作為跨鏈準備的一部分部署於 Ethereum 主網的惡意合約，但攻擊並未在 Ethereum 上執行。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "base",
           "role": "exploit_contract",
           "description": "作為跨鏈準備的一部分部署於 Base 的惡意合約，但攻擊並未在 Base 上執行。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "base"
         }
       ],
       "victims": [
         {
           "address": "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
-          "chain": "arbitrum",
           "role": "lending_pool",
           "description": "Radiant Capital 於 Arbitrum 上的借貸池合約。攻擊後用戶被建議撤銷對此合約的授權。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0xd50Cf00b6e600Dd036Ba8eF475677d816d6c4281",
-          "chain": "bsc",
           "role": "lending_pool",
           "description": "Radiant Capital 於 BNB Smart Chain 上的借貸池合約。攻擊後用戶被建議撤銷對此合約的授權。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "bsc"
         },
         {
           "address": "0x30798cFe2CCa822321ceed7e6085e633aAbC492F",
-          "chain": "base",
           "role": "lending_pool",
           "description": "Radiant Capital 於 Base 上的借貸池合約。Base 上無資金被盜，但用戶被建議撤銷授權以預防風險。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "base"
         },
         {
           "address": "0xA950974f64aA33f27F6C5e017eEE93BF7588ED07",
-          "chain": "ethereum",
           "role": "lending_pool",
           "description": "Radiant Capital 於 Ethereum 主網的借貸池合約。Ethereum 上無資金被盜，但用戶被建議撤銷授權以預防風險。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -310,109 +307,109 @@
       "transactions": [
         {
           "txHash": "0x7856552db409fe51e17339ab1e0e1ce9c85d68bf0f4de4c110fc4e372ea02fb1",
-          "chain": "arbitrum",
           "role": "exploit",
-          "description": "Arbitrum上の主要なエクスプロイトトランザクション。ブロック264193657（2024-10-15 23:01:06 UTC）に採掘された。攻撃者EOA 0x0629b104...が所有権移転とプロキシアップグレード後、悪意あるコントラクト0x57ba8957...にこのトランザクションを送信して資金排出を実行した。"
+          "description": "Arbitrum上の主要なエクスプロイトトランザクション。ブロック264193657（2024-10-15 23:01:06 UTC）に採掘された。攻撃者EOA 0x0629b104...が所有権移転とプロキシアップグレード後、悪意あるコントラクト0x57ba8957...にこのトランザクションを送信して資金排出を実行した。",
+          "blockchain": "arbitrum"
         },
         {
           "txHash": "0xd97b93f633aee356d992b49193e60a571b8c466bf46aaf072368f975dc11841c",
-          "chain": "bsc",
           "role": "exploit",
-          "description": "BNB Smart Chain上の主要なエクスプロイトトランザクション。Arbitrumの攻撃と同時に実行された。攻撃者EOA 0x0629b104...がBSC上の悪意あるコントラクトを呼び出して貸出プールの預金を排出した。"
+          "description": "BNB Smart Chain上の主要なエクスプロイトトランザクション。Arbitrumの攻撃と同時に実行された。攻撃者EOA 0x0629b104...がBSC上の悪意あるコントラクトを呼び出して貸出プールの預金を排出した。",
+          "blockchain": "bsc"
         },
         {
           "txHash": "0xab34055320676b35d4c6c5936dabc4101b45eda0d66b94ee02f10a96e8a1dd45",
-          "chain": "arbitrum",
           "role": "failed_attempt",
-          "description": "Arbitrum上の失敗した偵察攻撃。ブロック262315309（2024-10-10 10:07:17 UTC）に採掘された。同じ攻撃者EOAが本攻撃の6日前に同じ悪意あるコントラクトアドレスを呼び出しており、攻撃者がエクスプロイト経路を事前にテストしていたことを示している。"
+          "description": "Arbitrum上の失敗した偵察攻撃。ブロック262315309（2024-10-10 10:07:17 UTC）に採掘された。同じ攻撃者EOAが本攻撃の6日前に同じ悪意あるコントラクトアドレスを呼び出しており、攻撃者がエクスプロイト経路を事前にテストしていたことを示している。",
+          "blockchain": "arbitrum"
         }
       ],
       "attackers": [
         {
           "address": "0x0629b1048298AE9deff0F4100A31967Fb3f98962",
-          "chain": "arbitrum",
           "role": "primary_attacker",
           "description": "Arbitrum（およびBSC）上の攻撃者の外部所有アカウント（EOA）。悪意あるコントラクトを展開し、エクスプロイトを実行するために相互作用した。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x97a05beCc2e7891d07f382457cd5d57fD242E4e8",
-          "chain": "arbitrum",
           "role": "secondary_attacker",
           "description": "攻撃に関連するArbitrum上の二次攻撃者EOA。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x8B75E47976C3C500D0148463931717001F620887",
-          "chain": "arbitrum",
           "role": "fund_receiver",
           "description": "Arbitrum上の主要な資金受け取りアドレス。盗まれた資金はここで統合された後、ETHに交換された。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0xcF47c058CC4818CE90f9315B478EB2f2d588Cc78",
-          "chain": "bsc",
           "role": "fund_receiver",
           "description": "BSC上の主要な資金受け取りアドレス。盗まれた資金はここで統合された後、BNBに交換された。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "bsc"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "arbitrum",
           "role": "exploit_contract",
           "description": "攻撃の約14日前にArbitrum（およびBSC、Base）に展開された悪意あるスマートコントラクト。Pool Providerコントラクトの所有権を受け取り、プロキシアップグレードと資金排出ロジックを実行するために使用された。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "bsc",
           "role": "exploit_contract",
           "description": "BSCに展開された同一の悪意あるスマートコントラクト。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "bsc"
         },
         {
           "address": "0x3C2Bc83Dcd293Cc8a23526A37aaeEdD83eBd62de",
-          "chain": "ethereum",
           "role": "exploit_contract",
           "description": "マルチチェーン準備の一環としてEthereumメインネットに展開された悪意あるコントラクトだが、Ethereum上では攻撃は実行されなかった。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x57ba8957ed2ff2e7AE38F4935451E81Ce1eEFbf5",
-          "chain": "base",
           "role": "exploit_contract",
           "description": "マルチチェーン準備の一環としてBaseに展開された悪意あるコントラクトだが、Base上では攻撃は実行されなかった。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "base"
         }
       ],
       "victims": [
         {
           "address": "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
-          "chain": "arbitrum",
           "role": "lending_pool",
           "description": "Radiant CapitalのArbitrum上の貸出プールコントラクト。エクスプロイト後、ユーザーはこのコントラクトへの承認を取り消すよう助言された。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "arbitrum"
         },
         {
           "address": "0xd50Cf00b6e600Dd036Ba8eF475677d816d6c4281",
-          "chain": "bsc",
           "role": "lending_pool",
           "description": "Radiant CapitalのBNB Smart Chain上の貸出プールコントラクト。エクスプロイト後、ユーザーはこのコントラクトへの承認を取り消すよう助言された。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "bsc"
         },
         {
           "address": "0x30798cFe2CCa822321ceed7e6085e633aAbC492F",
-          "chain": "base",
           "role": "lending_pool",
           "description": "Radiant CapitalのBase上の貸出プールコントラクト。Baseからは資金が盗まれなかったが、予防措置としてユーザーは承認を取り消すよう助言された。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "base"
         },
         {
           "address": "0xA950974f64aA33f27F6C5e017eEE93BF7588ED07",
-          "chain": "ethereum",
           "role": "lending_pool",
           "description": "Radiant CapitalのEthereumメインネット上の貸出プールコントラクト。Ethereumからは資金が盗まれなかったが、予防措置としてユーザーは承認を取り消すよう助言された。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -428,5 +425,10 @@
         "秘密鍵の侵害はDeFiにおける支配的な攻撃ベクトルである。署名者のデバイスは、攻撃面を最小化するために、汎用コンピューティング、電子メール、メッセージングアプリケーションから分離されなければならない。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2025-01-15",
+    "lastUpdated": "2026-05-23",
+    "human_verified": false
   }
 }

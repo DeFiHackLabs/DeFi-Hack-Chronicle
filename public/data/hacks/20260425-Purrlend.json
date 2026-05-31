@@ -1,11 +1,19 @@
 {
-  "id": "purrlend-2026",
+  "id": "Purrlend-20260425",
+  "date": "2026-04-25",
   "title": "Purrlend Admin Multisig Compromise and Unbacked Collateral Exploit",
   "protocol": "Purrlend",
-  "blockchain": ["hyperevm", "megaeth"],
-  "category": ["access_control"],
+  "blockchain": [
+    "hyperevm",
+    "megaeth"
+  ],
+  "category": [
+    "access_control"
+  ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "1520000",
     "breakdown": [
@@ -31,107 +39,107 @@
     "note": "Privilege escalation began on HyperEVM at block 33372289 (2026-04-25 01:20:04 UTC). MegaETH privilege escalation followed at block 14284168 (2026-04-25 01:39:39 UTC). Exploit transactions on MegaETH continued through block 14284505 (2026-04-25 01:45:16 UTC). HyperEVM exploit transactions not individually indexed in public explorers but are confirmed in the official post-mortem.",
     "date": "2026-04-25"
   },
+  "description": "On April 25, 2026, Purrlend—a lending protocol forked from Aave and deployed on HyperEVM and MegaETH—suffered a security incident resulting in approximately $1.52 million in losses. The attacker compromised the team's 2/3 Gnosis Safe multisig wallet (0x4c2444d88AD61B0842Fba7CCdCb226260eBfA1bc) on both chains. Using this access, they executed Safe execTransaction calls to the ACLManager on each chain, granting themselves five administrative roles—including BRIDGE_ROLE—to a malicious EOA (0xd8010aca201f6113160200b8a521F35BE9f94C24). On HyperEVM, the privilege escalation transaction (0x73ac9cf7...) was mined at block 33372289 (2026-04-25 01:20:04 UTC), containing five RoleGranted events and pool configuration updates. On MegaETH, the corresponding transaction (0xb96cff9c...) was mined at block 14284168 (2026-04-25 01:39:39 UTC) with identical role grants. Leveraging BRIDGE_ROLE, the attacker called mintUnbacked to create ~2,000,000 pUSDm and ~4,850,000 pUSDC without any collateral backing. These unbacked pTokens were supplied as collateral into the Aave-style lending pools, which treated them as fully valid without additional reserve verification. The attacker then borrowed real assets against phantom collateral, draining the pools. HyperEVM losses (~$1.2M): 449,683 USDC, 194,745 USDH, 214,125 USDT0, 757 wHYPE, 2.04 UBTC, 19.60 UETH, 868 kHYPE, 1,581 wstHYPE. MegaETH losses (~$325K): 75,745 USDm, 163,169 USDT0, 36.87 WETH. Verified MegaETH exploit transactions: 0xf3061da2... at block 14284395 (01:43:26 UTC) and 0xf9b5365e... at block 14284505 (01:45:16 UTC), both calling Pool 0x81d5d25e... and emitting pToken mint and borrow logs. Post-exploit, the attacker converted assets to USDC/ETH and bridged portions out via Mayan and LiFi. A significant traceable amount (~652 ETH equivalent) remains at address 0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29. Purrlend detected the anomaly quickly, paused the protocol, revoked compromised privileges, engaged security partners (including SEAL team support), and sent an on-chain message to the attacker on April 28, 2026. On April 30, 2026, Purrlend published an official post-mortem acknowledging the incident stemmed from an operational security failure with the multisig configuration (no timelock), not a flaw in core smart contract logic.",
   "transactions": [
     {
       "txHash": "0x73ac9cf7c08f06d672371f4a295b19188e8ca625fc386bf361054c5be1537b4e",
-      "chain": "hyperevm",
       "role": "privilege_escalation",
-      "description": "HyperEVM Safe execTransaction at block 33372289 (2026-04-25 01:20:04 UTC). Compromised multisig signer 0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bb submits batch role grants via ACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703d. Attacker EOA 0xd8010aca201f6113160200b8a521f35be9f94c24 receives ASSET_LISTING_ADMIN_ROLE, POOL_ADMIN_ROLE, BRIDGE_ROLE, EMERGENCY_ADMIN_ROLE, and RISK_ADMIN_ROLE. Receipt contains 5 RoleGranted event logs from ACLManager and configuration updates on PoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767."
+      "description": "HyperEVM Safe execTransaction at block 33372289 (2026-04-25 01:20:04 UTC). Compromised multisig signer 0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bb submits batch role grants via ACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703d. Attacker EOA 0xd8010aca201f6113160200b8a521f35be9f94c24 receives ASSET_LISTING_ADMIN_ROLE, POOL_ADMIN_ROLE, BRIDGE_ROLE, EMERGENCY_ADMIN_ROLE, and RISK_ADMIN_ROLE. Receipt contains 5 RoleGranted event logs from ACLManager and configuration updates on PoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767.",
+      "blockchain": "hyperevm"
     },
     {
       "txHash": "0xb96cff9cb4d8061d7ba55e158c70f63b8b86198e31df9f8c6fb1601692dbbf24",
-      "chain": "megaeth",
       "role": "privilege_escalation",
-      "description": "MegaETH Safe execTransaction at block 14284168 (2026-04-25 01:39:39 UTC). Compromised multisig signer 0x2bcef069eaea664397a28f99b0de5d4a4f78e23e submits batch role grants via ACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13 to attacker EOA 0xd801... Same five roles granted. Receipt contains 5 RoleGranted event logs and PoolConfigurator updates on 0xb54407684b028ee75f012ef264644186e93e4e0e."
+      "description": "MegaETH Safe execTransaction at block 14284168 (2026-04-25 01:39:39 UTC). Compromised multisig signer 0x2bcef069eaea664397a28f99b0de5d4a4f78e23e submits batch role grants via ACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13 to attacker EOA 0xd801... Same five roles granted. Receipt contains 5 RoleGranted event logs and PoolConfigurator updates on 0xb54407684b028ee75f012ef264644186e93e4e0e.",
+      "blockchain": "megaeth"
     },
     {
       "txHash": "0xf3061da28411d19c17e08debbf9658e032dceecec5157d9638c1120d816dc36e",
-      "chain": "megaeth",
       "role": "exploit",
-      "description": "MegaETH exploit transaction at block 14284395 (2026-04-25 01:43:26 UTC). Attacker EOA 0xd801... calls Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702 to mint unbacked pTokens and borrow real assets. Logs show minting from 0x1e7c2bec64062098a192118d1708dad717c9c5fc (pToken contract) to attacker, followed by borrow event."
+      "description": "MegaETH exploit transaction at block 14284395 (2026-04-25 01:43:26 UTC). Attacker EOA 0xd801... calls Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702 to mint unbacked pTokens and borrow real assets. Logs show minting from 0x1e7c2bec64062098a192118d1708dad717c9c5fc (pToken contract) to attacker, followed by borrow event.",
+      "blockchain": "megaeth"
     },
     {
       "txHash": "0xf9b5365e802a0d21aa98d2e34c64d022b896896f3fe24ddf872aba46ccf1bf75",
-      "chain": "megaeth",
       "role": "exploit",
-      "description": "MegaETH exploit transaction at block 14284505 (2026-04-25 01:45:16 UTC). Attacker EOA 0xd801... calls Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702. Logs show minting from 0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2e (pToken contract) to attacker, supply as collateral, and borrow of real assets."
+      "description": "MegaETH exploit transaction at block 14284505 (2026-04-25 01:45:16 UTC). Attacker EOA 0xd801... calls Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702. Logs show minting from 0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2e (pToken contract) to attacker, supply as collateral, and borrow of real assets.",
+      "blockchain": "megaeth"
     }
   ],
   "attackers": [
     {
       "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-      "chain": "hyperevm",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA) on HyperEVM. Received privileged roles from compromised multisig, then minted unbacked pTokens and borrowed real assets. Confirmed EOA via eth_getCode (returns 0x).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "hyperevm"
     },
     {
       "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-      "chain": "megaeth",
       "role": "primary_attacker",
       "description": "Same attacker EOA on MegaETH. Executed mintUnbacked and borrow transactions on MegaETH Pool after receiving roles via compromised multisig. Confirmed EOA via eth_getCode (returns 0x).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "megaeth"
     },
     {
       "address": "0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29",
-      "chain": "megaeth",
       "role": "fund_holder",
       "description": "Attacker-controlled address holding ~652 ETH equivalent in traceable funds post-exploit. Confirmed EOA.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "megaeth"
     }
   ],
   "victims": [
     {
       "address": "0x507bc877a27baeb12be4df42efaa949a9a67703d",
-      "chain": "hyperevm",
       "role": "acl_manager",
       "description": "Purrlend ACLManager on HyperEVM. Contract that manages role-based access control. Compromised multisig executed execTransaction to grant attacker five roles including BRIDGE_ROLE.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "hyperevm"
     },
     {
       "address": "0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767",
-      "chain": "hyperevm",
       "role": "pool_configurator",
       "description": "Purrlend PoolConfigurator on HyperEVM. Emitted configuration update events as part of the privilege escalation transaction.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "hyperevm"
     },
     {
       "address": "0x217214bbf25f02a8019d42ea315ab192540ada13",
-      "chain": "megaeth",
       "role": "acl_manager",
       "description": "Purrlend ACLManager on MegaETH. Same role-grant batch executed by compromised multisig, emitting 5 RoleGranted events to attacker EOA.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "megaeth"
     },
     {
       "address": "0xb54407684b028ee75f012ef264644186e93e4e0e",
-      "chain": "megaeth",
       "role": "pool_configurator",
       "description": "Purrlend PoolConfigurator on MegaETH. Emitted pool configuration events as part of the privilege escalation transaction.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "megaeth"
     },
     {
       "address": "0x81d5d25ea81b72e546fc71b5baa8b059ef0da702",
-      "chain": "megaeth",
       "role": "pool_contract",
       "description": "Purrlend Lending Pool on MegaETH. Aave-style fork that treated unbacked pTokens as valid collateral, enabling attacker to borrow real assets. Core exploit target.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "megaeth"
     },
     {
       "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-      "chain": "hyperevm",
       "role": "compromised_admin",
       "description": "Purrlend team's 2/3 Gnosis Safe multisig wallet on HyperEVM. Attacker compromised one or more signers and submitted execTransaction to grant roles. Contract size ~172 bytes (confirmed via eth_getCode).",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "hyperevm"
     },
     {
       "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-      "chain": "megaeth",
       "role": "compromised_admin",
       "description": "Same Purrlend team 2/3 Gnosis Safe multisig wallet on MegaETH. Attacker used compromised signer to submit execTransaction for role grants.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "megaeth"
     }
   ],
-  "description": "On April 25, 2026, Purrlend—a lending protocol forked from Aave and deployed on HyperEVM and MegaETH—suffered a security incident resulting in approximately $1.52 million in losses. The attacker compromised the team's 2/3 Gnosis Safe multisig wallet (0x4c2444d88AD61B0842Fba7CCdCb226260eBfA1bc) on both chains. Using this access, they executed Safe execTransaction calls to the ACLManager on each chain, granting themselves five administrative roles—including BRIDGE_ROLE—to a malicious EOA (0xd8010aca201f6113160200b8a521F35BE9f94C24). On HyperEVM, the privilege escalation transaction (0x73ac9cf7...) was mined at block 33372289 (2026-04-25 01:20:04 UTC), containing five RoleGranted events and pool configuration updates. On MegaETH, the corresponding transaction (0xb96cff9c...) was mined at block 14284168 (2026-04-25 01:39:39 UTC) with identical role grants. Leveraging BRIDGE_ROLE, the attacker called mintUnbacked to create ~2,000,000 pUSDm and ~4,850,000 pUSDC without any collateral backing. These unbacked pTokens were supplied as collateral into the Aave-style lending pools, which treated them as fully valid without additional reserve verification. The attacker then borrowed real assets against phantom collateral, draining the pools. HyperEVM losses (~$1.2M): 449,683 USDC, 194,745 USDH, 214,125 USDT0, 757 wHYPE, 2.04 UBTC, 19.60 UETH, 868 kHYPE, 1,581 wstHYPE. MegaETH losses (~$325K): 75,745 USDm, 163,169 USDT0, 36.87 WETH. Verified MegaETH exploit transactions: 0xf3061da2... at block 14284395 (01:43:26 UTC) and 0xf9b5365e... at block 14284505 (01:45:16 UTC), both calling Pool 0x81d5d25e... and emitting pToken mint and borrow logs. Post-exploit, the attacker converted assets to USDC/ETH and bridged portions out via Mayan and LiFi. A significant traceable amount (~652 ETH equivalent) remains at address 0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29. Purrlend detected the anomaly quickly, paused the protocol, revoked compromised privileges, engaged security partners (including SEAL team support), and sent an on-chain message to the attacker on April 28, 2026. On April 30, 2026, Purrlend published an official post-mortem acknowledging the incident stemmed from an operational security failure with the multisig configuration (no timelock), not a flaw in core smart contract logic.",
   "rootCause": "The Purrlend team's 2/3 Gnosis Safe multisig wallet was compromised on both HyperEVM and MegaETH (method of compromise undisclosed—likely stolen private key or socially engineered signer). The attacker submitted Safe execTransaction (selector 0x6a761202) to the ACLManager on each chain, granting their EOA five roles: ASSET_LISTING_ADMIN_ROLE, POOL_ADMIN_ROLE, BRIDGE_ROLE, EMERGENCY_ADMIN_ROLE, and RISK_ADMIN_ROLE. With BRIDGE_ROLE, the attacker bypassed the onlyBridge access control and called mintUnbacked to mint ~2M pUSDm and ~4.85M pUSDC without collateral. The root operational failure was the absence of a timelock on multisig actions and insufficient signer key security. The contributing protocol-level issue was that the Aave-fork lending pool treated pTokens minted via BRIDGE_ROLE as unconditionally valid collateral without verifying backing reserves, allowing unbacked synthetic collateral to be used for real borrowing.",
   "attackVector": "1. Attacker compromised the Purrlend team's 2/3 multisig wallet (0x4c24...) on HyperEVM and MegaETH. 2. On HyperEVM, compromised signer 0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bb submitted Safe execTransaction 0x73ac9cf7... at block 33372289 (2026-04-25 01:20:04 UTC) to ACLManager 0x507bc877..., granting attacker EOA 0xd801... five roles including BRIDGE_ROLE. 3. On MegaETH, compromised signer 0x2bcef069eaea664397a28f99b0de5d4a4f78e23e submitted Safe execTransaction 0xb96cff9c... at block 14284168 (2026-04-25 01:39:39 UTC) to ACLManager 0x217214b..., granting identical roles. 4. Using BRIDGE_ROLE, attacker called mintUnbacked on the Pool contracts, generating ~2,000,000 pUSDm and ~4,850,000 pUSDC with zero collateral. 5. Attacker supplied these unbacked pTokens as collateral into the Aave-fork lending pools on both chains. 6. The pools' health-check logic accepted the unbacked pTokens as valid collateral, enabling the attacker to borrow real assets: USDC, USDH, USDT0, wHYPE, UBTC, UETH, kHYPE, wstHYPE on HyperEVM; USDm, USDT0, WETH on MegaETH. 7. Total drained: ~$1.52M. Attacker swapped assets to USDC/ETH and bridged out via Mayan and LiFi. 8. Traceable funds (~652 ETH equivalent) remain at 0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29.",
   "lessons": [
@@ -153,12 +161,6 @@
     "https://mega.etherscan.io/tx/0xf3061da28411d19c17e08debbf9658e032dceecec5157d9638c1120d816dc36e",
     "https://mega.etherscan.io/tx/0xf9b5365e802a0d21aa98d2e34c64d022b896896f3fe24ddf872aba46ccf1bf75"
   ],
-  "metadata": {
-    "dateAdded": "2026-05-22",
-    "lastUpdated": "2026-05-22",
-    "human_verified": false
-  },
-  "date": "2026-04-25",
   "locales": {
     "zh-TW": {
       "title": "Purrlend 管理員多簽錢包遭竄與無擔保抵押品攻擊事件",
@@ -168,101 +170,101 @@
       "transactions": [
         {
           "txHash": "0x73ac9cf7c08f06d672371f4a295b19188e8ca625fc386bf361054c5be1537b4e",
-          "chain": "hyperevm",
           "role": "privilege_escalation",
-          "description": "HyperEVM Safe execTransaction，採掛於區塊 33372289（2026-04-25 01:20:04 UTC）。遭竄多簽簽署者 0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bb 透過 ACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703d 批次授予攻擊者 EOA 0xd801... 五項角色（含 BRIDGE_ROLE）。交易收據包含 5 筆 ACLManager 的 RoleGranted 事件日誌與 PoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767 的配置更新。"
+          "description": "HyperEVM Safe execTransaction，採掛於區塊 33372289（2026-04-25 01:20:04 UTC）。遭竄多簽簽署者 0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bb 透過 ACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703d 批次授予攻擊者 EOA 0xd801... 五項角色（含 BRIDGE_ROLE）。交易收據包含 5 筆 ACLManager 的 RoleGranted 事件日誌與 PoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767 的配置更新。",
+          "blockchain": "hyperevm"
         },
         {
           "txHash": "0xb96cff9cb4d8061d7ba55e158c70f63b8b86198e31df9f8c6fb1601692dbbf24",
-          "chain": "megaeth",
           "role": "privilege_escalation",
-          "description": "MegaETH Safe execTransaction，採掛於區塊 14284168（2026-04-25 01:39:39 UTC）。遭竄多簽簽署者 0x2bcef069eaea664397a28f99b0de5d4a4f78e23e 透過 ACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13 授予攻擊者相同五項角色。收據包含 5 筆 RoleGranted 事件與 PoolConfigurator 0xb54407684b028ee75f012ef264644186e93e4e0e 的配置更新。"
+          "description": "MegaETH Safe execTransaction，採掛於區塊 14284168（2026-04-25 01:39:39 UTC）。遭竄多簽簽署者 0x2bcef069eaea664397a28f99b0de5d4a4f78e23e 透過 ACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13 授予攻擊者相同五項角色。收據包含 5 筆 RoleGranted 事件與 PoolConfigurator 0xb54407684b028ee75f012ef264644186e93e4e0e 的配置更新。",
+          "blockchain": "megaeth"
         },
         {
           "txHash": "0xf3061da28411d19c17e08debbf9658e032dceecec5157d9638c1120d816dc36e",
-          "chain": "megaeth",
           "role": "exploit",
-          "description": "MegaETH 攻擊交易，採掛於區塊 14284395（2026-04-25 01:43:26 UTC）。攻擊者 EOA 0xd801... 呼叫 Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702 執行無擔保鑄造與真實資產借款。日誌顯示 pToken 合約 0x1e7c2bec64062098a192118d1708dad717c9c5fc 鑄造代幣至攻擊者地址，隨後觸發借款事件。"
+          "description": "MegaETH 攻擊交易，採掛於區塊 14284395（2026-04-25 01:43:26 UTC）。攻擊者 EOA 0xd801... 呼叫 Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702 執行無擔保鑄造與真實資產借款。日誌顯示 pToken 合約 0x1e7c2bec64062098a192118d1708dad717c9c5fc 鑄造代幣至攻擊者地址，隨後觸發借款事件。",
+          "blockchain": "megaeth"
         },
         {
           "txHash": "0xf9b5365e802a0d21aa98d2e34c64d022b896896f3fe24ddf872aba46ccf1bf75",
-          "chain": "megaeth",
           "role": "exploit",
-          "description": "MegaETH 攻擊交易，採掛於區塊 14284505（2026-04-25 01:45:16 UTC）。攻擊者 EOA 0xd801... 呼叫 Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702。日誌顯示 pToken 合約 0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2e 鑄造代幣至攻擊者地址，接著存入作為抵押品並借出真實資產。"
+          "description": "MegaETH 攻擊交易，採掛於區塊 14284505（2026-04-25 01:45:16 UTC）。攻擊者 EOA 0xd801... 呼叫 Pool 0x81d5d25ea81b72e546fc71b5baa8b059ef0da702。日誌顯示 pToken 合約 0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2e 鑄造代幣至攻擊者地址，接著存入作為抵押品並借出真實資產。",
+          "blockchain": "megaeth"
         }
       ],
       "attackers": [
         {
           "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-          "chain": "hyperevm",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA）在 HyperEVM 上。接收遭竄多簽授予的特權角色後，執行無擔保 pToken 鑄造並借出真實資產。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-          "chain": "megaeth",
           "role": "primary_attacker",
           "description": "同一攻擊者 EOA 在 MegaETH 上。接收角色後，於 MegaETH Pool 執行 mintUnbacked 與借款交易。經由 eth_getCode 確認為純粹錢包。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29",
-          "chain": "megaeth",
           "role": "fund_holder",
           "description": "攻擊者控制的地址，攻擊後仍持有約 652 ETH 等值的可追溯資金。經確認為 EOA。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "megaeth"
         }
       ],
       "victims": [
         {
           "address": "0x507bc877a27baeb12be4df42efaa949a9a67703d",
-          "chain": "hyperevm",
           "role": "acl_manager",
           "description": "Purrlend 在 HyperEVM 上的 ACLManager。管理角色存取控制的合約。遭竄多簽執行 execTransaction 授予攻擊者五項角色（含 BRIDGE_ROLE）。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767",
-          "chain": "hyperevm",
           "role": "pool_configurator",
           "description": "Purrlend 在 HyperEVM 上的 PoolConfigurator。在權限提升交易中發出配置更新事件。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x217214bbf25f02a8019d42ea315ab192540ada13",
-          "chain": "megaeth",
           "role": "acl_manager",
           "description": "Purrlend 在 MegaETH 上的 ACLManager。遭竄多簽執行相同批次角色授予，產生 5 筆 RoleGranted 事件。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0xb54407684b028ee75f012ef264644186e93e4e0e",
-          "chain": "megaeth",
           "role": "pool_configurator",
           "description": "Purrlend 在 MegaETH 上的 PoolConfigurator。在權限提升交易中發出資金池配置事件。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x81d5d25ea81b72e546fc71b5baa8b059ef0da702",
-          "chain": "megaeth",
           "role": "pool_contract",
           "description": "Purrlend 在 MegaETH 上的 Lending Pool（Aave 分叉）。將無擔保 pToken 視為有效抵押品，使攻擊者得以借出真實資產。核心攻擊目標。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-          "chain": "hyperevm",
           "role": "compromised_admin",
           "description": "Purrlend 團隊的 2/3 Gnosis Safe 多簽錢包在 HyperEVM 上。攻擊者竄取一名或多名簽署者後提交 execTransaction 進行角色授予。合約大小約 172 位元組（經 eth_getCode 確認）。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-          "chain": "megaeth",
           "role": "compromised_admin",
           "description": "Purrlend 團隊的 2/3 Gnosis Safe 多簽錢包在 MegaETH 上。攻擊者利用遭竄簽署者提交 execTransaction 執行角色授予。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         }
       ],
       "lessons": [
@@ -284,101 +286,101 @@
       "transactions": [
         {
           "txHash": "0x73ac9cf7c08f06d672371f4a295b19188e8ca625fc386bf361054c5be1537b4e",
-          "chain": "hyperevm",
           "role": "privilege_escalation",
-          "description": "HyperEVMのSafe execTransaction。ブロック33372289（2026-04-25 01:20:04 UTC）に採掘。侵害されたマルチシグ署名者0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bbがACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703dを介して、攻撃者EOA 0xd801...に5つのロール（BRIDGE_ROLEを含む）をバッチ付与した。レシートにはACLManagerからの5つのRoleGrantedイベントログとPoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767の設定更新が含まれる。"
+          "description": "HyperEVMのSafe execTransaction。ブロック33372289（2026-04-25 01:20:04 UTC）に採掘。侵害されたマルチシグ署名者0x7312f0b280f4bbaa47fc6485809f1c5cc629d7bbがACLManager 0x507bc877a27baeb12be4df42efaa949a9a67703dを介して、攻撃者EOA 0xd801...に5つのロール（BRIDGE_ROLEを含む）をバッチ付与した。レシートにはACLManagerからの5つのRoleGrantedイベントログとPoolConfigurator 0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767の設定更新が含まれる。",
+          "blockchain": "hyperevm"
         },
         {
           "txHash": "0xb96cff9cb4d8061d7ba55e158c70f63b8b86198e31df9f8c6fb1601692dbbf24",
-          "chain": "megaeth",
           "role": "privilege_escalation",
-          "description": "MegaETHのSafe execTransaction。ブロック14284168（2026-04-25 01:39:39 UTC）に採掘。侵害されたマルチシグ署名者0x2bcef069eaea664397a28f99b0de5d4a4f78e23eがACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13を介して、攻撃者に同じ5つのロールを付与した。レシートには5つのRoleGrantedイベントとPoolConfigurator 0xb54407684b028ee75f012ef264644186e93e4e0eの設定更新が含まれる。"
+          "description": "MegaETHのSafe execTransaction。ブロック14284168（2026-04-25 01:39:39 UTC）に採掘。侵害されたマルチシグ署名者0x2bcef069eaea664397a28f99b0de5d4a4f78e23eがACLManager 0x217214bbf25f02a8019d42ea315ab192540ada13を介して、攻撃者に同じ5つのロールを付与した。レシートには5つのRoleGrantedイベントとPoolConfigurator 0xb54407684b028ee75f012ef264644186e93e4e0eの設定更新が含まれる。",
+          "blockchain": "megaeth"
         },
         {
           "txHash": "0xf3061da28411d19c17e08debbf9658e032dceecec5157d9638c1120d816dc36e",
-          "chain": "megaeth",
           "role": "exploit",
-          "description": "MegaETHの攻撃トランザクション。ブロック14284395（2026-04-25 01:43:26 UTC）に採掘。攻撃者EOA 0xd801...がプール0x81d5d25ea81b72e546fc71b5baa8b059ef0da702を呼び出し、無担保の鋳造と実資産の借り入れを実行した。ログにはpTokenコントラクト0x1e7c2bec64062098a192118d1708dad717c9c5fcから攻撃者への鋳造と、その後の借り入れイベントが記録されている。"
+          "description": "MegaETHの攻撃トランザクション。ブロック14284395（2026-04-25 01:43:26 UTC）に採掘。攻撃者EOA 0xd801...がプール0x81d5d25ea81b72e546fc71b5baa8b059ef0da702を呼び出し、無担保の鋳造と実資産の借り入れを実行した。ログにはpTokenコントラクト0x1e7c2bec64062098a192118d1708dad717c9c5fcから攻撃者への鋳造と、その後の借り入れイベントが記録されている。",
+          "blockchain": "megaeth"
         },
         {
           "txHash": "0xf9b5365e802a0d21aa98d2e34c64d022b896896f3fe24ddf872aba46ccf1bf75",
-          "chain": "megaeth",
           "role": "exploit",
-          "description": "MegaETHの攻撃トランザクション。ブロック14284505（2026-04-25 01:45:16 UTC）に採掘。攻撃者EOA 0xd801...がプール0x81d5d25ea81b72e546fc71b5baa8b059ef0da702を呼び出した。ログにはpTokenコントラクト0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2eからの鋳造、担保としての供託、および実資産の借り出しが記録されている。"
+          "description": "MegaETHの攻撃トランザクション。ブロック14284505（2026-04-25 01:45:16 UTC）に採掘。攻撃者EOA 0xd801...がプール0x81d5d25ea81b72e546fc71b5baa8b059ef0da702を呼び出した。ログにはpTokenコントラクト0x8d0ea7eb7fc2f1a55abbb7c1c625c1ac8bc00a2eからの鋳造、担保としての供託、および実資産の借り出しが記録されている。",
+          "blockchain": "megaeth"
         }
       ],
       "attackers": [
         {
           "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-          "chain": "hyperevm",
           "role": "primary_attacker",
           "description": "HyperEVM上の攻撃者の外部所有アカウント（EOA）。侵害されたマルチシグから特権ロールを受け取り、無担保pTokenを鋳造して実資産を借り出した。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0xd8010aca201f6113160200b8a521f35be9f94c24",
-          "chain": "megaeth",
           "role": "primary_attacker",
           "description": "MegaETH上の同一攻撃者EOA。ロール付与後、MegaETHのプールでmintUnbackedと借り入れトランザクションを実行した。eth_getCodeにより純粋なウォレットと確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x09CF48BEb67e8Ca3573CBfEb32F03363FFf0cb29",
-          "chain": "megaeth",
           "role": "fund_holder",
           "description": "攻撃者が管理するアドレス。攻撃後も約652 ETH相当の追跡可能な資金を保持している。EOAとして確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "megaeth"
         }
       ],
       "victims": [
         {
           "address": "0x507bc877a27baeb12be4df42efaa949a9a67703d",
-          "chain": "hyperevm",
           "role": "acl_manager",
           "description": "HyperEVM上のPurrlend ACLManager。ロールベースのアクセス制御を管理するコントラクト。侵害されたマルチシグがexecTransactionを実行して、攻撃者に5つのロール（BRIDGE_ROLEを含む）を付与した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x8cfafcac64a9a5cb52fc3482c3b8c855e9308767",
-          "chain": "hyperevm",
           "role": "pool_configurator",
           "description": "HyperEVM上のPurrlend PoolConfigurator。権限昇格トランザクションにおいて設定更新イベントを発行した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x217214bbf25f02a8019d42ea315ab192540ada13",
-          "chain": "megaeth",
           "role": "acl_manager",
           "description": "MegaETH上のPurrlend ACLManager。侵害されたマルチシグが同じバッチロール付与を実行し、5つのRoleGrantedイベントを発行した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0xb54407684b028ee75f012ef264644186e93e4e0e",
-          "chain": "megaeth",
           "role": "pool_configurator",
           "description": "MegaETH上のPurrlend PoolConfigurator。権限昇格トランザクションにおいてプール設定イベントを発行した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x81d5d25ea81b72e546fc71b5baa8b059ef0da702",
-          "chain": "megaeth",
           "role": "pool_contract",
           "description": "MegaETH上のPurrlend Lending Pool（Aaveフォーク）。無担保pTokenを有効担保として扱い、攻撃者が実資産を借り出せるようにした。核心攻撃対象。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         },
         {
           "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-          "chain": "hyperevm",
           "role": "compromised_admin",
           "description": "HyperEVM上のPurrlendチームの2/3 Gnosis Safeマルチシグウォレット。攻撃者は1名以上の署名者を侵害し、execTransactionを提出してロールを付与した。コントラクトサイズは約172バイト（eth_getCodeで確認）。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "hyperevm"
         },
         {
           "address": "0x4c2444d88ad61b0842fba7ccdcb226260ebfa1bc",
-          "chain": "megaeth",
           "role": "compromised_admin",
           "description": "MegaETH上のPurrlendチームの2/3 Gnosis Safeマルチシグウォレット。攻撃者は侵害された署名者を利用してexecTransactionを提出し、ロールを付与した。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "megaeth"
         }
       ],
       "lessons": [
@@ -392,5 +394,10 @@
         "インシデント後の透明な開示と迅速な事後分析は、エコシステムの信頼を強化し、業界全体で類似の攻撃を防ぐのに役立つ。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-05-22",
+    "human_verified": false
   }
 }

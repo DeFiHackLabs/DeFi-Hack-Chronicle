@@ -1,5 +1,6 @@
 {
-  "id": "harvest-2020",
+  "id": "HarvestFinance-20201026",
+  "date": "2020-10-26",
   "title": "Harvest Finance Flash Loan Attack",
   "protocol": "Harvest Finance",
   "blockchain": [
@@ -10,7 +11,9 @@
     "price_manipulation"
   ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "24000000",
     "breakdown": [
@@ -34,79 +37,79 @@
     "note": "Attacker executed 15 consecutive transactions across 18 blocks (11129500 to 11129517). The first exploit cycle began at block 11129500 (02:59:55 UTC, tx 0x0fc6d2ca...). The primary exploit tx occurred at block 11129514 (03:01:39 UTC, tx 0x9d0933...). Funds were extracted at block 11129515 (03:01:48 UTC, tx 0x53fae6...) and partially returned at block 11129517 (03:01:53 UTC, tx 0x25119cd5...). Total on-chain attack window: ~118 seconds.",
     "date": "2020-10-26"
   },
+  "description": "On October 26, 2020, an unknown attacker executed a sophisticated flash loan attack against Harvest Finance, extracting approximately 24 million USD from fUSDC and fUSDT vaults. Over a span of ~118 seconds, the attacker sent 15 consecutive transactions from EOA 0xf224ab... to a helper contract 0xc6028a..., each borrowing 50 million USDT via flash loan from Uniswap V2 WETH/USDT pair, manipulating Curve Y pool stablecoin ratios, and exploiting Harvest's vault share price calculation which relied on the manipulated spot prices. The attacker netted 13 million USDC and 11 million USDT, later returning approximately 2.3 million USD to the Harvest deployer. The incident highlighted critical vulnerabilities in single-source price oracles and the dangers of flash loan amplified price manipulation.",
   "transactions": [
     {
       "txHash": "0x0fc6d2ca064fc841bc9b1c1fad1fbb97bcea5c9a1b2b66ef837f1227e06519a6",
-      "chain": "ethereum",
       "role": "manipulation",
-      "description": "First exploit cycle at block 11129500 (2020-10-26 02:59:55 UTC). Attacker EOA 0xf224ab... called helper contract 0xc6028a... to execute a flash loan from Uniswap V2 WETH/USDT pair (0x0d4a11...) and began deposit-withdraw arbitrage against Harvest's fUSDT vault (0x053c80...) via Curve Y pool (0x45f783...). 76 event logs generated."
+      "description": "First exploit cycle at block 11129500 (2020-10-26 02:59:55 UTC). Attacker EOA 0xf224ab... called helper contract 0xc6028a... to execute a flash loan from Uniswap V2 WETH/USDT pair (0x0d4a11...) and began deposit-withdraw arbitrage against Harvest's fUSDT vault (0x053c80...) via Curve Y pool (0x45f783...). 76 event logs generated.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x9d093325272701d63fdafb0af2d89c7e23eaf18be1a51c580d9bce89987a2dc1",
-      "chain": "ethereum",
       "role": "manipulation",
-      "description": "Primary exploit transaction at block 11129514 (2020-10-26 03:01:39 UTC). Largest single exploit cycle: 8,570,689 gas used, 70 event logs, 1,194 internal traces. Attacker borrowed 50,000,000 USDT via flash loan from Uniswap V2 pair 0x0d4a11..., manipulated Curve Y pool stablecoin ratios, and executed multiple deposit-withdraw cycles against fUSDT vault (0x053c80...) through strategy contract 0x1c47343... to extract profit."
+      "description": "Primary exploit transaction at block 11129514 (2020-10-26 03:01:39 UTC). Largest single exploit cycle: 8,570,689 gas used, 70 event logs, 1,194 internal traces. Attacker borrowed 50,000,000 USDT via flash loan from Uniswap V2 pair 0x0d4a11..., manipulated Curve Y pool stablecoin ratios, and executed multiple deposit-withdraw cycles against fUSDT vault (0x053c80...) through strategy contract 0x1c47343... to extract profit.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x53fae6f1d6b8a76a666a0bf7f9c724e6006465e544f89f1515b939d8911e8c58",
-      "chain": "ethereum",
       "role": "drain",
-      "description": "Fund extraction at block 11129515 (2020-10-26 03:01:48 UTC). Helper contract 0xc6028a... transferred stolen funds to attacker-controlled EOA 0x3811765a...: 13,000,000 USDC and 11,000,000 USDT. Gas used: 69,061. This marks the net extraction of approximately 24,000,000 USD."
+      "description": "Fund extraction at block 11129515 (2020-10-26 03:01:48 UTC). Helper contract 0xc6028a... transferred stolen funds to attacker-controlled EOA 0x3811765a...: 13,000,000 USDC and 11,000,000 USDT. Gas used: 69,061. This marks the net extraction of approximately 24,000,000 USD.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x25119cd54a4562aa427d9770af383512f9cb5e8e4d17232ad96b69dc293a3510",
-      "chain": "ethereum",
       "role": "recovery",
-      "description": "Partial fund return at block 11129517 (2020-10-26 03:01:53 UTC). Helper contract 0xc6028a... returned 1,847,562 USDC and 450,188 USDT to Harvest Finance deployer 0xf00dd244228f51547f0563e60bca65a30fbf5f7f. Gas used: 78,642. This reduced the net loss to approximately 21,700,000 USD."
+      "description": "Partial fund return at block 11129517 (2020-10-26 03:01:53 UTC). Helper contract 0xc6028a... returned 1,847,562 USDC and 450,188 USDT to Harvest Finance deployer 0xf00dd244228f51547f0563e60bca65a30fbf5f7f. Gas used: 78,642. This reduced the net loss to approximately 21,700,000 USD.",
+      "blockchain": "ethereum"
     }
   ],
   "attackers": [
     {
       "address": "0xf224ab004461540778a914ea397c589b677e27bb",
-      "chain": "ethereum",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA). Labeled on Etherscan as 'Harvest.Finance: Hacker 1'. Executed all 15 attack transactions (nonces 20-34) to helper contract 0xc6028a... between blocks 11129500 and 11129517. Confirmed EOA via eth_getCode returning 0x. Did not deploy the helper contract directly but was the sole caller.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x3811765a53c3188c24d412daec3f60faad5f119b",
-      "chain": "ethereum",
       "role": "fund_receiver",
       "description": "Attacker fund-receiving EOA. Labeled on Etherscan as 'Harvest.Finance: Hacker 2'. Received 13,000,000 USDC and 11,000,000 USDT from helper contract 0xc6028a... in tx 0x53fae6... at block 11129515. Subsequently laundered funds through renBTC conversion and Tornado Cash. Confirmed EOA via eth_getCode returning 0x.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "ethereum"
     },
     {
       "address": "0xc6028a9fa486f52efd2b95b949ac630d287ce0af",
-      "chain": "ethereum",
       "role": "helper_contract",
       "description": "Attacker-deployed helper contract that executed complex multi-step interactions within single transactions. Received 50M USDT flash loans from Uniswap V2 pair 0x0d4a11..., swapped on Curve Y pool 0x45f783..., deposited/withdrawn from Harvest fUSDT vault 0x053c80... via strategy 0x1c47343..., and managed fund transfers. All 15 attack transactions were directed to this contract. Unverified source code.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     }
   ],
   "victims": [
     {
       "address": "0xf0358e8c3CD5Fa238a29301d0bEa3D63A17bEdBE",
-      "chain": "ethereum",
       "role": "fusdc_vault",
       "description": "Harvest Finance fUSDC vault. Users who had deposited USDC into this vault suffered losses when the attacker manipulated the shared Curve Y pool price oracle, causing vault share prices to deviate from true market value. On-chain balance dropped from ~54.19M USDC (block 11129513) to ~53.75M USDC (block 11129515). Contract code length: 2,034 bytes (proxy contract).",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x053c80ea73dc6941f518a68e2fc52ac45bde7c9c",
-      "chain": "ethereum",
       "role": "fusdt_vault",
       "description": "Harvest Finance fUSDT vault. Primary target of the exploit. The attacker directly deposited and withdrew USDT through this vault in multiple cycles within tx 0x9d0933... (block 11129514), extracting profit from manipulated share pricing. On-chain balance dropped from ~37.53M USDT (block 11129513) to ~36.25M USDT (block 11129514). Interacted with strategy contract 0x1c47343... which used Curve Y pool spot prices. Contract code length: 2,034 bytes (proxy contract).",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
-      "chain": "ethereum",
       "role": "curve_y_pool",
       "description": "Curve Finance Y-pool (Curve Y Pool). The attacker's helper contract called exchange_underlying on this pool to manipulate stablecoin ratios. By swapping massive amounts of USDC and USDT within single transactions, the attacker distorted the pool's internal price ratios, which Harvest's vault strategies then used to calculate inflated/deflated share prices. Verified Vyper contract.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     }
   ],
-  "description": "On October 26, 2020, an unknown attacker executed a sophisticated flash loan attack against Harvest Finance, extracting approximately 24 million USD from fUSDC and fUSDT vaults. Over a span of ~118 seconds, the attacker sent 15 consecutive transactions from EOA 0xf224ab... to a helper contract 0xc6028a..., each borrowing 50 million USDT via flash loan from Uniswap V2 WETH/USDT pair, manipulating Curve Y pool stablecoin ratios, and exploiting Harvest's vault share price calculation which relied on the manipulated spot prices. The attacker netted 13 million USDC and 11 million USDT, later returning approximately 2.3 million USD to the Harvest deployer. The incident highlighted critical vulnerabilities in single-source price oracles and the dangers of flash loan amplified price manipulation.",
   "rootCause": "Harvest Finance's vault share price calculation relied on a single-source spot price oracle reading from the Curve Y pool. There was no time-weighted average price (TWAP), no multi-source aggregation, and no manipulation-resistant pricing mechanism. The attacker used a flash loan to execute massive stablecoin swaps within the Curve pool in a single transaction, temporarily distorting the pool's internal token ratios. Because Harvest's vault strategies (specifically CRVStrategyStableMainnet) read this manipulated spot price to calculate the net asset value of vault shares, the attacker was able to deposit at an inflated price and withdraw at a deflated price (or vice versa), extracting profit on each cycle.",
   "attackVector": "1. The attacker identified that Harvest Finance's CRVStrategyStableMainnet strategies read Curve Y pool spot prices without time-weighted averaging or slippage guards. 2. The attacker deployed helper contract 0xc6028a... to execute complex multi-step interactions within single transactions. 3. Starting at block 11129500 (02:59:55 UTC), the attacker EOA 0xf224ab... called the helper contract to borrow 50,000,000 USDT via flash loan from Uniswap V2 WETH/USDT pair 0x0d4a11... 4. The helper contract swapped USDT and USDC on Curve Y pool 0x45f783..., creating extreme price imbalance in the pool's stablecoin ratios. 5. The manipulated pool price was read by Harvest's fUSDT strategy 0x1c47343... (and indirectly affected fUSDC strategy 0xd55ada...) to calculate vault share NAV. 6. The helper contract deposited USDT into fUSDT vault 0x053c80... at the manipulated price, then withdrew at a different price, netting profit from the share price delta. 7. The attacker repeated this cycle across 13 large transactions (nonces 20-32, blocks 11129500-11129514), each containing multiple internal deposit-withdraw loops. 8. At block 11129515 (03:01:48 UTC), the helper contract transferred accumulated stolen funds—13,000,000 USDC and 11,000,000 USDT—to attacker EOA 0x3811765a... 9. At block 11129517 (03:01:53 UTC), approximately 2,300,000 USD was returned to Harvest deployer 0xf00dd244... 10. The remaining stolen funds were subsequently laundered through renBTC conversion and Tornado Cash.",
   "lessons": [
@@ -130,15 +133,6 @@
     "https://etherscan.io/address/0x053c80ea73dc6941f518a68e2fc52ac45bde7c9c",
     "https://curve.fi/#/ethereum/pools"
   ],
-  "metadata": {
-    "dateAdded": "2025-01-15",
-    "lastUpdated": "2026-05-26",
-    "human_verified": true,
-    "models": [
-      "kimi-k2.6"
-    ]
-  },
-  "date": "2020-10-26",
   "locales": {
     "zh-TW": {
       "title": "Harvest Finance 閃電貸攻擊事件",
@@ -148,73 +142,73 @@
       "transactions": [
         {
           "txHash": "0x0fc6d2ca064fc841bc9b1c1fad1fbb97bcea5c9a1b2b66ef837f1227e06519a6",
-          "chain": "ethereum",
           "role": "manipulation",
-          "description": "第一輪攻擊循環，採掛於區塊 11129500（2020-10-26 02:59:55 UTC）。攻擊者 EOA 0xf224ab... 呼叫輔助合約 0xc6028a...，從 Uniswap V2 WETH/USDT 交易對取得閃電貸，開始針對 Harvest fUSDT 金庫透過 Curve Y 池進行存提套利。共產生 76 個事件日誌。"
+          "description": "第一輪攻擊循環，採掛於區塊 11129500（2020-10-26 02:59:55 UTC）。攻擊者 EOA 0xf224ab... 呼叫輔助合約 0xc6028a...，從 Uniswap V2 WETH/USDT 交易對取得閃電貸，開始針對 Harvest fUSDT 金庫透過 Curve Y 池進行存提套利。共產生 76 個事件日誌。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x9d093325272701d63fdafb0af2d89c7e23eaf18be1a51c580d9bce89987a2dc1",
-          "chain": "ethereum",
           "role": "manipulation",
-          "description": "主要攻擊交易，採掛於區塊 11129514（2020-10-26 03:01:39 UTC）。最大單筆攻擊循環：耗用 8,570,689 gas，產生 70 個事件日誌，含 1,194 筆內部追蹤。攻擊者借入 5,000 萬 USDT 閃電貸，操縱 Curve Y 池穩定幣比率，並透過策略合約 0x1c47343... 對 fUSDT 金庫 0x053c80... 執行多次存提循環以提取利潤。"
+          "description": "主要攻擊交易，採掛於區塊 11129514（2020-10-26 03:01:39 UTC）。最大單筆攻擊循環：耗用 8,570,689 gas，產生 70 個事件日誌，含 1,194 筆內部追蹤。攻擊者借入 5,000 萬 USDT 閃電貸，操縱 Curve Y 池穩定幣比率，並透過策略合約 0x1c47343... 對 fUSDT 金庫 0x053c80... 執行多次存提循環以提取利潤。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x53fae6f1d6b8a76a666a0bf7f9c724e6006465e544f89f1515b939d8911e8c58",
-          "chain": "ethereum",
           "role": "drain",
-          "description": "資金提取交易，採掛於區塊 11129515（2020-10-26 03:01:48 UTC）。輔助合約 0xc6028a... 將被盜資金轉移至攻擊者控制的 EOA 0x3811765a...：1,300 萬 USDC 與 1,100 萬 USDT。耗用 gas 69,061。標誌淨提取約 2,400 萬美元。"
+          "description": "資金提取交易，採掛於區塊 11129515（2020-10-26 03:01:48 UTC）。輔助合約 0xc6028a... 將被盜資金轉移至攻擊者控制的 EOA 0x3811765a...：1,300 萬 USDC 與 1,100 萬 USDT。耗用 gas 69,061。標誌淨提取約 2,400 萬美元。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x25119cd54a4562aa427d9770af383512f9cb5e8e4d17232ad96b69dc293a3510",
-          "chain": "ethereum",
           "role": "recovery",
-          "description": "部分資金退回交易，採掛於區塊 11129517（2020-10-26 03:01:53 UTC）。輔助合約 0xc6028a... 向 Harvest Finance 部署者 0xf00dd244... 退回 1,847,562 USDC 與 450,188 USDT。耗用 gas 78,642。淨損失降至約 2,170 萬美元。"
+          "description": "部分資金退回交易，採掛於區塊 11129517（2020-10-26 03:01:53 UTC）。輔助合約 0xc6028a... 向 Harvest Finance 部署者 0xf00dd244... 退回 1,847,562 USDC 與 450,188 USDT。耗用 gas 78,642。淨損失降至約 2,170 萬美元。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xf224ab004461540778a914ea397c589b677e27bb",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA）。Etherscan 標註為 'Harvest.Finance: Hacker 1'。在區塊 11129500 至 11129517 間執行全部 15 筆攻擊交易（nonces 20-34），目標均為輔助合約 0xc6028a...。經 eth_getCode 確認為純錢包（回傳 0x）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3811765a53c3188c24d412daec3f60faad5f119b",
-          "chain": "ethereum",
           "role": "fund_receiver",
           "description": "攻擊者資金接收 EOA。Etherscan 標註為 'Harvest.Finance: Hacker 2'。於區塊 11129515（tx 0x53fae6...）從輔助合約 0xc6028a... 接收 1,300 萬 USDC 與 1,100 萬 USDT。後續將資金透過 renBTC 轉換及 Tornado Cash 洗錢。經 eth_getCode 確認為 EOA。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xc6028a9fa486f52efd2b95b949ac630d287ce0af",
-          "chain": "ethereum",
           "role": "helper_contract",
           "description": "攻擊者部署的輔助合約，在單一交易內執行複雜多步操作。從 Uniswap V2 WETH/USDT 交易對 0x0d4a11... 接收 5,000 萬 USDT 閃電貸，於 Curve Y 池 0x45f783... 交換，並透過策略 0x1c47343... 與 Harvest fUSDT 金庫 0x053c80... 互動以管理資金轉移。全部 15 筆攻擊交易均指向此合約。原始碼未經驗證。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0xf0358e8c3CD5Fa238a29301d0bEa3D63A17bEdBE",
-          "chain": "ethereum",
           "role": "fusdc_vault",
           "description": "Harvest Finance fUSDC 金庫。當攻擊者操縱共享的 Curve Y 池價格預言機時，存入此金庫的用戶因份額價格偏離真實市場價值而遭受損失。鏈上餘額自區塊 11129513 的約 5,418 萬 USDC 降至區塊 11129515 的約 5,375 萬 USDC。合約長度 2,034 bytes（代理合約）。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x053c80ea73dc6941f518a68e2fc52ac45bde7c9c",
-          "chain": "ethereum",
           "role": "fusdt_vault",
           "description": "Harvest Finance fUSDT 金庫。主要攻擊目標。攻擊者在 tx 0x9d0933...（區塊 11129514）中直接對此金庫進行多輪存入與提取，從操縱的份額定價中獲利。鏈上餘額自區塊 11129513 的約 3,753 萬 USDT 降至區塊 11129514 的約 3,625 萬 USDT。透過策略合約 0x1c47343... 與 Curve Y 池現價互動。合約長度 2,034 bytes（代理合約）。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
-          "chain": "ethereum",
           "role": "curve_y_pool",
           "description": "Curve Finance Y 池。攻擊者的輔助合約呼叫此池的 exchange_underlying 以操縱穩定幣比率。透過在單一交易內大量交換 USDC 與 USDT，攻擊者改變了池內代幣比率，使 Harvest 的策略誤用人為扭曲的價格計算金庫份額淨值。已驗證 Vyper 合約。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -236,73 +230,73 @@
       "transactions": [
         {
           "txHash": "0x0fc6d2ca064fc841bc9b1c1fad1fbb97bcea5c9a1b2b66ef837f1227e06519a6",
-          "chain": "ethereum",
           "role": "manipulation",
-          "description": "最初の攻撃サイクル。ブロック11129500（2020-10-26 02:59:55 UTC）。攻撃者EOA 0xf224ab...が補助コントラクト0xc6028a...を呼び出し、Uniswap V2 WETH/USDTペアからフラッシュローンを取得し、Harvest fUSDTボールトに対してCurve Yプールを介した預入/引出アービトラージを開始した。76個のイベントログを生成。"
+          "description": "最初の攻撃サイクル。ブロック11129500（2020-10-26 02:59:55 UTC）。攻撃者EOA 0xf224ab...が補助コントラクト0xc6028a...を呼び出し、Uniswap V2 WETH/USDTペアからフラッシュローンを取得し、Harvest fUSDTボールトに対してCurve Yプールを介した預入/引出アービトラージを開始した。76個のイベントログを生成。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x9d093325272701d63fdafb0af2d89c7e23eaf18be1a51c580d9bce89987a2dc1",
-          "chain": "ethereum",
           "role": "manipulation",
-          "description": "主要な攻撃トランザクション。ブロック11129514（2020-10-26 03:01:39 UTC）。最大の単一攻撃サイクル：8,570,689ガス使用、70個のイベントログ、1,194個の内部トレース。攻撃者は5000万USDTのフラッシュローンを借り入れ、Curve Yプールのステーブルコイン比率を操作し、戦略コントラクト0x1c47343...を介してfUSDTボールト0x053c80...に対して複数の預入/引出サイクルを実行して利益を抽出した。"
+          "description": "主要な攻撃トランザクション。ブロック11129514（2020-10-26 03:01:39 UTC）。最大の単一攻撃サイクル：8,570,689ガス使用、70個のイベントログ、1,194個の内部トレース。攻撃者は5000万USDTのフラッシュローンを借り入れ、Curve Yプールのステーブルコイン比率を操作し、戦略コントラクト0x1c47343...を介してfUSDTボールト0x053c80...に対して複数の預入/引出サイクルを実行して利益を抽出した。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x53fae6f1d6b8a76a666a0bf7f9c724e6006465e544f89f1515b939d8911e8c58",
-          "chain": "ethereum",
           "role": "drain",
-          "description": "資金抽出トランザクション。ブロック11129515（2020-10-26 03:01:48 UTC）。補助コントラクト0xc6028a...が窃取資金を攻撃者管理のEOA 0x3811765a...に転送：1300万USDCおよび1100万USDT。ガス使用69,061。純粋な2400万米ドルの抽出を意味する。"
+          "description": "資金抽出トランザクション。ブロック11129515（2020-10-26 03:01:48 UTC）。補助コントラクト0xc6028a...が窃取資金を攻撃者管理のEOA 0x3811765a...に転送：1300万USDCおよび1100万USDT。ガス使用69,061。純粋な2400万米ドルの抽出を意味する。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x25119cd54a4562aa427d9770af383512f9cb5e8e4d17232ad96b69dc293a3510",
-          "chain": "ethereum",
           "role": "recovery",
-          "description": "部分資金返還トランザクション。ブロック11129517（2020-10-26 03:01:53 UTC）。補助コントラクト0xc6028a...が1,847,562 USDCおよび450,188 USDTをHarvest Financeデプロイヤー0xf00dd244...に返還。ガス使用78,642。純損失はおよそ2170万米ドルに減少。"
+          "description": "部分資金返還トランザクション。ブロック11129517（2020-10-26 03:01:53 UTC）。補助コントラクト0xc6028a...が1,847,562 USDCおよび450,188 USDTをHarvest Financeデプロイヤー0xf00dd244...に返還。ガス使用78,642。純損失はおよそ2170万米ドルに減少。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xf224ab004461540778a914ea397c589b677e27bb",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻撃者の外部所有アカウント（EOA）。Etherscanでは'Harvest.Finance: Hacker 1'とラベル付けされている。ブロック11129500から11129517の間に、補助コントラクト0xc6028a...宛てに15回の攻撃トランザクション（nonces 20-34）を実行した。eth_getCodeによるEOA確認（0x応答）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3811765a53c3188c24d412daec3f60faad5f119b",
-          "chain": "ethereum",
           "role": "fund_receiver",
           "description": "攻撃者の資金受取EOA。Etherscanでは'Harvest.Finance: Hacker 2'とラベル付けされている。ブロック11129515（tx 0x53fae6...）で、補助コントラクト0xc6028a...から1300万USDCおよび1100万USDTを受け取った。その後、renBTCへの変換およびTornado Cashを通じて資金を洗浄。eth_getCodeによるEOA確認。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xc6028a9fa486f52efd2b95b949ac630d287ce0af",
-          "chain": "ethereum",
           "role": "helper_contract",
           "description": "攻撃者がデプロイした補助コントラクト。単一トランザクション内で複雑な多段階操作を実行。Uniswap V2 WETH/USDTペア0x0d4a11...から5000万USDTのフラッシュローンを受け取り、Curve Yプール0x45f783...で交換し、戦略0x1c47343...を介してHarvest fUSDTボールト0x053c80...と相互作用して資金移動を管理した。すべての15回の攻撃トランザクションがこのコントラクトを対象としていた。未検証ソースコード。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0xf0358e8c3CD5Fa238a29301d0bEa3D63A17bEdBE",
-          "chain": "ethereum",
           "role": "fusdc_vault",
           "description": "Harvest Finance fUSDCボールト。攻撃者が共有のCurve Yプール価格オラクルを操作した際に、このボールトに預入れしたユーザーはシェア価格が真の市場価値から逸脱したことにより損失を被った。オンチェーンバランスはブロック11129513の約5419万USDCからブロック11129515の約5375万USDCに減少。コントラクト長2,034バイト（プロキシコントラクト）。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x053c80ea73dc6941f518a68e2fc52ac45bde7c9c",
-          "chain": "ethereum",
           "role": "fusdt_vault",
           "description": "Harvest Finance fUSDTボールト。主要な攻撃対象。攻撃者はtx 0x9d0933...（ブロック11129514）で、このボールトに対して直接的に複数回の預入/引出を行い、操作されたシェア価格から利益を抽出した。オンチェーンバランスはブロック11129513の約3753万USDTからブロック11129514の約3625万USDTに減少。戦略コントラクト0x1c47343...を介してCurve Yプールのスポット価格と相互作用。コントラクト長2,034バイト（プロキシコントラクト）。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
-          "chain": "ethereum",
           "role": "curve_y_pool",
           "description": "Curve Finance Yプール。攻撃者の補助コントラクトはこのプールのexchange_underlyingを呼び出してステーブルコイン比率を操作した。単一トランザクション内で大量のUSDCとUSDTを交換することでプール内トークン比率を変え、Harvestの戦略が人為的に歪められた価格を使用してボールトシェアNAVを計算するようにした。検証済みVyperコントラクト。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -316,5 +310,13 @@
         "攻撃トランザクションの単一ブロック原子性は、ノード運営者が同じブロック内で介入できないことを意味する——堅牢なオラクル設計による予防が、フラッシュローン攻撃に対する唯一の有効な防御手段である。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2025-01-15",
+    "lastUpdated": "2026-05-26",
+    "human_verified": true,
+    "models": [
+      "kimi-k2.6"
+    ]
   }
 }

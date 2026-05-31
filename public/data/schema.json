@@ -1,10 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DeFi Hack Event",
-  "description": "Schema for individual hack event files in data/hacks/. Each file represents one security incident. Files may contain additional metadata beyond what is defined here. NOTE: When no existing key in languages, ecosystems, categories, blockchains, accountTypes, or role matches the incident, you MAY add a new key to accurately describe it.",
+  "description": "Strict schema for DeFi hack event records. All objects use additionalProperties: false.",
   "type": "object",
   "required": [
     "id",
+    "date",
     "title",
     "protocol",
     "blockchain",
@@ -14,201 +15,741 @@
     "estimatedLoss",
     "attackTime",
     "description",
-    "date"
+    "transactions",
+    "attackers",
+    "victims",
+    "rootCause",
+    "attackVector",
+    "lessons",
+    "references",
+    "metadata"
   ],
-  "additionalProperties": true,
+  "additionalProperties": false,
   "_metadata": {
-    "languages": [
-      { "id": "solidity", "name": "Solidity", "color": "#6366f1", "description": "Ethereum smart contract language" },
-      { "id": "vyper", "name": "Vyper", "color": "#8b5cf6", "description": "Python-like smart contract language" },
-      { "id": "rust", "name": "Rust", "color": "#f74c00", "description": "Solana and Polkadot smart contract language" },
-      { "id": "move", "name": "Move", "color": "#22c55e", "description": "Aptos and Sui smart contract language" },
-      { "id": "huff", "name": "Huff", "color": "#d946ef", "description": "Low-level EVM assembly-like smart contract language" },
-      { "id": "default", "name": "Other", "color": "#6b7280", "description": "Other, unknown or unclassified language" }
-    ],
-    "ecosystems": [
-      { "id": "evm", "name": "EVM", "color": "#3b82f6", "description": "Ethereum Virtual Machine compatible chains" },
-      { "id": "solana", "name": "SolanaVM", "color": "#a855f7", "description": "Solana ecosystem" },
-      { "id": "move", "name": "MoveVM", "color": "#06b6d4", "description": "Aptos and Sui ecosystem" },
-      { "id": "bitcoin", "name": "Bitcoin", "color": "#f7931a", "description": "Bitcoin ecosystem" },
-      { "id": "default", "name": "Other", "color": "#6b7280", "description": "Other, unknown or unclassified ecosystems" }
-    ],
-    "categories": [
-      { "id": "reentrancy", "name": "Reentrancy", "color": "#ef4444", "description": "Reentrancy Attack" },
-      { "id": "price_manipulation", "name": "Price Manipulation", "color": "#f97316", "description": "Price Manipulation Attack" },
-      { "id": "flashloan", "name": "Flashloan", "color": "#eab308", "description": "Flash Loan Attack" },
-      { "id": "bridge", "name": "Cross-chain Bridge", "color": "#8b5cf6", "description": "Cross-chain Bridge Attack" },
-      { "id": "rugpull", "name": "Rug Pull", "color": "#ec4899", "description": "Rug Pull / Exit Scam" },
-      { "id": "access_control", "name": "Access Control", "color": "#06b6d4", "description": "Access Control Issue" },
-      { "id": "business_logic", "name": "Business Logic", "color": "#10b981", "description": "Logic errors, parsing bugs, calculation flaws, or incorrect state transitions" },
-      { "id": "arithmetic_error", "name": "Arithmetic Error", "color": "#f59e0b", "description": "Integer overflow, underflow, division by zero, or precision loss in calculations" },
-      { "id": "social_engineering", "name": "Social Engineering", "color": "#f43f5e", "description": "Attacks exploiting human psychology or trust" },
-      { "id": "default", "name": "Unclassified", "color": "#6b7280", "description": "Unclassified category" }
-    ],
-    "blockchains": [
-      { "id": "multi-chain", "name": "Multi-chain", "color": "#f59e0b", "description": "Multiple blockchains involved" },
-      { "id": "ethereum", "name": "Ethereum", "color": "#627eea", "description": "Ethereum mainnet" },
-      { "id": "bsc", "name": "BSC", "color": "#f0b90b", "description": "BNB Smart Chain (formerly BSC)" },
-      { "id": "arbitrum", "name": "Arbitrum", "color": "#28a0f0", "description": "Arbitrum L2" },
-      { "id": "polygon", "name": "Polygon", "color": "#8247e5", "description": "Polygon (formerly Matic)" },
-      { "id": "optimism", "name": "Optimism", "color": "#ff0420", "description": "Optimism L2" },
-      { "id": "avalanche", "name": "Avalanche", "color": "#e84142", "description": "Avalanche C-Chain" },
-      { "id": "solana", "name": "Solana", "color": "#14f195", "description": "Solana" },
-      { "id": "ronin", "name": "Ronin", "color": "#0a6bff", "description": "Ronin sidechain (Axie Infinity)" },
-      { "id": "harmony", "name": "Harmony", "color": "#00eaf0", "description": "Harmony blockchain" },
-      { "id": "monad", "name": "Monad", "color": "#836ef9", "description": "Monad EVM-compatible Layer 1 blockchain" },
-      { "id": "bitcoin", "name": "Bitcoin", "color": "#f7931a", "description": "Bitcoin network" },
-      { "id": "sui", "name": "Sui", "color": "#4da2ff", "description": "Sui Network, MoveVM-based Layer 1 blockchain" },
-      { "id": "hyperevm", "name": "HyperEVM", "color": "#00d1ff", "description": "Hyperliquid EVM-compatible Layer 1 blockchain" },
-      { "id": "megaeth", "name": "MegaETH", "color": "#00e676", "description": "MegaETH EVM-compatible Layer 1 blockchain" },
-      { "id": "default", "name": "Unclassified", "color": "#6b7280", "description": "Unclassified blockchain" }
-    ],
-    "accountTypes": [
-      { "id": "contract_open_source", "name": "Contract (Open Source)", "color": "#22c55e", "description": "Smart contract with publicly available source code, including explorer-verified code or public repositories such as GitHub" },
-      { "id": "contract_close_source", "name": "Contract (Closed Source)", "color": "#ef4444", "description": "Smart contract without publicly available source code" },
-      { "id": "eoa", "name": "EOA", "color": "#6b7280", "description": "Plain wallet-style account" },
-      { "id": "unknown", "name": "Unknown", "color": "#9ca3af", "description": "Account type could not be determined" }
-    ],
     "fileNamingConvention": "YYYYMMDD-ProtocolName.json",
     "repository": "data/hacks/",
     "extensibleFields": {
-      "description": "The following fields MAY accept new keys when no existing key accurately describes the incident. Add new keys only as a last resort when no predefined key is a reasonable match.",
-      "fields": ["languages", "ecosystems", "categories", "blockchains", "accountTypes", "role"]
+      "description": "When no existing key matches, you MAY add a new key to these vocabularies.",
+      "fields": [
+        "languages",
+        "ecosystems",
+        "categories",
+        "blockchains",
+        "attackerRoles",
+        "victimRoles",
+        "transactionRoles"
+      ]
+    },
+    "categories": [
+      {
+        "id": "reentrancy",
+        "name": "Reentrancy",
+        "color": "#ff2e63",
+        "description": "Reentrancy Attack"
+      },
+      {
+        "id": "business_logic",
+        "name": "Business Logic",
+        "color": "#10b981",
+        "description": "Logic errors, parsing bugs, calculation flaws, or incorrect state transitions"
+      },
+      {
+        "id": "flashloan",
+        "name": "Flashloan",
+        "color": "#eab308",
+        "description": "Flash Loan Attack"
+      },
+      {
+        "id": "access_control",
+        "name": "Access Control",
+        "color": "#06b6d4",
+        "description": "Access Control Issue"
+      },
+      {
+        "id": "price_manipulation",
+        "name": "Price Manipulation",
+        "color": "#f97316",
+        "description": "Price Manipulation Attack"
+      },
+      {
+        "id": "rug_pull",
+        "name": "Rug Pull / Exit scam",
+        "color": "#ec4899",
+        "description": "Rug pull / Exit scam"
+      },
+      {
+        "id": "governance_attack",
+        "name": "Governance / DAO attack",
+        "color": "#8b5cf6",
+        "description": "Governance / DAO attack"
+      },
+      {
+        "id": "bridge",
+        "name": "Cross-chain Bridge",
+        "color": "#8b5cf6",
+        "description": "Cross-chain Bridge Attack"
+      },
+      {
+        "id": "social_engineering",
+        "name": "Social Engineering",
+        "color": "#f43f5e",
+        "description": "Social Engineering"
+      },
+      {
+        "id": "signature_abuse",
+        "name": "Signature Abuse Attack",
+        "color": "#f43f5e",
+        "description": "Signature Abuse Attack"
+      },
+      {
+        "id": "mev_front_running",
+        "name": "MEV / Front-Running",
+        "color": "#f59e0b",
+        "description": "MEV / Front-Running Attack"
+      },
+      {
+        "id": "key_compromise",
+        "name": "Private key Compromise",
+        "color": "#6366f1",
+        "description": "Private Key Compromise"
+      }
+    ],
+    "blockchains": [
+      {
+        "id": "ethereum",
+        "name": "Ethereum",
+        "description": "Ethereum mainnet"
+      },
+      {
+        "id": "bsc",
+        "name": "BSC",
+        "description": "BNB Smart Chain (formerly BSC)"
+      },
+      {
+        "id": "polygon",
+        "name": "Polygon",
+        "description": "Polygon (formerly Matic)"
+      },
+      {
+        "id": "arbitrum",
+        "name": "Arbitrum",
+        "description": "Arbitrum L2"
+      },
+      {
+        "id": "optimism",
+        "name": "Optimism",
+        "description": "Optimism L2"
+      },
+      {
+        "id": "avalanche",
+        "name": "Avalanche",
+        "description": "Avalanche C-Chain"
+      },
+      {
+        "id": "fantom",
+        "name": "Fantom",
+        "description": "Fantom"
+      },
+      {
+        "id": "solana",
+        "name": "Solana",
+        "description": "Solana"
+      },
+      {
+        "id": "cosmos",
+        "name": "Cosmos",
+        "description": "Cosmos Hub"
+      },
+      {
+        "id": "bitcoin",
+        "name": "Bitcoin",
+        "description": "Bitcoin network"
+      },
+      {
+        "id": "base",
+        "name": "Base",
+        "description": "Base"
+      },
+      {
+        "id": "tron",
+        "name": "TRON",
+        "description": "TRON"
+      },
+      {
+        "id": "hyperevm",
+        "name": "HyperEVM",
+        "description": "Hyperliquid EVM-compatible Layer 1 blockchain"
+      },
+      {
+        "id": "megaeth",
+        "name": "MegaETH",
+        "description": "MegaETH EVM-compatible Layer 1 blockchain"
+      },
+      {
+        "id": "sui",
+        "name": "Sui",
+        "description": "Sui Network, MoveVM-based Layer 1 blockchain"
+      },
+      {
+        "id": "monad",
+        "name": "Monad",
+        "description": "Monad EVM-compatible Layer 1 blockchain"
+      }
+    ],
+    "languages": [
+      {
+        "id": "solidity",
+        "name": "Solidity",
+        "description": "Ethereum smart contract language"
+      },
+      {
+        "id": "vyper",
+        "name": "Vyper",
+        "description": "Python-like smart contract language"
+      },
+      {
+        "id": "rust",
+        "name": "Rust",
+        "description": "Solana and Polkadot smart contract language"
+      },
+      {
+        "id": "go",
+        "name": "Go",
+        "description": "Go"
+      },
+      {
+        "id": "move",
+        "name": "Move",
+        "description": "Aptos and Sui smart contract language"
+      },
+      {
+        "id": "huff",
+        "name": "Huff",
+        "description": "Low-level EVM assembly-like smart contract language"
+      },
+      {
+        "id": "yul",
+        "name": "Yul",
+        "description": "Yul"
+      },
+      {
+        "id": "cairo",
+        "name": "Cairo",
+        "description": "Cairo"
+      },
+      {
+        "id": "N/A",
+        "name": "N/A",
+        "description": "Not applicable"
+      }
+    ],
+    "ecosystems": [
+      {
+        "id": "evm",
+        "name": "EVM",
+        "description": "Ethereum Virtual Machine compatible chains"
+      },
+      {
+        "id": "cosmos",
+        "name": "Cosmos",
+        "description": "Cosmos SDK"
+      },
+      {
+        "id": "polkadot",
+        "name": "Polkadot",
+        "description": "Polkadot SDK"
+      },
+      {
+        "id": "substrate",
+        "name": "Substrate",
+        "description": "Substrate Framework"
+      },
+      {
+        "id": "solana",
+        "name": "Solana",
+        "description": "Solana ecosystem"
+      },
+      {
+        "id": "move",
+        "name": "Move",
+        "description": "Aptos and Sui ecosystem"
+      },
+      {
+        "id": "ton",
+        "name": "TON",
+        "description": "Telegram Open Network"
+      },
+      {
+        "id": "bitcoin",
+        "name": "Bitcoin",
+        "description": "Bitcoin ecosystem"
+      },
+      {
+        "id": "other",
+        "name": "Other",
+        "description": "Other"
+      }
+    ],
+    "attackerRoles": [
+      {
+        "id": "gas_funder",
+        "name": "Gas Funder",
+        "color": "#ef4444",
+        "description": "Address that funded the attacker"
+      },
+      {
+        "id": "primary_attacker",
+        "name": "Primary Attacker",
+        "color": "#f97316",
+        "description": "Primary exploiter"
+      },
+      {
+        "id": "exploit_contract",
+        "name": "Exploit Contract",
+        "color": "#eab308",
+        "description": "Exploit contract"
+      },
+      {
+        "id": "consolidation",
+        "name": "Consolidation",
+        "color": "#84cc16",
+        "description": "Fund consolidation address"
+      },
+      {
+        "id": "child_dao",
+        "name": "Child Dao",
+        "color": "#22c55e",
+        "description": "Child DAO created by exploit"
+      }
+    ],
+    "victimRoles": [
+      {
+        "id": "protocol",
+        "name": "Protocol",
+        "color": "#ef4444",
+        "description": "The attacked protocol itself"
+      },
+      {
+        "id": "user",
+        "name": "User",
+        "color": "#f97316",
+        "description": "End users who lost funds"
+      },
+      {
+        "id": "liquidity_pool",
+        "name": "Liquidity Pool",
+        "color": "#eab308",
+        "description": "Liquidity pool"
+      },
+      {
+        "id": "treasury",
+        "name": "Treasury",
+        "color": "#84cc16",
+        "description": "Protocol treasury"
+      },
+      {
+        "id": "protocol_contract",
+        "name": "Protocol Contract",
+        "color": "#22c55e",
+        "description": "Protocol smart contract"
+      },
+      {
+        "id": "vulnerable_contract",
+        "name": "Vulnerable Contract",
+        "color": "#06b6d4",
+        "description": "Vulnerable contract"
+      }
+    ],
+    "transactionRoles": [
+      {
+        "id": "funding",
+        "name": "Funding",
+        "color": "#ef4444",
+        "description": "Transaction that funded the attacker"
+      },
+      {
+        "id": "setup",
+        "name": "Setup",
+        "color": "#f97316",
+        "description": "Setup for exploit"
+      },
+      {
+        "id": "exploit",
+        "name": "Exploit",
+        "color": "#eab308",
+        "description": "The main exploit transaction"
+      },
+      {
+        "id": "consolidation",
+        "name": "Consolidation",
+        "color": "#84cc16",
+        "description": "Attacker consolidation transaction"
+      },
+      {
+        "id": "laundering",
+        "name": "Laundering",
+        "color": "#22c55e",
+        "description": "Money laundering"
+      }
+    ],
+    "accountTypes": [
+      {
+        "id": "EOA",
+        "name": "EOA",
+        "color": "#6b7280",
+        "description": "Externally Owned Account"
+      },
+      {
+        "id": "Contract",
+        "name": "Contract",
+        "color": "#22c55e",
+        "description": "Smart Contract"
+      },
+      {
+        "id": "Multisig",
+        "name": "Multisig",
+        "color": "#f59e0b",
+        "description": "Multi-signature Wallet"
+      },
+      {
+        "id": "Exchange",
+        "name": "Exchange",
+        "color": "#3b82f6",
+        "description": "Exchange / Custodial"
+      },
+      {
+        "id": "Unknown",
+        "name": "Unknown",
+        "color": "#9ca3af",
+        "description": "Unknown / Unverified"
+      }
+    ]
+  },
+  "$defs": {
+    "transactionItem": {
+      "type": "object",
+      "required": [
+        "txHash",
+        "blockchain",
+        "role"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "txHash": {
+          "type": "string",
+          "pattern": "^.{1,128}$",
+          "description": "Transaction hash (hex or base58)"
+        },
+        "blockchain": {
+          "type": "string",
+          "description": "Blockchain name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of this transaction (see _metadata.transactionRoles)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description"
+        }
+      }
+    },
+    "attackerItem": {
+      "type": "object",
+      "required": [
+        "address",
+        "blockchain",
+        "role"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Attacker address"
+        },
+        "blockchain": {
+          "type": "string",
+          "description": "Blockchain name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of this attacker (see _metadata.attackerRoles)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description"
+        },
+        "accountType": {
+          "type": "string",
+          "enum": [
+            "EOA",
+            "Contract",
+            "Multisig",
+            "Exchange",
+            "Unknown"
+          ],
+          "description": "Type of account"
+        }
+      }
+    },
+    "victimItem": {
+      "type": "object",
+      "required": [
+        "address",
+        "blockchain",
+        "role"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Victim address"
+        },
+        "blockchain": {
+          "type": "string",
+          "description": "Blockchain name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of this victim (see _metadata.victimRoles)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description"
+        },
+        "accountType": {
+          "type": "string",
+          "enum": [
+            "EOA",
+            "Contract",
+            "Multisig",
+            "Exchange",
+            "Unknown"
+          ],
+          "description": "Type of account"
+        }
+      }
+    },
+    "localeObject": {
+      "type": "object",
+      "description": "Localized override of translatable fields. Any field present replaces the root equivalent for this locale.",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "rootCause": {
+          "type": "string"
+        },
+        "attackVector": {
+          "type": "string"
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transactionItem"
+          }
+        },
+        "attackers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attackerItem"
+          }
+        },
+        "victims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/victimItem"
+          }
+        },
+        "estimatedLoss": {
+          "type": "object",
+          "description": "Localized override of estimatedLoss fields",
+          "properties": {
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "attackTime": {
+          "type": "object",
+          "description": "Localized override of attackTime fields",
+          "properties": {
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier for the event, e.g. 'dao-2016'",
-      "pattern": "^[a-z0-9]+-[0-9]{4}(-[0-9]+)?$"
+      "description": "Unique identifier. Format: ProtocolName-YYYYMMDD (e.g., FTX-20221111)",
+      "pattern": "^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*-[0-9]{8}$"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Calendar date for sorting (YYYY-MM-DD)"
     },
     "title": {
       "type": "string",
-      "description": "Human-readable title of the hack"
+      "description": "Human-readable event title"
     },
     "protocol": {
       "type": "string",
-      "description": "Name of the protocol that was hacked"
+      "description": "Name of the affected protocol"
     },
     "blockchain": {
       "type": "array",
+      "description": "Affected blockchains",
       "items": {
         "type": "string"
-      },
-      "description": "Blockchain IDs where the hack occurred, must reference ids from blockchains in schema metadata."
+      }
     },
     "category": {
       "type": "array",
+      "description": "Attack categories",
       "items": {
         "type": "string"
-      },
-      "description": "Attack category IDs, must reference ids from categories in schema metadata"
+      }
     },
     "ecosystem": {
       "type": "string",
-      "description": "Ecosystem ID, must reference an id from ecosystems in schema metadata"
+      "description": "Ecosystem (see _metadata.ecosystems)"
     },
     "language": {
-      "type": "string",
-      "description": "Programming language ID, must reference an id from languages in schema metadata"
+      "type": "array",
+      "description": "Languages used in the protocol (e.g., ['solidity'], ['N/A'])",
+      "items": {
+        "type": "string"
+      }
     },
     "estimatedLoss": {
       "type": "object",
-      "required": ["totalUSD"],
+      "required": [
+        "totalUSD",
+        "breakdown"
+      ],
+      "additionalProperties": false,
       "properties": {
         "totalUSD": {
           "type": "string",
-          "description": "Total estimated loss in USD (string to preserve precision)"
+          "description": "Total estimated loss in USD"
         },
         "breakdown": {
           "type": "array",
+          "description": "Asset-level breakdown",
           "items": {
             "type": "object",
-            "required": ["asset", "amount", "convertedUSD"],
+            "required": [
+              "asset",
+              "amount",
+              "convertedUSD"
+            ],
+            "additionalProperties": false,
             "properties": {
-              "asset": { "type": "string", "description": "The actual stolen asset (e.g. 'ETH', 'BTC', 'USDC', 'USD')" },
-              "amount": { "type": "string", "description": "Amount stolen in the original asset denomination" },
-              "convertedUSD": { "type": "string", "description": "USD value at time of hack" }
+              "asset": {
+                "type": "string",
+                "description": "Asset symbol or name"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Amount lost"
+              },
+              "convertedUSD": {
+                "type": "string",
+                "description": "USD equivalent at time of incident"
+              },
+              "note": {
+                "type": "string",
+                "description": "Optional note about this breakdown item"
+              }
             }
           }
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string",
+          "description": "Optional note about loss calculation"
+        }
       }
     },
     "attackTime": {
       "type": "object",
-      "required": ["startTime", "endTime", "date"],
+      "required": [
+        "startTime",
+        "endTime",
+        "date"
+      ],
+      "additionalProperties": false,
       "properties": {
         "startTime": {
           "type": "string",
-          "description": "ISO 8601 timestamp of attack start"
+          "format": "date-time",
+          "description": "Attack start time (ISO 8601)"
         },
         "endTime": {
           "type": "string",
-          "description": "ISO 8601 timestamp of attack end"
+          "format": "date-time",
+          "description": "Attack end time (ISO 8601)"
         },
-        "isRange": { "type": "boolean" },
-        "note": { "type": "string" },
+        "isRange": {
+          "type": "boolean",
+          "description": "Whether the attack spanned a time range"
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional note about timing"
+        },
         "date": {
           "type": "string",
-          "description": "Date string YYYY-MM-DD used for calendar display"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Calendar date (YYYY-MM-DD)"
         }
       }
     },
     "transactions": {
       "type": "array",
+      "description": "Related transactions",
       "items": {
-        "type": "object",
-        "required": ["txHash", "chain", "role"],
-        "properties": {
-          "txHash": { "type": "string" },
-          "chain": { "type": "string" },
-          "role": { "type": "string" },
-          "description": { "type": "string" }
-        }
+        "$ref": "#/$defs/transactionItem"
       }
     },
     "attackers": {
       "type": "array",
+      "description": "Attacker addresses",
       "items": {
-        "type": "object",
-        "required": ["address", "chain", "role"],
-        "properties": {
-          "address": { "type": "string" },
-          "chain": { "type": "string" },
-          "role": { "type": "string" },
-          "description": { "type": "string" },
-          "accountType": {
-            "type": "string",
-            "description": "Account type, must reference an id from accountTypes in schema metadata"
-          }
-        }
+        "$ref": "#/$defs/attackerItem"
       }
     },
     "victims": {
       "type": "array",
+      "description": "Victim addresses",
       "items": {
-        "type": "object",
-        "required": ["address", "chain", "role"],
-        "properties": {
-          "address": { "type": "string" },
-          "chain": { "type": "string" },
-          "role": { "type": "string" },
-          "description": { "type": "string" },
-          "accountType": {
-            "type": "string",
-            "description": "Account type, must reference an id from accountTypes in schema metadata"
-          }
-        }
+        "$ref": "#/$defs/victimItem"
       }
     },
     "description": {
       "type": "string",
-      "description": "Description of the hack"
+      "description": "Detailed description of the incident"
     },
     "rootCause": {
       "type": "string",
-      "description": "Root cause of the vulnerability"
+      "description": "Root cause of the exploit"
     },
     "attackVector": {
       "type": "string",
@@ -216,38 +757,53 @@
     },
     "lessons": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Key lessons learned from this incident"
+      "description": "Lessons learned",
+      "items": {
+        "type": "string"
+      }
     },
     "references": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "URLs to reports, tx details, post-mortems"
-    },
-    "metadata": {
-      "type": "object",
-      "required": ["human_verified"],
-      "properties": {
-        "dateAdded": { "type": "string" },
-        "lastUpdated": { "type": "string" },
-        "human_verified": { "type": "boolean" },
-        "models": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "AI models used to investigate this event (optional)"
-        }
+      "description": "Reference URLs",
+      "items": {
+        "type": "string"
       }
-    },
-    "date": {
-      "type": "string",
-      "description": "Date string YYYY-MM-DD for calendar sorting/display"
     },
     "locales": {
       "type": "object",
-      "description": "Optional localization overrides for string fields. Keys are language codes (e.g., 'zh-TW', 'ja')",
+      "description": "Optional localization overrides keyed by language code (e.g., 'zh-TW', 'ja')",
       "additionalProperties": {
-        "type": "object",
-        "description": "Contains translated strings mapping exactly to the root fields, like title, description etc."
+        "$ref": "#/$defs/localeObject"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "human_verified"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dateAdded": {
+          "type": "string",
+          "format": "date",
+          "description": "Date this record was added"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last update"
+        },
+        "human_verified": {
+          "type": "boolean",
+          "description": "Whether this record has been human-verified"
+        },
+        "models": {
+          "type": "array",
+          "description": "AI models used to generate or verify this record",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
   }

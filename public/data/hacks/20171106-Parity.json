@@ -1,11 +1,18 @@
 {
-  "id": "parity-2017",
+  "id": "ParityMultisigWallet-20171106",
+  "date": "2017-11-06",
   "title": "Parity Multisig Wallet Library Self-Destruct",
   "protocol": "Parity Multisig Wallet",
-  "blockchain": ["ethereum"],
-  "category": ["access_control"],
+  "blockchain": [
+    "ethereum"
+  ],
+  "category": [
+    "access_control"
+  ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "152500000",
     "breakdown": [
@@ -24,78 +31,78 @@
     "note": "The incident began at 14:33:47 UTC when devops199 called initWallet() on the library contract (block 4501736), making themselves the owner. Approximately 52 minutes later, at 15:25:21 UTC, devops199 called kill() (block 4501969), triggering selfdestruct and permanently destroying the library code. The GitHub issue #6995 was posted at 15:54:34 UTC. devops199 subsequently attempted to extract funds from affected wallets via execute() calls, but all attempts failed because the library code no longer existed.",
     "date": "2017-11-06"
   },
+  "description": "On November 6, 2017, a critical vulnerability in the Parity Multisig Wallet Library contract was accidentally triggered by a user known as 'devops199' (GitHub username), permanently freezing approximately 513,774.16 ETH (valued at ~$152.5 million USD) across 587 multisig wallet contracts. The incident was not a theft—no funds were stolen—but rather an accidental contract self-destruction that rendered all dependent wallets permanently inoperable. Parity Technologies had deployed this library contract on July 20, 2017, as a shared logic component for all multisig wallets created after a previous exploit on July 19, 2017. The library used a proxy/delegatecall pattern (EIP-897) where lightweight wallet proxies delegated all logic to this single shared library. The fatal flaw was that the library contract contained a publicly callable initWallet() function that had not been invoked during deployment. This left the library uninitialized and vulnerable. At 14:33:47 UTC, devops199 called initWallet() on the library itself (rather than on a wallet proxy), setting themselves as the sole owner. Approximately 52 minutes later, at 15:25:21 UTC, devops199 called the kill() function, which executed selfdestruct and permanently destroyed the library's bytecode. Because all 587 wallet proxies relied on delegatecall to this library, they instantly lost all executable logic. The wallets became hollow shells capable only of receiving ETH (via empty fallback functions) but completely unable to execute withdrawals, ownership changes, or any other state-modifying operation. devops199 subsequently posted on GitHub issue #6995 with the message 'I accidentally killed it,' and attempted to extract funds from multiple affected wallets via execute() calls, all of which failed. The Web3 Foundation (Polkadot) was the largest affected party, holding a substantial portion of the frozen ETH. An Ethereum Improvement Proposal (EIP-999) was later introduced to restore the library contract via a state change, but it was narrowly rejected by the Ethereum community due to concerns about setting a precedent for mutability. As of 2025, the frozen funds remain permanently inaccessible with no viable recovery path.",
   "transactions": [
     {
       "txHash": "0x348ec4b5a396c95b4a5524ab0ff61b5f6e434098cf6e5c1a6887bed2bc35625d",
-      "chain": "ethereum",
       "role": "setup",
-      "description": "Library contract creation transaction. Deployed by 0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bb at block 4049249 (2017-07-20 04:36:05 UTC). Gas used: 1,626,355. The deployed library contract at 0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4 was intended as a shared component for all Parity multisig wallets deployed after the July 19, 2017 exploit fix."
+      "description": "Library contract creation transaction. Deployed by 0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bb at block 4049249 (2017-07-20 04:36:05 UTC). Gas used: 1,626,355. The deployed library contract at 0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4 was intended as a shared component for all Parity multisig wallets deployed after the July 19, 2017 exploit fix.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x05f71e1b2cb4f03e547739db15d080fd30c989eda04d37ce6264c5686e0722c9",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "initWallet() call on the library contract at block 4501736 (2017-11-06 14:33:47 UTC). Sent by devops199 (0xae7168deb525862f4fee37d987a971b385b96952). Input data: 0xe46dcfeb (initWallet signature). Gas used: 140,701. This transaction initialized the library contract as if it were a regular wallet, setting devops199 as the sole owner with a required signature threshold of 0, bypassing all future access controls."
+      "description": "initWallet() call on the library contract at block 4501736 (2017-11-06 14:33:47 UTC). Sent by devops199 (0xae7168deb525862f4fee37d987a971b385b96952). Input data: 0xe46dcfeb (initWallet signature). Gas used: 140,701. This transaction initialized the library contract as if it were a regular wallet, setting devops199 as the sole owner with a required signature threshold of 0, bypassing all future access controls.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x47f7cff7a5e671884629c93b368cb18f58a993f4b19c2a53a8662e3f1482f690",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "kill() call (selfdestruct) on the library contract at block 4501969 (2017-11-06 15:25:21 UTC). Sent by devops199. Input data: 0xcbf0b0c0 (kill signature). Gas used: 69,082. Status: success (0x1). The internal transaction log confirms a 'self-destruct' event, transferring any remaining balance to devops199. This permanently destroyed the library contract code, rendering all 587 dependent multisig wallet proxies non-functional."
+      "description": "kill() call (selfdestruct) on the library contract at block 4501969 (2017-11-06 15:25:21 UTC). Sent by devops199. Input data: 0xcbf0b0c0 (kill signature). Gas used: 69,082. Status: success (0x1). The internal transaction log confirms a 'self-destruct' event, transferring any remaining balance to devops199. This permanently destroyed the library contract code, rendering all 587 dependent multisig wallet proxies non-functional.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0xb63f7a2a1940a11664d58fb6a2d4942e031562b160c98e60fdea900b6402ea79",
-      "chain": "ethereum",
       "role": "post_exploit_attempt",
-      "description": "Failed kill() attempt on an affected wallet proxy (0x3bfc20f0b9afcace800d73d2191166ff16540258) at block 4501990 (2017-11-06 15:30:01 UTC). Input: 0xcbf0b0c0. Gas used: 23,959. This transaction failed because the wallet proxy's delegatecall to the destroyed library returned no code, making the kill function inaccessible."
+      "description": "Failed kill() attempt on an affected wallet proxy (0x3bfc20f0b9afcace800d73d2191166ff16540258) at block 4501990 (2017-11-06 15:30:01 UTC). Input: 0xcbf0b0c0. Gas used: 23,959. This transaction failed because the wallet proxy's delegatecall to the destroyed library returned no code, making the kill function inaccessible.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x2fbf911803cd6d2804f75b9789bb95fab48d39b256c5043f7cb1fd377c48ec7e",
-      "chain": "ethereum",
       "role": "post_exploit_attempt",
-      "description": "Failed execute() attempt on affected wallet proxy 0x3bfc20f0... at block 4501997 (2017-11-06 15:32:52 UTC). Input: 0xf00d4b5d (execute signature). Gas used: 25,373. Transaction reverted because the delegatecall target (library) no longer contained executable code."
+      "description": "Failed execute() attempt on affected wallet proxy 0x3bfc20f0... at block 4501997 (2017-11-06 15:32:52 UTC). Input: 0xf00d4b5d (execute signature). Gas used: 25,373. Transaction reverted because the delegatecall target (library) no longer contained executable code.",
+      "blockchain": "ethereum"
     }
   ],
   "attackers": [
     {
       "address": "0xae7168deb525862f4fee37d987a971b385b96952",
-      "chain": "ethereum",
       "role": "primary_attacker",
       "description": "Externally owned account (EOA) operated by GitHub user 'devops199'. This account executed the initWallet() and kill() transactions on the Parity multisig wallet library contract. devops199 claimed the actions were accidental, posting 'I accidentally killed it.' on GitHub issue #6995. The account subsequently attempted to extract funds from multiple affected wallets via execute() calls, all of which failed. Current balance: 0 ETH. Total transaction count: 192 (0xc0 in hex).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "ethereum"
     }
   ],
   "victims": [
     {
       "address": "0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4",
-      "chain": "ethereum",
       "role": "library_contract",
       "description": "Parity Multisig Wallet Library contract. Deployed on 2017-07-20 as a shared logic component for all Parity multisig wallet proxies created after the July 19, 2017 exploit fix. Contained the core wallet logic including ownership management, transaction execution, and the fatal kill() (selfdestruct) function. After the kill transaction, the contract code was permanently destroyed (eth_getCode returns 0x). The contract had zero ETH balance at time of destruction as it was a logic library, not a fund holder.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x3bfc20f0b9afcace800d73d2191166ff16540258",
-      "chain": "ethereum",
       "role": "affected_wallet_proxy",
       "description": "One of 587 affected Parity multisig wallet proxies dependent on the destroyed library. This wallet was directly targeted by devops199 in post-exploit execute() and kill() attempts (blocks 4501990-4501998), all of which failed. The wallet's funds remain permanently frozen as its delegatecall target no longer exists.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x376c3e5547c68bc26240d8dcc6729fff665a4448",
-      "chain": "ethereum",
       "role": "affected_wallet_proxy",
       "description": "One of 587 affected Parity multisig wallet proxies. Listed in devops199's published Pastebin of affected addresses. Funds permanently frozen.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x1c0e9b714da970e6466ba8e6980c55e7636835a6",
-      "chain": "ethereum",
       "role": "affected_wallet_proxy",
       "description": "One of 587 affected Parity multisig wallet proxies. Listed in devops199's published Pastebin of affected addresses. Funds permanently frozen.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     }
   ],
-  "description": "On November 6, 2017, a critical vulnerability in the Parity Multisig Wallet Library contract was accidentally triggered by a user known as 'devops199' (GitHub username), permanently freezing approximately 513,774.16 ETH (valued at ~$152.5 million USD) across 587 multisig wallet contracts. The incident was not a theft—no funds were stolen—but rather an accidental contract self-destruction that rendered all dependent wallets permanently inoperable. Parity Technologies had deployed this library contract on July 20, 2017, as a shared logic component for all multisig wallets created after a previous exploit on July 19, 2017. The library used a proxy/delegatecall pattern (EIP-897) where lightweight wallet proxies delegated all logic to this single shared library. The fatal flaw was that the library contract contained a publicly callable initWallet() function that had not been invoked during deployment. This left the library uninitialized and vulnerable. At 14:33:47 UTC, devops199 called initWallet() on the library itself (rather than on a wallet proxy), setting themselves as the sole owner. Approximately 52 minutes later, at 15:25:21 UTC, devops199 called the kill() function, which executed selfdestruct and permanently destroyed the library's bytecode. Because all 587 wallet proxies relied on delegatecall to this library, they instantly lost all executable logic. The wallets became hollow shells capable only of receiving ETH (via empty fallback functions) but completely unable to execute withdrawals, ownership changes, or any other state-modifying operation. devops199 subsequently posted on GitHub issue #6995 with the message 'I accidentally killed it,' and attempted to extract funds from multiple affected wallets via execute() calls, all of which failed. The Web3 Foundation (Polkadot) was the largest affected party, holding a substantial portion of the frozen ETH. An Ethereum Improvement Proposal (EIP-999) was later introduced to restore the library contract via a state change, but it was narrowly rejected by the Ethereum community due to concerns about setting a precedent for mutability. As of 2025, the frozen funds remain permanently inaccessible with no viable recovery path.",
   "rootCause": "The Parity Multisig Wallet Library contract contained an unprotected initWallet() function that could be called by any address at any time. In the proxy/delegatecall architecture, the library contract was deployed as a standalone contract rather than being initialized via a constructor. The initWallet() function was designed to set up ownership parameters (owner addresses, required signature threshold) during wallet creation. However, because it was never called during the library's deployment on July 20, 2017, the library remained in an uninitialized state. When devops199 called initWallet() on the library contract itself, it treated the library as a regular wallet and set devops199 as the sole owner with a required signature threshold of zero. The library contract also retained a kill() function (inherited from the original audited Foundation wallet code) that was protected by an onlyowner modifier. Once devops199 became the owner through initWallet(), they had unrestricted access to call kill(), which invoked selfdestruct and permanently destroyed the library's bytecode. The vulnerability was compounded by the single-point-of-failure architecture: one shared library served as the logic layer for hundreds of independent wallet proxies, meaning the destruction of a single contract instantly paralyzed an entire ecosystem of wallets.",
   "attackVector": "1. Background: On July 19, 2017, a different vulnerability in Parity multisig wallets was exploited to steal ~153,000 ETH. Parity Technologies deployed a patched library contract on July 20, 2017 (tx 0x348ec4b5..., block 4049249) to fix this issue. 2. The new library was deployed but never initialized—its initWallet() function remained publicly callable by anyone. 3. On November 6, 2017, at 14:33:47 UTC (block 4501736), user devops199 (EOA 0xae7168deb525862f4fee37d987a971b385b96952) sent transaction 0x05f71e1b... calling initWallet() (function signature 0xe46dcfeb) directly to the library contract address 0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4. Gas used: 140,701. The transaction succeeded, initializing the library with devops199 as the sole owner. 4. At 15:25:21 UTC (block 4501969), devops199 sent transaction 0x47f7cff7... calling kill() (function signature 0xcbf0b0c0) to the same library address. Gas used: 69,082. The kill() function invoked selfdestruct, permanently destroying the library contract. The internal transaction log confirms a 'self-destruct' event. 5. All 587 Parity multisig wallet proxies that delegated to this library instantly lost their logic. Their code effectively reduced to: contract Wallet { function () payable { } } — capable only of receiving deposits but completely unable to execute withdrawals, ownership changes, or any other function. 6. Between 15:30:01 UTC and 16:17:46 UTC, devops199 sent numerous follow-up transactions (execute() and kill() attempts) to multiple affected wallet proxies (including 0x3bfc20f0..., 0x376c3e55..., 0x1c0e9b71...), attempting to extract funds. All failed with gas usage of ~23,000-25,000 per transaction because the delegatecall to the destroyed library returned empty code. 7. The total frozen funds: 513,774.16 ETH across 587 wallets, with Polkadot/Web3 Foundation holding the largest share.",
   "lessons": [
@@ -122,12 +129,6 @@
     "https://etherscan.io/address/0xae7168deb525862f4fee37d987a971b385b96952",
     "https://web.archive.org/web/2017/https://paritytech.io/on-classes-of-stuck-ether-and-potential-solutions/"
   ],
-  "metadata": {
-    "dateAdded": "2025-01-15",
-    "lastUpdated": "2025-01-15",
-    "human_verified": false
-  },
-  "date": "2017-11-06",
   "locales": {
     "zh-TW": {
       "title": "Parity 多簽錢包圖書館合約自毀事件",
@@ -137,72 +138,72 @@
       "transactions": [
         {
           "txHash": "0x348ec4b5a396c95b4a5524ab0ff61b5f6e434098cf6e5c1a6887bed2bc35625d",
-          "chain": "ethereum",
           "role": "setup",
-          "description": "圖書館合約建立交易。由 0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bb 於區塊 4049249（2017-07-20 04:36:05 UTC）部署。Gas 使用量：1,626,355。部署於 0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4 的圖書館合約原設計為 2017 年 7 月 19 日漏洞被利用後所有 Parity 多簽錢包的共享元件。"
+          "description": "圖書館合約建立交易。由 0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bb 於區塊 4049249（2017-07-20 04:36:05 UTC）部署。Gas 使用量：1,626,355。部署於 0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4 的圖書館合約原設計為 2017 年 7 月 19 日漏洞被利用後所有 Parity 多簽錢包的共享元件。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x05f71e1b2cb4f03e547739db15d080fd30c989eda04d37ce6264c5686e0722c9",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "對圖書館合約的 initWallet() 呼叫，採掛於區塊 4501736（2017-11-06 14:33:47 UTC）。由 devops199（0xae7168deb525862f4fee37d987a971b385b96952）發送。輸入資料：0xe46dcfeb（initWallet 簽名）。Gas 使用量：140,701。此交易將圖書館合約初始化為普通錢包，將 devops199 設為唯一所有者，且所需簽名門檻為 0，從而繞過了所有未來的存取控制。"
+          "description": "對圖書館合約的 initWallet() 呼叫，採掛於區塊 4501736（2017-11-06 14:33:47 UTC）。由 devops199（0xae7168deb525862f4fee37d987a971b385b96952）發送。輸入資料：0xe46dcfeb（initWallet 簽名）。Gas 使用量：140,701。此交易將圖書館合約初始化為普通錢包，將 devops199 設為唯一所有者，且所需簽名門檻為 0，從而繞過了所有未來的存取控制。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x47f7cff7a5e671884629c93b368cb18f58a993f4b19c2a53a8662e3f1482f690",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "對圖書館合約的 kill() 呼叫（selfdestruct），採掛於區塊 4501969（2017-11-06 15:25:21 UTC）。由 devops199 發送。輸入資料：0xcbf0b0c0（kill 簽名）。Gas 使用量：69,082。狀態：成功（0x1）。內部交易日誌確認了「self-destruct」事件，將任何剩餘餘額轉移給 devops199。這永久銷毀了圖書館合約程式碼，導致所有 587 個依賴它的多簽錢包代理無法運作。"
+          "description": "對圖書館合約的 kill() 呼叫（selfdestruct），採掛於區塊 4501969（2017-11-06 15:25:21 UTC）。由 devops199 發送。輸入資料：0xcbf0b0c0（kill 簽名）。Gas 使用量：69,082。狀態：成功（0x1）。內部交易日誌確認了「self-destruct」事件，將任何剩餘餘額轉移給 devops199。這永久銷毀了圖書館合約程式碼，導致所有 587 個依賴它的多簽錢包代理無法運作。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xb63f7a2a1940a11664d58fb6a2d4942e031562b160c98e60fdea900b6402ea79",
-          "chain": "ethereum",
           "role": "post_exploit_attempt",
-          "description": "對受影響錢包代理（0x3bfc20f0b9afcace800d73d2191166ff16540258）的失敗 kill() 嘗試，採掛於區塊 4501990（2017-11-06 15:30:01 UTC）。輸入：0xcbf0b0c0。Gas 使用量：23,959。此交易因錢包代理對已銷毀圖書館的 delegatecall 傳回無程式碼，導致 kill 函式無法存取而失敗。"
+          "description": "對受影響錢包代理（0x3bfc20f0b9afcace800d73d2191166ff16540258）的失敗 kill() 嘗試，採掛於區塊 4501990（2017-11-06 15:30:01 UTC）。輸入：0xcbf0b0c0。Gas 使用量：23,959。此交易因錢包代理對已銷毀圖書館的 delegatecall 傳回無程式碼，導致 kill 函式無法存取而失敗。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2fbf911803cd6d2804f75b9789bb95fab48d39b256c5043f7cb1fd377c48ec7e",
-          "chain": "ethereum",
           "role": "post_exploit_attempt",
-          "description": "對受影響錢包代理 0x3bfc20f0... 的失敗 execute() 嘗試，採掛於區塊 4501997（2017-11-06 15:32:52 UTC）。輸入：0xf00d4b5d（execute 簽名）。Gas 使用量：25,373。交易因 delegatecall 目標（圖書館）不再包含可執行程式碼而回復。"
+          "description": "對受影響錢包代理 0x3bfc20f0... 的失敗 execute() 嘗試，採掛於區塊 4501997（2017-11-06 15:32:52 UTC）。輸入：0xf00d4b5d（execute 簽名）。Gas 使用量：25,373。交易因 delegatecall 目標（圖書館）不再包含可執行程式碼而回復。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xae7168deb525862f4fee37d987a971b385b96952",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "由 GitHub 使用者「devops199」操作的外部擁有帳戶（EOA）。此帳戶執行了 Parity 多簽錢包圖書館合約上的 initWallet() 與 kill() 交易。devops199 聲稱這些行為是意外，在 GitHub issue #6995 上發文「I accidentally killed it」（我不小心殺了它）。該帳戶隨後嘗試透過 execute() 呼叫從多個受影響的錢包中提取資金，但全部失敗。目前餘額：0 ETH。總交易筆數：192（十六進位 0xc0）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4",
-          "chain": "ethereum",
           "role": "library_contract",
           "description": "Parity 多簽錢包圖書館合約。於 2017-07-20 部署，作為 2017 年 7 月 19 日漏洞被利用後所有 Parity 多簽錢包代理的共享邏輯元件。包含核心錢包邏輯，包括所有權管理、交易執行，以及致命的 kill()（selfdestruct）函式。在 kill 交易後，合約程式碼被永久銷毀（eth_getCode 傳回 0x）。銷毀時合約 ETH 餘額為零，因為它是邏輯圖書館而非資金持有者。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3bfc20f0b9afcace800d73d2191166ff16540258",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "587 個受影響的 Parity 多簽錢包代理之一，依賴於已銷毀的圖書館。此錢包在事後被 devops199 以 execute() 與 kill() 嘗試直接鎖定（區塊 4501990-4501998），全部失敗。錢包資金仍然永久凍結，因為其 delegatecall 目標已不存在。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x376c3e5547c68bc26240d8dcc6729fff665a4448",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "587 個受影響的 Parity 多簽錢包代理之一。列於 devops199 發布的 Pastebin 受影響地址清單中。資金永久凍結。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x1c0e9b714da970e6466ba8e6980c55e7636835a6",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "587 個受影響的 Parity 多簽錢包代理之一。列於 devops199 發布的 Pastebin 受影響地址清單中。資金永久凍結。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -226,72 +227,72 @@
       "transactions": [
         {
           "txHash": "0x348ec4b5a396c95b4a5524ab0ff61b5f6e434098cf6e5c1a6887bed2bc35625d",
-          "chain": "ethereum",
           "role": "setup",
-          "description": "ライブラリコントラクトの作成トランザクション。0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bbによりブロック4049249（2017-07-20 04:36:05 UTC）に展開された。Gas使用量：1,626,355。0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4に展開されたライブラリコントラクトは、2017年7月19日の脆弱性悪用後に作成されたすべてのParityマルチシグウォレットの共有コンポーネントとして設計されていた。"
+          "description": "ライブラリコントラクトの作成トランザクション。0x00caa64684700d2825da7cac6ba0c6ed9fd2a1bbによりブロック4049249（2017-07-20 04:36:05 UTC）に展開された。Gas使用量：1,626,355。0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4に展開されたライブラリコントラクトは、2017年7月19日の脆弱性悪用後に作成されたすべてのParityマルチシグウォレットの共有コンポーネントとして設計されていた。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x05f71e1b2cb4f03e547739db15d080fd30c989eda04d37ce6264c5686e0722c9",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "ライブラリコントラクトに対するinitWallet()呼び出し。ブロック4501736（2017-11-06 14:33:47 UTC）に採掘。devops199（0xae7168deb525862f4fee37d987a971b385b96952）より送信。入力データ：0xe46dcfeb（initWalletシグネチャ）。Gas使用量：140,701。このトランザクションはライブラリコントラクトを通常のウォレットとして初期化し、devops199を唯一の所有者に、必要署名閾値をゼロに設定し、今後のすべてのアクセスコントロールを迂回した。"
+          "description": "ライブラリコントラクトに対するinitWallet()呼び出し。ブロック4501736（2017-11-06 14:33:47 UTC）に採掘。devops199（0xae7168deb525862f4fee37d987a971b385b96952）より送信。入力データ：0xe46dcfeb（initWalletシグネチャ）。Gas使用量：140,701。このトランザクションはライブラリコントラクトを通常のウォレットとして初期化し、devops199を唯一の所有者に、必要署名閾値をゼロに設定し、今後のすべてのアクセスコントロールを迂回した。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x47f7cff7a5e671884629c93b368cb18f58a993f4b19c2a53a8662e3f1482f690",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "ライブラリコントラクトに対するkill()呼び出し（selfdestruct）。ブロック4501969（2017-11-06 15:25:21 UTC）に採掘。devops199より送信。入力データ：0xcbf0b0c0（killシグネチャ）。Gas使用量：69,082。ステータス：成功（0x1）。内部トランザクションログは「self-destruct」イベントを確認しており、残存残高をdevops199に振り替えた。これによりライブラリコントラクトのコードが永続的に破壊され、すべての587の依存マルチシグウォレットプロキシが機能不能となった。"
+          "description": "ライブラリコントラクトに対するkill()呼び出し（selfdestruct）。ブロック4501969（2017-11-06 15:25:21 UTC）に採掘。devops199より送信。入力データ：0xcbf0b0c0（killシグネチャ）。Gas使用量：69,082。ステータス：成功（0x1）。内部トランザクションログは「self-destruct」イベントを確認しており、残存残高をdevops199に振り替えた。これによりライブラリコントラクトのコードが永続的に破壊され、すべての587の依存マルチシグウォレットプロキシが機能不能となった。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xb63f7a2a1940a11664d58fb6a2d4942e031562b160c98e60fdea900b6402ea79",
-          "chain": "ethereum",
           "role": "post_exploit_attempt",
-          "description": "影響を受けたウォレットプロキシ（0x3bfc20f0b9afcace800d73d2191166ff16540258）に対する失敗したkill()試行。ブロック4501990（2017-11-06 15:30:01 UTC）に採掘。入力：0xcbf0b0c0。Gas使用量：23,959。このトランザクションは、ウォレットプロキシの破壊されたライブラリへのdelegatecallがコードを返さなかったため、kill関数にアクセスできず失敗した。"
+          "description": "影響を受けたウォレットプロキシ（0x3bfc20f0b9afcace800d73d2191166ff16540258）に対する失敗したkill()試行。ブロック4501990（2017-11-06 15:30:01 UTC）に採掘。入力：0xcbf0b0c0。Gas使用量：23,959。このトランザクションは、ウォレットプロキシの破壊されたライブラリへのdelegatecallがコードを返さなかったため、kill関数にアクセスできず失敗した。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2fbf911803cd6d2804f75b9789bb95fab48d39b256c5043f7cb1fd377c48ec7e",
-          "chain": "ethereum",
           "role": "post_exploit_attempt",
-          "description": "影響を受けたウォレットプロキシ0x3bfc20f0...に対する失敗したexecute()試行。ブロック4501997（2017-11-06 15:32:52 UTC）に採掘。入力：0xf00d4b5d（executeシグネチャ）。Gas使用量：25,373。delegatecallターゲット（ライブラリ）に実行可能なコードが存在しなくなったため、トランザクションはリバートした。"
+          "description": "影響を受けたウォレットプロキシ0x3bfc20f0...に対する失敗したexecute()試行。ブロック4501997（2017-11-06 15:32:52 UTC）に採掘。入力：0xf00d4b5d（executeシグネチャ）。Gas使用量：25,373。delegatecallターゲット（ライブラリ）に実行可能なコードが存在しなくなったため、トランザクションはリバートした。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xae7168deb525862f4fee37d987a971b385b96952",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "GitHubユーザー「devops199」が操作する外部所有アカウント（EOA）。このアカウントはParityマルチシグウォレットライブラリコントラクト上でinitWallet()とkill()のトランザクションを実行した。devops199はこれらの行為が誤ったものであると主張し、GitHub issue #6995で「I accidentally killed it」（誤って破壊してしまいました）と投稿した。このアカウントはその後、複数の影響を受けたウォレットからexecute()呼び出しで資金を引き出そうと試みたが、すべて失敗した。現在の残高：0 ETH。総トランザクション数：192（16進数0xc0）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0x863df6bfa4469f3ead0be8f9f2aae51c91a907b4",
-          "chain": "ethereum",
           "role": "library_contract",
           "description": "Parityマルチシグウォレットライブラリコントラクト。2017-07-20に展開され、2017年7月19日の脆弱性悪用後に作成されたすべてのParityマルチシグウォレットプロキシの共有ロジックコンポーネントとして機能した。所有権管理、トランザクション実行、および致命的なkill()（selfdestruct）関数を含むコアウォレットロジックを含んでいた。killトランザクション後、コントラクトコードは永続的に破壊された（eth_getCodeは0xを返す）。破壊時のコントラクトETH残高はゼロであり、これはロジックライブラリであり資金保持者ではなかったためである。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3bfc20f0b9afcace800d73d2191166ff16540258",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "破壊されたライブラリに依存する587の影響を受けたParityマルチシグウォレットプロキシの1つ。このウォレットは事後にdevops199によってexecute()およびkill()の試行で直接標的とされた（ブロック4501990-4501998）が、すべて失敗した。delegatecallターゲットがもはや存在しないため、ウォレットの資金は永久に凍結されたままである。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x376c3e5547c68bc26240d8dcc6729fff665a4448",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "587の影響を受けたParityマルチシグウォレットプロキシの1つ。devops199が公開したPastebinの影響を受けたアドレスリストに記載されている。資金は永久に凍結されたままである。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x1c0e9b714da970e6466ba8e6980c55e7636835a6",
-          "chain": "ethereum",
           "role": "affected_wallet_proxy",
           "description": "587の影響を受けたParityマルチシグウォレットプロキシの1つ。devops199が公開したPastebinの影響を受けたアドレスリストに記載されている。資金は永久に凍結されたままである。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -307,5 +308,10 @@
         "重要な共有インフラストラクチャコントラクトを自動異常検出で監視し、予期しない初期化やselfdestruct呼び出しが発生した際にアラートを発することができるようにする。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2025-01-15",
+    "lastUpdated": "2025-01-15",
+    "human_verified": false
   }
 }

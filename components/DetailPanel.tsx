@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence, type TargetAndTransition } from 'framer-motion';
-import type { HackEvent, Category, Blockchain, AccountType, Transaction, Attacker, Victim } from '@/lib/types';
+import type { HackEvent, Category, Blockchain, AccountType, RoleInfo, Transaction, Attacker, Victim } from '@/lib/types';
 import { formatCurrency, getLocalizedArray, getLocalizedField, getEventCategories, getEventCategoryColor } from '@/lib/utils';
 import { IconInfo } from './Icons';
 
@@ -56,6 +56,16 @@ function getExplorerUrl(chain: string, type: 'tx' | 'address', hash: string): st
 // Props
 // ---------------------------------------------------------------------------
 
+// Merge all role arrays into one for quick color lookup
+function findRoleColor(
+  roleId: string,
+  attackerRoles: RoleInfo[],
+  victimRoles: RoleInfo[],
+  transactionRoles: RoleInfo[]
+): string | undefined {
+  return [...attackerRoles, ...victimRoles, ...transactionRoles].find((r) => r.id === roleId)?.color;
+}
+
 interface DetailPanelProps {
   selectedEvent: HackEvent | null;
   panelViewMode: 'empty' | 'list' | 'detail';
@@ -64,6 +74,9 @@ interface DetailPanelProps {
   categories: Category[];
   blockchains: Blockchain[];
   accountTypes: AccountType[];
+  attackerRoles: RoleInfo[];
+  victimRoles: RoleInfo[];
+  transactionRoles: RoleInfo[];
   currentLang: string;
   t: (key: string) => string;
   onEventSelect: (event: HackEvent) => void;
@@ -85,7 +98,9 @@ interface DetailPanelProps {
 
 export default function DetailPanel({
   selectedEvent, panelViewMode, panelListEvents, panelListDate,
-  categories, blockchains, accountTypes, currentLang, t,
+  categories, blockchains, accountTypes,
+  attackerRoles, victimRoles, transactionRoles,
+  currentLang, t,
   onEventSelect, onBackToList
 }: DetailPanelProps) {
   const detailContentRef = useRef<HTMLDivElement>(null);
@@ -262,6 +277,9 @@ export default function DetailPanel({
                 categories={categories}
                 blockchains={blockchains}
                 accountTypes={accountTypes}
+                attackerRoles={attackerRoles}
+                victimRoles={victimRoles}
+                transactionRoles={transactionRoles}
                 currentLang={currentLang}
                 t={t}
                 showBack={panelListEvents.length > 1}
@@ -284,6 +302,9 @@ interface EventDetailProps {
   categories: Category[];
   blockchains: Blockchain[];
   accountTypes: AccountType[];
+  attackerRoles: RoleInfo[];
+  victimRoles: RoleInfo[];
+  transactionRoles: RoleInfo[];
   currentLang: string;
   t: (key: string) => string;
   showBack: boolean;
@@ -291,7 +312,9 @@ interface EventDetailProps {
 }
 
 function EventDetail({
-  event, categories, blockchains, accountTypes, currentLang, t,
+  event, categories, blockchains, accountTypes,
+  attackerRoles, victimRoles, transactionRoles,
+  currentLang, t,
   showBack, onBack
 }: EventDetailProps) {
   // --- Derived values from the event (with i18n fallback) ---
@@ -409,23 +432,26 @@ function EventDetail({
 
       {transactions.length > 0 && (
         <DetailSection title={t('detail.transactions')} delay={0.35} {...sectionAnim}>
-          {transactions.map((tx, i) => (
-            <div className="detail-item" key={tx.txHash || i}>
-              <div className="detail-item-header">
-                <code className="tx-hash">{tx.txHash}</code>
-                <span className={`item-role ${tx.role}`}>{tx.role}</span>
+          {transactions.map((tx, i) => {
+            const txRoleColor = findRoleColor(tx.role, attackerRoles, victimRoles, transactionRoles);
+            return (
+              <div className="detail-item" key={tx.txHash || i}>
+                <div className="detail-item-header">
+                  <code className="tx-hash">{tx.txHash}</code>
+                  <span className="item-role" style={txRoleColor ? { background: `${txRoleColor}22`, color: txRoleColor } : {}}>{tx.role}</span>
+                </div>
+                <p className="item-description">{tx.description}</p>
+                <a
+                  href={getExplorerUrl(tx.blockchain || '', 'tx', tx.txHash)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tx-link"
+                >
+                  View on Explorer →
+                </a>
               </div>
-              <p className="item-description">{tx.description}</p>
-              <a
-                href={getExplorerUrl(tx.chain || '', 'tx', tx.txHash)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tx-link"
-              >
-                View on Explorer →
-              </a>
-            </div>
-          ))}
+            );
+          })}
         </DetailSection>
       )}
 
@@ -436,10 +462,13 @@ function EventDetail({
               key={att.address}
               address={att.address}
               role={att.role}
-              chain={att.chain || ''}
+              blockchain={att.blockchain || ''}
               description={att.description || ''}
               accountType={att.accountType || ''}
               accountTypes={accountTypes}
+              attackerRoles={attackerRoles}
+              victimRoles={victimRoles}
+              transactionRoles={transactionRoles}
             />
           ))}
         </DetailSection>
@@ -452,10 +481,13 @@ function EventDetail({
               key={vic.address}
               address={vic.address}
               role={vic.role}
-              chain={vic.chain || ''}
+              blockchain={vic.blockchain || ''}
               description={vic.description || ''}
               accountType={vic.accountType || ''}
               accountTypes={accountTypes}
+              attackerRoles={attackerRoles}
+              victimRoles={victimRoles}
+              transactionRoles={transactionRoles}
               // Victims may not always have an address on-chain
               hideExplorerLink={!vic.address}
             />
@@ -515,28 +547,35 @@ function DetailSection({
 function AccountItem({
   address,
   role,
-  chain,
+  blockchain,
   description,
   accountType,
   accountTypes,
+  attackerRoles,
+  victimRoles,
+  transactionRoles,
   hideExplorerLink = false,
 }: {
   address: string;
   role: string;
-  chain: string;
+  blockchain: string;
   description: string;
   accountType: string;
   accountTypes: AccountType[];
+  attackerRoles: RoleInfo[];
+  victimRoles: RoleInfo[];
+  transactionRoles: RoleInfo[];
   hideExplorerLink?: boolean;
 }) {
   const typeInfo = accountTypes.find((t) => t.id === accountType);
+  const roleColor = findRoleColor(role, attackerRoles, victimRoles, transactionRoles);
 
   return (
     <div className="detail-item">
       <div className="detail-item-header">
         <code className="address">{address}</code>
         <span className="detail-item-tags">
-          <span className={`item-role ${role}`}>{role}</span>
+          <span className="item-role" style={roleColor ? { background: `${roleColor}22`, color: roleColor } : {}}>{role}</span>
           {typeInfo && (
             <span
               className="account-type-badge"
@@ -556,7 +595,7 @@ function AccountItem({
 
       {!hideExplorerLink && (
         <a
-          href={getExplorerUrl(chain, 'address', address)}
+          href={getExplorerUrl(blockchain, 'address', address)}
           target="_blank"
           rel="noopener noreferrer"
           className="address-link"

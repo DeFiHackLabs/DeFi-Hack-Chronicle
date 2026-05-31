@@ -1,11 +1,19 @@
 {
-  "id": "echo-protocol-2026",
+  "id": "EchoProtocol-20260518",
+  "date": "2026-05-18",
   "title": "Echo Protocol Admin Key Compromise",
   "protocol": "Echo Protocol",
-  "blockchain": ["monad", "ethereum"],
-  "category": ["access_control"],
+  "blockchain": [
+    "monad",
+    "ethereum"
+  ],
+  "category": [
+    "access_control"
+  ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "816000",
     "breakdown": [
@@ -29,70 +37,70 @@
     "note": "Attack began on Monad chain on May 18, 2026 (exact mint time not publicly indexed). Ethereum-side laundering occurred between 21:27 UTC and 22:39 UTC on May 18, 2026. PeckShieldAlert first reported the incident on May 18, 2026.",
     "date": "2026-05-18"
   },
+  "description": "On May 18, 2026, Echo Protocol—a Bitcoin DeFi platform deployed on Monad—suffered an admin private key compromise that allowed an attacker to mint approximately 1,000 unauthorized eBTC (synthetic Bitcoin), valued at roughly $76.7 million. The root cause was operational, not a smart contract bug: a single-signature admin key with no timelock, no minting supply cap, and no rate limit enabled unlimited minting once the key was compromised. The attacker executed a pre-tested laundering flow: deposited 45 eBTC (~$3.45M) into Curvance as collateral, borrowed ~11.29 WBTC (~$867K), bridged to Ethereum, swapped for ETH, and sent ~384 ETH (~$823K) to Tornado Cash. Echo Protocol regained control of the admin key and burned the remaining 955 eBTC, limiting actual realized losses to approximately $816,000. The incident was confined to Monad; Echo's Aptos deployment was unaffected.",
   "transactions": [
     {
       "txHash": "0x2f5e5a5c3a4d737b965ce57576cf6a60307c1a9f29c0b5a4fc8bbd4461bc819c",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "Contract interaction on Ethereum at block TBD (May 18, 2026 21:27:35 UTC). Likely a DEX swap or bridge operation as part of the laundering flow. Gas used: 436,854."
+      "description": "Contract interaction on Ethereum at block TBD (May 18, 2026 21:27:35 UTC). Likely a DEX swap or bridge operation as part of the laundering flow. Gas used: 436,854.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x3003d1f23f9712410039819e4491cbe2beac4f1623e7f03cbd3399beeb7041eb",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "USDC contract interaction on Ethereum at block TBD (May 18, 2026 21:27:23 UTC). Part of the token swap/bridge sequence. Gas used: 55,906."
+      "description": "USDC contract interaction on Ethereum at block TBD (May 18, 2026 21:27:23 UTC). Part of the token swap/bridge sequence. Gas used: 55,906.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0xa6d60d4555ffd6d7331ef3e2e5e9fde5655358c313a54ee363f668cf0cb731ff",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "ETH transfer of 101 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:34:23 UTC). Part of the Tornado Cash laundering sequence."
+      "description": "ETH transfer of 101 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:34:23 UTC). Part of the Tornado Cash laundering sequence.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x57283033c52bc2f54e0ac62bfbe2f692ee9e47644ac87da327bdd4bd4c64f55f",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "ETH transfer of 101 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:38:11 UTC). Part of the Tornado Cash laundering sequence."
+      "description": "ETH transfer of 101 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:38:11 UTC). Part of the Tornado Cash laundering sequence.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x2c8c7e5eaa66908c92aaca8542dfd79db785becf7601a7dbe84fa309e580b19f",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "ETH transfer of 100 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:39:59 UTC). Part of the Tornado Cash laundering sequence."
+      "description": "ETH transfer of 100 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 21:39:59 UTC). Part of the Tornado Cash laundering sequence.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x56dd4100fb2e105c0c99b6a1cdefc84ef46b5547ef24aa7fca5c982c2e7f46c8",
-      "chain": "ethereum",
       "role": "launder",
-      "description": "ETH transfer of 83 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 22:39:11 UTC). Final Tornado Cash deposit. Total ~384-385 ETH laundered."
+      "description": "ETH transfer of 83 ETH to intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e on Ethereum (May 18, 2026 22:39:11 UTC). Final Tornado Cash deposit. Total ~384-385 ETH laundered.",
+      "blockchain": "ethereum"
     }
   ],
   "attackers": [
     {
       "address": "0x6a0109d3c5ab56277096c75e8f5d1d1d45243415",
-      "chain": "ethereum",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA) used for the Ethereum-side laundering phase. Confirmed EOA via eth_getCode (returns 0x). Received bridged WBTC, swapped to ETH, and deposited ~384 ETH in batches to Tornado Cash via intermediary 0x3eda... Total ETH sent: ~385 ETH.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x3edaf41895fac4c198fcff1b03b8e9804621f57e",
-      "chain": "ethereum",
       "role": "laundering_intermediary",
       "description": "Intermediary address receiving ETH batches (100+101+101+83 ETH) from attacker EOA. Unverified contract or EOA. Likely connected to Tornado Cash mixing service.",
-      "accountType": "unknown"
+      "accountType": "Unknown",
+      "blockchain": "ethereum"
     }
   ],
   "victims": [
     {
       "address": "TBD",
-      "chain": "monad",
       "role": "protocol_contract",
       "description": "Echo Protocol eBTC contract on Monad. Admin key compromise allowed unauthorized minting of 1,000 eBTC. Contract worked as designed but lacked multi-sig, timelock, minting cap, and rate limits.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "monad"
     }
   ],
-  "description": "On May 18, 2026, Echo Protocol—a Bitcoin DeFi platform deployed on Monad—suffered an admin private key compromise that allowed an attacker to mint approximately 1,000 unauthorized eBTC (synthetic Bitcoin), valued at roughly $76.7 million. The root cause was operational, not a smart contract bug: a single-signature admin key with no timelock, no minting supply cap, and no rate limit enabled unlimited minting once the key was compromised. The attacker executed a pre-tested laundering flow: deposited 45 eBTC (~$3.45M) into Curvance as collateral, borrowed ~11.29 WBTC (~$867K), bridged to Ethereum, swapped for ETH, and sent ~384 ETH (~$823K) to Tornado Cash. Echo Protocol regained control of the admin key and burned the remaining 955 eBTC, limiting actual realized losses to approximately $816,000. The incident was confined to Monad; Echo's Aptos deployment was unaffected.",
   "rootCause": "Admin private key compromise on Echo Protocol's Monad deployment. The eBTC contract itself functioned as designed, but the operational security around it was critically deficient: (1) single-signature admin role with no multi-sig, (2) no timelock on privileged operations, (3) no minting supply cap or rate limit, and (4) downstream protocols (Curvance) lacked supply sanity checks for freshly minted collateral. The attacker did not exploit a code vulnerability—they simply used a stolen admin key to authorize unlimited minting.",
   "attackVector": "1. Attacker obtained Echo Protocol's admin private key for the Monad deployment (method of compromise undisclosed). 2. Using the admin key, the attacker directly triggered the mint function on the eBTC contract, generating 1,000 unauthorized eBTC (~$76.7M). 3. Attacker deposited 45 eBTC (~$3.45M) into Curvance lending protocol as collateral. 4. Borrowed ~11.29 WBTC (~$867K) against the eBTC collateral. 5. Bridged WBTC from Monad to Ethereum mainnet. 6. Swapped WBTC for ETH on Ethereum. 7. Sent ~384 ETH (~$823K) in batches to Tornado Cash via intermediary address 0x3edaf41895fac4c198fcff1b03b8e9804621f57e. 8. Echo Protocol regained admin key control and burned the remaining 955 eBTC before further damage.",
   "lessons": [
@@ -118,12 +126,6 @@
     "https://etherscan.io/tx/0x2c8c7e5eaa66908c92aaca8542dfd79db785becf7601a7dbe84fa309e580b19f",
     "https://etherscan.io/tx/0x56dd4100fb2e105c0c99b6a1cdefc84ef46b5547ef24aa7fca5c982c2e7f46c8"
   ],
-  "metadata": {
-    "dateAdded": "2026-05-21",
-    "lastUpdated": "2026-05-21",
-    "human_verified": false
-  },
-  "date": "2026-05-18",
   "locales": {
     "zh-TW": {
       "title": "Echo Protocol 管理員金鑰遭竄事件",
@@ -133,64 +135,64 @@
       "transactions": [
         {
           "txHash": "0x2f5e5a5c3a4d737b965ce57576cf6a60307c1a9f29c0b5a4fc8bbd4461bc819c",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "以太坊上的合約互動（2026-05-18 21:27:35 UTC）。疑似 DEX 兌換或跨鏈橋操作，屬於洗錢流程的一環。Gas 使用量：436,854。"
+          "description": "以太坊上的合約互動（2026-05-18 21:27:35 UTC）。疑似 DEX 兌換或跨鏈橋操作，屬於洗錢流程的一環。Gas 使用量：436,854。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x3003d1f23f9712410039819e4491cbe2beac4f1623e7f03cbd3399beeb7041eb",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "以太坊上與 USDC 合約的互動（2026-05-18 21:27:23 UTC）。屬於代幣兌換／跨鏈序列的一部分。Gas 使用量：55,906。"
+          "description": "以太坊上與 USDC 合約的互動（2026-05-18 21:27:23 UTC）。屬於代幣兌換／跨鏈序列的一部分。Gas 使用量：55,906。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xa6d60d4555ffd6d7331ef3e2e5e9fde5655358c313a54ee363f668cf0cb731ff",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "轉出 101 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:34:23 UTC）。Tornado Cash 洗錢序列的一環。"
+          "description": "轉出 101 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:34:23 UTC）。Tornado Cash 洗錢序列的一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x57283033c52bc2f54e0ac62bfbe2f692ee9e47644ac87da327bdd4bd4c64f55f",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "轉出 101 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:38:11 UTC）。Tornado Cash 洗錢序列的一環。"
+          "description": "轉出 101 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:38:11 UTC）。Tornado Cash 洗錢序列的一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2c8c7e5eaa66908c92aaca8542dfd79db785becf7601a7dbe84fa309e580b19f",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "轉出 100 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:39:59 UTC）。Tornado Cash 洗錢序列的一環。"
+          "description": "轉出 100 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 21:39:59 UTC）。Tornado Cash 洗錢序列的一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x56dd4100fb2e105c0c99b6a1cdefc84ef46b5547ef24aa7fca5c982c2e7f46c8",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "轉出 83 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 22:39:11 UTC）。最後一筆 Tornado Cash 存款。共約 384–385 ETH 被洗白。"
+          "description": "轉出 83 ETH 至中介地址 0x3edaf41895fac4c198fcff1b03b8e9804621f57e（2026-05-18 22:39:11 UTC）。最後一筆 Tornado Cash 存款。共約 384–385 ETH 被洗白。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0x6a0109d3c5ab56277096c75e8f5d1d1d45243415",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA），用於以太坊端的洗錢階段。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。接收跨鏈橋接過來的 WBTC，兌換為 ETH 後，分批將約 384 ETH 存入 Tornado Cash。共轉出約 385 ETH。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3edaf41895fac4c198fcff1b03b8e9804621f57e",
-          "chain": "ethereum",
           "role": "laundering_intermediary",
           "description": "接收 ETH 批次轉帳（100+101+101+83 ETH）的中介地址。未驗證合約或 EOA。疑似與 Tornado Cash 混幣服務相關。",
-          "accountType": "unknown"
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "TBD",
-          "chain": "monad",
           "role": "protocol_contract",
           "description": "Echo Protocol 在 Monad 上的 eBTC 合約。管理員金鑰外洩導致未經授權鑄造 1,000 顆 eBTC。合約本身按設計運作，但缺乏多簽、時間鎖、鑄造上限與速率限制。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "monad"
         }
       ],
       "lessons": [
@@ -212,64 +214,64 @@
       "transactions": [
         {
           "txHash": "0x2f5e5a5c3a4d737b965ce57576cf6a60307c1a9f29c0b5a4fc8bbd4461bc819c",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "イーサリアム上のコントラクト相互作用（2026-05-18 21:27:35 UTC）。DEXスワップまたはクロスチェーンブリッジ操作の可能性があり、マネーロンダリングフローの一環。Gas使用量：436,854。"
+          "description": "イーサリアム上のコントラクト相互作用（2026-05-18 21:27:35 UTC）。DEXスワップまたはクロスチェーンブリッジ操作の可能性があり、マネーロンダリングフローの一環。Gas使用量：436,854。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x3003d1f23f9712410039819e4491cbe2beac4f1623e7f03cbd3399beeb7041eb",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "イーサリアム上のUSDCコントラクト相互作用（2026-05-18 21:27:23 UTC）。トークンスワップ／ブリッジシーケンスの一部。Gas使用量：55,906。"
+          "description": "イーサリアム上のUSDCコントラクト相互作用（2026-05-18 21:27:23 UTC）。トークンスワップ／ブリッジシーケンスの一部。Gas使用量：55,906。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xa6d60d4555ffd6d7331ef3e2e5e9fde5655358c313a54ee363f668cf0cb731ff",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "101 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:34:23 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。"
+          "description": "101 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:34:23 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x57283033c52bc2f54e0ac62bfbe2f692ee9e47644ac87da327bdd4bd4c64f55f",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "101 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:38:11 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。"
+          "description": "101 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:38:11 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2c8c7e5eaa66908c92aaca8542dfd79db785becf7601a7dbe84fa309e580b19f",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "100 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:39:59 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。"
+          "description": "100 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 21:39:59 UTC）。Tornado Cashマネーロンダリングシーケンスの一環。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x56dd4100fb2e105c0c99b6a1cdefc84ef46b5547ef24aa7fca5c982c2e7f46c8",
-          "chain": "ethereum",
           "role": "launder",
-          "description": "83 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 22:39:11 UTC）。最後のTornado Cash入金。合計約384–385 ETHが洗浄された。"
+          "description": "83 ETHを仲介アドレス0x3edaf41895fac4c198fcff1b03b8e9804621f57eに転送（2026-05-18 22:39:11 UTC）。最後のTornado Cash入金。合計約384–385 ETHが洗浄された。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0x6a0109d3c5ab56277096c75e8f5d1d1d45243415",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻撃者の外部所有アカウント（EOA）。イーサリアム側のマネーロンダリングフェーズに使用された。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。クロスチェーンブリッジで受け取ったWBTCをETHに交換し、約384 ETHをTornado Cashにバッチで入金した。合計約385 ETHを転送した。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x3edaf41895fac4c198fcff1b03b8e9804621f57e",
-          "chain": "ethereum",
           "role": "laundering_intermediary",
           "description": "ETHバッチ転送（100+101+101+83 ETH）を受け取った仲介アドレス。未検証のコントラクトまたはEOA。Tornado Cashミキシングサービスに関連している可能性がある。",
-          "accountType": "unknown"
+          "accountType": "Unknown",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "TBD",
-          "chain": "monad",
           "role": "protocol_contract",
           "description": "Monad上のEcho Protocol eBTCコントラクト。管理者キーの漏洩により1,000枚の未承認eBTCが鋳造された。コントラクト自体は設計通りに動作していたが、マルチシグ、タイムロック、鋳造上限、レート制限が欠けていた。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "monad"
         }
       ],
       "lessons": [
@@ -283,5 +285,10 @@
         "適時の公開情報開示と迅速な対応は、実際の損失を大幅に減らすことができる——Echo Protocolは迅速にキーを取り戻し、95.5%の未承認eBTCを焼却して、7,600万ドルの損失が永久化するのを阻止した。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-21",
+    "lastUpdated": "2026-05-21",
+    "human_verified": false
   }
 }

@@ -1,5 +1,6 @@
 {
-  "id": "paritymultisig-2017",
+  "id": "ParityMultisigWallet-20170719",
+  "date": "2017-07-19",
   "title": "Parity Multisig Wallet Hack",
   "protocol": "Parity Multisig Wallet",
   "blockchain": [
@@ -9,7 +10,9 @@
     "access_control"
   ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "30000000",
     "breakdown": [
@@ -28,77 +31,77 @@
     "note": "First exploit transaction mined at block 4041169 (2017-07-18 22:28:36 UTC) targeting Edgeless Casino wallet. Final drain transaction mined at block 4043802 (2017-07-19 12:19:36 UTC) targeting aeternity wallet. Total attack span: ~13 hours 51 minutes across two calendar days. The vulnerability was publicly disclosed by Parity on July 19, 2017 at 15:15 UTC, after which a White Hat Group used the same exploit to rescue ~377,000 ETH from other vulnerable wallets before malicious copycats could strike.",
     "date": "2017-07-19"
   },
+  "description": "On July 19, 2017, an unknown attacker exploited a critical access-control vulnerability in Parity Multisig Wallet version 1.5+ to steal approximately 153,037 ETH (~$30 million USD) from three high-profile multisignature contracts holding funds from past token sales: Edgeless Casino, Swarm City, and aeternity. Parity's multisig architecture used a shared library contract (WalletLibrary at 0x863df6bf...) deployed to conserve gas. Individual wallet contracts were thin proxies that forwarded all unmatched function calls to this library via delegatecall, executing library code in the wallet's own storage context. The library's initWallet() function—extracted from the constructor to allow shared initialization logic—had no access-control checks and could be called by anyone at any time. Because delegatecall runs in the caller's storage context, calling initWallet on a wallet contract overwrote that wallet's owner array (m_owners), signature threshold (m_required), and daily withdrawal limit (m_dailyLimit) in the wallet's own storage slots. The attacker systematically targeted three wallets in a two-phase sequence: first calling initWallet() with function selector 0xe46dcfeb to set themselves as the sole owner with a zero-signature requirement, then calling execute() with function selector 0xb61d27f6 to transfer all ETH to their EOA. Edgeless Casino was hit first on July 18 at 22:28 UTC (block 4041169), losing 26,793 ETH. After a pause of ~13.8 hours, the attacker returned on July 19 at 12:13 UTC to drain Swarm City (44,055 ETH at block 4043784) and aeternity (82,189 ETH at block 4043800). The vulnerability was first identified by Parity internally and publicly disclosed at 15:15 UTC on July 19 via a security alert. Immediately following disclosure, an ad-hoc White Hat Group (EOA 0x1e3f49b581...) used the exact same exploit against hundreds of other vulnerable Parity multisig wallets to rescue approximately 377,000 ETH before copycat attackers could strike. The White Hats moved rescued funds to a secure recovery multi-sig. Parity subsequently released patched wallet version 1.6.10 and later versions that properly protected initWallet. The incident highlighted the severe risks of delegatecall-based proxy libraries when initialization or privileged functions lack guards, and became a canonical case study in smart contract access-control failures.",
   "transactions": [
     {
       "txHash": "0xff261a49c61861884d0509dac46ed67577a7d48cb73c2f51f149c0bf96b29660",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "initWallet exploit transaction at block 4041169 (2017-07-18 22:28:36 UTC). Attacker EOA 0xb376... called initWallet() on Edgeless Casino multisig 0x91efff... via function selector 0xe46dcfeb to reset the wallet's owner array to only the attacker, with m_required=0. Gas used: 87,409. This was the first step in the two-transaction sequence against Edgeless."
+      "description": "initWallet exploit transaction at block 4041169 (2017-07-18 22:28:36 UTC). Attacker EOA 0xb376... called initWallet() on Edgeless Casino multisig 0x91efff... via function selector 0xe46dcfeb to reset the wallet's owner array to only the attacker, with m_required=0. Gas used: 87,409. This was the first step in the two-transaction sequence against Edgeless.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x0e0d16475d2ac6a4802437a35a21776e5c9b681a77fef1693b0badbb6afdb083",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "Drain transaction at block 4041179 (2017-07-18 22:33:23 UTC). Attacker called execute() via function selector 0xb61d27f6 on Edgeless Casino multisig 0x91efff... to transfer 26,793 ETH internally to attacker EOA 0xb376... Gas used: 162,754. Internal transaction 0x91efff... -> 0xb376... confirmed 26,793 ETH moved."
+      "description": "Drain transaction at block 4041179 (2017-07-18 22:33:23 UTC). Attacker called execute() via function selector 0xb61d27f6 on Edgeless Casino multisig 0x91efff... to transfer 26,793 ETH internally to attacker EOA 0xb376... Gas used: 162,754. Internal transaction 0x91efff... -> 0xb376... confirmed 26,793 ETH moved.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x2e65274f2bcc729a1fe6c2b44138b1da3642fca19d6419054a13ed8fa3933c2d",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "initWallet exploit transaction at block 4043784 (2017-07-19 12:13:36 UTC). Attacker called initWallet() on Swarm City multisig 0x50126e... via function selector 0xe46dcfeb, setting attacker as sole owner with zero required signatures. Gas used: 82,703."
+      "description": "initWallet exploit transaction at block 4043784 (2017-07-19 12:13:36 UTC). Attacker called initWallet() on Swarm City multisig 0x50126e... via function selector 0xe46dcfeb, setting attacker as sole owner with zero required signatures. Gas used: 82,703.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x97f7662322d56e1c54bd1bab39bccf98bc736fcb9c7e61640e6ff1f633637d38",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "Drain transaction at block 4043791 (2017-07-19 12:14:18 UTC). Attacker called execute() on Swarm City multisig 0x50126e... via function selector 0xb61d27f6 to internally transfer 44,055 ETH to attacker EOA. Gas used: 88,926."
+      "description": "Drain transaction at block 4043791 (2017-07-19 12:14:18 UTC). Attacker called execute() on Swarm City multisig 0x50126e... via function selector 0xb61d27f6 to internally transfer 44,055 ETH to attacker EOA. Gas used: 88,926.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0x9dbf0326a03a2a3719c27be4fa69aacc9857fd231a8d9dcaede4bb083def75ec",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "initWallet exploit transaction at block 4043800 (2017-07-19 12:18:15 UTC). Attacker called initWallet() on aeternity multisig 0xbec591... via function selector 0xe46dcfeb to seize ownership. Gas used: 82,703."
+      "description": "initWallet exploit transaction at block 4043800 (2017-07-19 12:18:15 UTC). Attacker called initWallet() on aeternity multisig 0xbec591... via function selector 0xe46dcfeb to seize ownership. Gas used: 82,703.",
+      "blockchain": "ethereum"
     },
     {
       "txHash": "0xeef10fc5170f669b86c4cd0444882a96087221325f8bf2f55d6188633aa7be7c",
-      "chain": "ethereum",
       "role": "exploit",
-      "description": "Drain transaction at block 4043802 (2017-07-19 12:19:36 UTC). Attacker called execute() on aeternity multisig 0xbec591... via function selector 0xb61d27f6 to internally transfer 82,189 ETH to attacker EOA. Gas used: 78,926. This was the final confirmed attack transaction."
+      "description": "Drain transaction at block 4043802 (2017-07-19 12:19:36 UTC). Attacker called execute() on aeternity multisig 0xbec591... via function selector 0xb61d27f6 to internally transfer 82,189 ETH to attacker EOA. Gas used: 78,926. This was the final confirmed attack transaction.",
+      "blockchain": "ethereum"
     }
   ],
   "attackers": [
     {
       "address": "0xb3764761e297d6f121e79c32a65829cd1ddb4d32",
-      "chain": "ethereum",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA). Executed six verified exploit transactions against three Parity multisig wallets over a ~13.8 hour window. Confirmed EOA via eth_getCode (no contract code). After draining 153,037 ETH, the attacker distributed funds to seven subsidiary addresses in 10,000 ETH chunks between blocks 4045849 and 4045875 (2017-07-19 17:10–17:14 UTC), then ceased activity.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "ethereum"
     }
   ],
   "victims": [
     {
       "address": "0x91efffb9c6cd3a66474688d0a48aa6ecfe515aa5",
-      "chain": "ethereum",
       "role": "protocol_contract",
       "description": "Edgeless Casino (EDG) multisig wallet. Deployed February 2017 to hold ICO proceeds. Used Parity Multisig Wallet version 1.5+ with shared WalletLibrary at 0x863df6bf.... Stolen: 26,793 ETH. Current balance: negligible.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0x50126e8fcb9be29f83c6bbd913cc85b40eaf86fc",
-      "chain": "ethereum",
       "role": "protocol_contract",
       "description": "Swarm City (SWT) multisig wallet. Deployed March 2017 to hold token sale funds. Used Parity Multisig Wallet version 1.5+ with shared WalletLibrary. Stolen: 44,055 ETH. Current balance: negligible.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     },
     {
       "address": "0xbec591de75b8699a3ba52f073428822d0bfc0d7e",
-      "chain": "ethereum",
       "role": "protocol_contract",
       "description": "aeternity (AE) multisig wallet. Deployed June 2017 to hold ICO proceeds. Used Parity Multisig Wallet version 1.5+ with shared WalletLibrary. Stolen: 82,189 ETH. Current balance: negligible.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "ethereum"
     }
   ],
-  "description": "On July 19, 2017, an unknown attacker exploited a critical access-control vulnerability in Parity Multisig Wallet version 1.5+ to steal approximately 153,037 ETH (~$30 million USD) from three high-profile multisignature contracts holding funds from past token sales: Edgeless Casino, Swarm City, and aeternity. Parity's multisig architecture used a shared library contract (WalletLibrary at 0x863df6bf...) deployed to conserve gas. Individual wallet contracts were thin proxies that forwarded all unmatched function calls to this library via delegatecall, executing library code in the wallet's own storage context. The library's initWallet() function—extracted from the constructor to allow shared initialization logic—had no access-control checks and could be called by anyone at any time. Because delegatecall runs in the caller's storage context, calling initWallet on a wallet contract overwrote that wallet's owner array (m_owners), signature threshold (m_required), and daily withdrawal limit (m_dailyLimit) in the wallet's own storage slots. The attacker systematically targeted three wallets in a two-phase sequence: first calling initWallet() with function selector 0xe46dcfeb to set themselves as the sole owner with a zero-signature requirement, then calling execute() with function selector 0xb61d27f6 to transfer all ETH to their EOA. Edgeless Casino was hit first on July 18 at 22:28 UTC (block 4041169), losing 26,793 ETH. After a pause of ~13.8 hours, the attacker returned on July 19 at 12:13 UTC to drain Swarm City (44,055 ETH at block 4043784) and aeternity (82,189 ETH at block 4043800). The vulnerability was first identified by Parity internally and publicly disclosed at 15:15 UTC on July 19 via a security alert. Immediately following disclosure, an ad-hoc White Hat Group (EOA 0x1e3f49b581...) used the exact same exploit against hundreds of other vulnerable Parity multisig wallets to rescue approximately 377,000 ETH before copycat attackers could strike. The White Hats moved rescued funds to a secure recovery multi-sig. Parity subsequently released patched wallet version 1.6.10 and later versions that properly protected initWallet. The incident highlighted the severe risks of delegatecall-based proxy libraries when initialization or privileged functions lack guards, and became a canonical case study in smart contract access-control failures.",
   "rootCause": "The Parity Multisig Wallet used a shared WalletLibrary contract (0x863df6bf...) to reduce deployment costs. Each individual wallet was a thin proxy that forwarded all unmatched function calls to the library via delegatecall, which executes the library's bytecode in the caller's (the wallet's) storage context. The WalletLibrary contained an initWallet(address[] _owners, uint _required, uint _daylimit) function that had been extracted from the wallet constructor logic to support the library pattern. Critically, initWallet had zero access-control checks: no initialization flag, no onlyUninitialized modifier, and no owner verification. Because the wallet's fallback function blindly delegatecalled any unrecognized function data to the library, anyone could call initWallet on any deployed wallet contract. When initWallet executed via delegatecall, it wrote directly to the wallet's storage slots—specifically overwriting the m_owners array, m_required (number of signatures needed), and m_dailyLimit variables. This allowed the attacker to instantly and irreversibly seize sole ownership of any Parity Multisig Wallet 1.5+ with a single unauthenticated transaction. The root cause was therefore a missing access-control check on a state-mutating initialization function inside a delegatecall-based shared library.",
   "attackVector": "1. The attacker identified that Parity Multisig Wallet 1.5+ used a shared WalletLibrary at 0x863df6bf... and that the wallet proxy's fallback function forwarded all calls to this library via delegatecall. 2. The attacker determined that the library's initWallet() function had no access restrictions and could be invoked on any already-deployed wallet. 3. On July 18, 2017 at 22:28 UTC (block 4041169), the attacker sent transaction 0xff261a49... from EOA 0xb376... to Edgeless Casino wallet 0x91efff..., calling initWallet via selector 0xe46dcfeb with parameters that set the attacker as the sole owner and m_required=0. Gas used: 87,409. 4. Five minutes later, at 22:33 UTC (block 4041179), the attacker sent transaction 0x0e0d1647... to the same wallet, calling execute via selector 0xb61d27f6 to internally transfer 26,793 ETH to the attacker's EOA. Gas used: 162,754. 5. After a ~13.8 hour pause, the attacker repeated the exact two-step sequence against Swarm City wallet 0x50126e...: initWallet at 12:13 UTC (tx 0x2e65274f..., gas 82,703) followed by execute at 12:14 UTC (tx 0x97f76623..., gas 88,926), draining 44,055 ETH. 6. Immediately after, the attacker targeted aeternity wallet 0xbec591...: initWallet at 12:18 UTC (tx 0x9dbf0326..., gas 82,703) and execute at 12:19 UTC (tx 0xeef10fc5..., gas 78,926), draining 82,189 ETH. 7. Total stolen: 153,037 ETH. 8. Between blocks 4045849 and 4045875 (July 19 ~17:10–17:14 UTC), the attacker distributed the stolen funds in 10,000 ETH chunks to seven separate addresses, then ceased on-chain activity.",
   "lessons": [
@@ -130,12 +133,6 @@
     "https://hackingdistributed.com/2017/07/22/deep-dive-parity-bug/",
     "https://www.reddit.com/r/ethereum/comments/6oskiu/parity_multisig_wallet_hacked/"
   ],
-  "metadata": {
-    "dateAdded": "2026-05-21",
-    "lastUpdated": "2026-05-21",
-    "human_verified": false
-  },
-  "date": "2017-07-19",
   "locales": {
     "zh-TW": {
       "title": "Parity 多簽錢包駭客攻擊事件",
@@ -145,71 +142,71 @@
       "transactions": [
         {
           "txHash": "0xff261a49c61861884d0509dac46ed67577a7d48cb73c2f51f149c0bf96b29660",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet 攻擊交易，採掛於區塊 4041169（2017-07-18 22:28:36 UTC）。攻擊者 EOA 0xb376... 透過函式選擇器 0xe46dcfeb 呼叫 Edgeless Casino 多簽錢包 0x91efff... 的 initWallet()，將錢包擁有者陣列重置為僅有攻擊者，且 m_required=0。Gas 使用量：87,409。這是針對 Edgeless 的兩步驟攻擊序列中的第一步。"
+          "description": "initWallet 攻擊交易，採掛於區塊 4041169（2017-07-18 22:28:36 UTC）。攻擊者 EOA 0xb376... 透過函式選擇器 0xe46dcfeb 呼叫 Edgeless Casino 多簽錢包 0x91efff... 的 initWallet()，將錢包擁有者陣列重置為僅有攻擊者，且 m_required=0。Gas 使用量：87,409。這是針對 Edgeless 的兩步驟攻擊序列中的第一步。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x0e0d16475d2ac6a4802437a35a21776e5c9b681a77fef1693b0badbb6afdb083",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": " drained 交易，採掛於區塊 4041179（2017-07-18 22:33:23 UTC）。攻擊者透過函式選擇器 0xb61d27f6 呼叫 Edgeless Casino 多簽錢包 0x91efff... 的 execute()，內部轉移 26,793 ETH 至攻擊者 EOA 0xb376...。Gas 使用量：162,754。內部交易 0x91efff... -> 0xb376... 確認移動了 26,793 ETH。"
+          "description": " drained 交易，採掛於區塊 4041179（2017-07-18 22:33:23 UTC）。攻擊者透過函式選擇器 0xb61d27f6 呼叫 Edgeless Casino 多簽錢包 0x91efff... 的 execute()，內部轉移 26,793 ETH 至攻擊者 EOA 0xb376...。Gas 使用量：162,754。內部交易 0x91efff... -> 0xb376... 確認移動了 26,793 ETH。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2e65274f2bcc729a1fe6c2b44138b1da3642fca19d6419054a13ed8fa3933c2d",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet 攻擊交易，採掛於區塊 4043784（2017-07-19 12:13:36 UTC）。攻擊者透過函式選擇器 0xe46dcfeb 呼叫 Swarm City 多簽錢包 0x50126e... 的 initWallet()，將攻擊者設為唯一擁有者且所需簽名數為零。Gas 使用量：82,703。"
+          "description": "initWallet 攻擊交易，採掛於區塊 4043784（2017-07-19 12:13:36 UTC）。攻擊者透過函式選擇器 0xe46dcfeb 呼叫 Swarm City 多簽錢包 0x50126e... 的 initWallet()，將攻擊者設為唯一擁有者且所需簽名數為零。Gas 使用量：82,703。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x97f7662322d56e1c54bd1bab39bccf98bc736fcb9c7e61640e6ff1f633637d38",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": " drained 交易，採掛於區塊 4043791（2017-07-19 12:14:18 UTC）。攻擊者呼叫 Swarm City 多簽錢包 0x50126e... 的 execute()，透過選擇器 0xb61d27f6 內部轉移 44,055 ETH 至攻擊者 EOA。Gas 使用量：88,926。"
+          "description": " drained 交易，採掛於區塊 4043791（2017-07-19 12:14:18 UTC）。攻擊者呼叫 Swarm City 多簽錢包 0x50126e... 的 execute()，透過選擇器 0xb61d27f6 內部轉移 44,055 ETH 至攻擊者 EOA。Gas 使用量：88,926。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x9dbf0326a03a2a3719c27be4fa69aacc9857fd231a8d9dcaede4bb083def75ec",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet 攻擊交易，採掛於區塊 4043800（2017-07-19 12:18:15 UTC）。攻擊者透過函式選擇器 0xe46dcfeb 呼叫 aeternity 多簽錢包 0xbec591... 的 initWallet() 以奪取所有權。Gas 使用量：82,703。"
+          "description": "initWallet 攻擊交易，採掛於區塊 4043800（2017-07-19 12:18:15 UTC）。攻擊者透過函式選擇器 0xe46dcfeb 呼叫 aeternity 多簽錢包 0xbec591... 的 initWallet() 以奪取所有權。Gas 使用量：82,703。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xeef10fc5170f669b86c4cd0444882a96087221325f8bf2f55d6188633aa7be7c",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": " drained 交易，採掛於區塊 4043802（2017-07-19 12:19:36 UTC）。攻擊者呼叫 aeternity 多簽錢包 0xbec591... 的 execute()，透過選擇器 0xb61d27f6 內部轉移 82,189 ETH 至攻擊者 EOA。Gas 使用量：78,926。這是最後一筆已確認的攻擊交易。"
+          "description": " drained 交易，採掛於區塊 4043802（2017-07-19 12:19:36 UTC）。攻擊者呼叫 aeternity 多簽錢包 0xbec591... 的 execute()，透過選擇器 0xb61d27f6 內部轉移 82,189 ETH 至攻擊者 EOA。Gas 使用量：78,926。這是最後一筆已確認的攻擊交易。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xb3764761e297d6f121e79c32a65829cd1ddb4d32",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA）。在約 13.8 小時內對三個 Parity 多簽錢包執行了六筆已驗證的攻擊交易。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。 drained 153,037 ETH 後，攻擊者在區塊 4045849 至 4045875 之間（2017-07-19 17:10–17:14 UTC）將資金以每筆 10,000 ETH 的區塊分發到七個附屬地址，隨後停止活動。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0x91efffb9c6cd3a66474688d0a48aa6ecfe515aa5",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "Edgeless Casino（EDG）多簽錢包。2017 年 2 月部署以存放 ICO 募集資金。使用 Parity Multisig Wallet 1.5+ 版本，搭配位於 0x863df6bf... 的共享 WalletLibrary。被盜：26,793 ETH。目前餘額：可忽略。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x50126e8fcb9be29f83c6bbd913cc85b40eaf86fc",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "Swarm City（SWT）多簽錢包。2017 年 3 月部署以存放代幣銷售資金。使用 Parity Multisig Wallet 1.5+ 版本，搭配共享 WalletLibrary。被盜：44,055 ETH。目前餘額：可忽略。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xbec591de75b8699a3ba52f073428822d0bfc0d7e",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "aeternity（AE）多簽錢包。2017 年 6 月部署以存放 ICO 募集資金。使用 Parity Multisig Wallet 1.5+ 版本，搭配共享 WalletLibrary。被盜：82,189 ETH。目前餘額：可忽略。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -233,71 +230,71 @@
       "transactions": [
         {
           "txHash": "0xff261a49c61861884d0509dac46ed67577a7d48cb73c2f51f149c0bf96b29660",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet攻撃トランザクション。ブロック4041169（2017-07-18 22:28:36 UTC）に採掘。攻撃者EOA 0xb376...がEdgeless Casino多署ウォレット0x91efff...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し、ウォレットのオーナー配列を攻撃者のみにリセットし、m_required=0とした。Gas使用量：87,409。これはEdgeless対象の2トランザクションシーケンスの第1ステップである。"
+          "description": "initWallet攻撃トランザクション。ブロック4041169（2017-07-18 22:28:36 UTC）に採掘。攻撃者EOA 0xb376...がEdgeless Casino多署ウォレット0x91efff...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し、ウォレットのオーナー配列を攻撃者のみにリセットし、m_required=0とした。Gas使用量：87,409。これはEdgeless対象の2トランザクションシーケンスの第1ステップである。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x0e0d16475d2ac6a4802437a35a21776e5c9b681a77fef1693b0badbb6afdb083",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "排出トランザクション。ブロック4041179（2017-07-18 22:33:23 UTC）に採掘。攻撃者がEdgeless Casino多署ウォレット0x91efff...のexecute()を関数セレクタ0xb61d27f6で呼び出し、26,793 ETHを攻撃者EOA 0xb376...に内部転送した。Gas使用量：162,754。内部トランザクション0x91efff... -> 0xb376...で26,793 ETHの移動が確認された。"
+          "description": "排出トランザクション。ブロック4041179（2017-07-18 22:33:23 UTC）に採掘。攻撃者がEdgeless Casino多署ウォレット0x91efff...のexecute()を関数セレクタ0xb61d27f6で呼び出し、26,793 ETHを攻撃者EOA 0xb376...に内部転送した。Gas使用量：162,754。内部トランザクション0x91efff... -> 0xb376...で26,793 ETHの移動が確認された。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x2e65274f2bcc729a1fe6c2b44138b1da3642fca19d6419054a13ed8fa3933c2d",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet攻撃トランザクション。ブロック4043784（2017-07-19 12:13:36 UTC）に採掘。攻撃者がSwarm City多署ウォレット0x50126e...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し、攻撃者を唯一オーナーかつ署名必要数を0に設定した。Gas使用量：82,703。"
+          "description": "initWallet攻撃トランザクション。ブロック4043784（2017-07-19 12:13:36 UTC）に採掘。攻撃者がSwarm City多署ウォレット0x50126e...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し、攻撃者を唯一オーナーかつ署名必要数を0に設定した。Gas使用量：82,703。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x97f7662322d56e1c54bd1bab39bccf98bc736fcb9c7e61640e6ff1f633637d38",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "排出トランザクション。ブロック4043791（2017-07-19 12:14:18 UTC）に採掘。攻撃者がSwarm City多署ウォレット0x50126e...のexecute()を関数セレクタ0xb61d27f6で呼び出し、44,055 ETHを攻撃者EOAに内部転送した。Gas使用量：88,926。"
+          "description": "排出トランザクション。ブロック4043791（2017-07-19 12:14:18 UTC）に採掘。攻撃者がSwarm City多署ウォレット0x50126e...のexecute()を関数セレクタ0xb61d27f6で呼び出し、44,055 ETHを攻撃者EOAに内部転送した。Gas使用量：88,926。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0x9dbf0326a03a2a3719c27be4fa69aacc9857fd231a8d9dcaede4bb083def75ec",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "initWallet攻撃トランザクション。ブロック4043800（2017-07-19 12:18:15 UTC）に採掘。攻撃者がaeternity多署ウォレット0xbec591...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し所有権を奪取した。Gas使用量：82,703。"
+          "description": "initWallet攻撃トランザクション。ブロック4043800（2017-07-19 12:18:15 UTC）に採掘。攻撃者がaeternity多署ウォレット0xbec591...のinitWallet()を関数セレクタ0xe46dcfebで呼び出し所有権を奪取した。Gas使用量：82,703。",
+          "blockchain": "ethereum"
         },
         {
           "txHash": "0xeef10fc5170f669b86c4cd0444882a96087221325f8bf2f55d6188633aa7be7c",
-          "chain": "ethereum",
           "role": "exploit",
-          "description": "排出トランザクション。ブロック4043802（2017-07-19 12:19:36 UTC）に採掘。攻撃者がaeternity多署ウォレット0xbec591...のexecute()を関数セレクタ0xb61d27f6で呼び出し、82,189 ETHを攻撃者EOAに内部転送した。Gas使用量：78,926。これが最後に確認された攻撃トランザクションである。"
+          "description": "排出トランザクション。ブロック4043802（2017-07-19 12:19:36 UTC）に採掘。攻撃者がaeternity多署ウォレット0xbec591...のexecute()を関数セレクタ0xb61d27f6で呼び出し、82,189 ETHを攻撃者EOAに内部転送した。Gas使用量：78,926。これが最後に確認された攻撃トランザクションである。",
+          "blockchain": "ethereum"
         }
       ],
       "attackers": [
         {
           "address": "0xb3764761e297d6f121e79c32a65829cd1ddb4d32",
-          "chain": "ethereum",
           "role": "primary_attacker",
           "description": "攻撃者の外部所有アカウント（EOA）。約313.8時間のウィンドウ内で3つのParity多署ウォレットに対して6件の検証済み攻撃トランザクションを実行した。eth_getCodeによりコントラクトコードのない純粋なウォレットと確認されている。153,037 ETHを排出した後、攻撃者はブロック4045849から4045875の間（2017-07-19 17:10–17:14 UTC）で10,000 ETHズツに7つの副次的アドレスに資金を分配し、その後活動を停止した。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "ethereum"
         }
       ],
       "victims": [
         {
           "address": "0x91efffb9c6cd3a66474688d0a48aa6ecfe515aa5",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "Edgeless Casino（EDG）多署ウォレット。2017年2月にデプロイされ、ICOで募集した資金を保管するためのもの。Parity Multisig Walletバージョン1.5+を使用し、0x863df6bf...の共有WalletLibraryを使用。被害額：26,793 ETH。現在の残高：可視でない。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0x50126e8fcb9be29f83c6bbd913cc85b40eaf86fc",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "Swarm City（SWT）多署ウォレット。2017年3月にデプロイされ、トークンセール資金を保管するためのもの。Parity Multisig Walletバージョン1.5+を使用し、共有WalletLibraryを使用。被害額：44,055 ETH。現在の残高：可視でない。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         },
         {
           "address": "0xbec591de75b8699a3ba52f073428822d0bfc0d7e",
-          "chain": "ethereum",
           "role": "protocol_contract",
           "description": "aeternity（AE）多署ウォレット。2017年6月にデプロイされ、ICOで募集した資金を保管するためのもの。Parity Multisig Walletバージョン1.5+を使用し、共有WalletLibraryを使用。被害額：82,189 ETH。現在の残高：可視でない。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "ethereum"
         }
       ],
       "lessons": [
@@ -313,5 +310,10 @@
         "Parityの事件（2017年7月の盗難と2017年11月の凍結）は、同じライブラリ-プロキシパターンが欠陷を持つ場合、資金の完全な損失と資金の完全な凍結の両方が起こりうる—これらは相反するが、同じくらい災難的な結果であることを示している。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-21",
+    "lastUpdated": "2026-05-21",
+    "human_verified": false
   }
 }

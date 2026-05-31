@@ -1,5 +1,6 @@
 {
-  "id": "inkfinance-2026",
+  "id": "INKFinance-20260511",
+  "date": "2026-05-11",
   "title": "INK Finance Treasury Proxy Exploit",
   "protocol": "INK Finance",
   "blockchain": [
@@ -9,7 +10,9 @@
     "access_control"
   ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "140180",
     "breakdown": [
@@ -28,72 +31,72 @@
     "note": "The exploit was executed entirely within a single contract-creation transaction at block 86711192 (Polygon). Fund laundering occurred in two subsequent transactions over the following ~33 minutes.",
     "date": "2026-05-11"
   },
+  "description": "On May 11, 2026, at approximately 07:24:54 UTC, an attacker exploited the Workspace Treasury Proxy of INK Finance on Polygon, draining approximately 140,180.18 USDT (valued at ~$140,180). According to security researchers at ExVul and Blockaid, the attacker deployed a smart contract whose address matched a whitelisted claimer entry, allowing them to pass eligibility checks and trigger an unauthorized treasury transfer. On-chain analysis reveals the attack was executed entirely within the constructor of a newly deployed contract (0x74f28b9a...) at block 86711192. The attacker utilized a flash loan of 24,982.65 USDT from the Balancer Vault as part of the exploit sequence, interacted with an intermediate unverified contract (0xa184af4b...), and ultimately extracted 140,180.18 USDT in net profit to their externally owned account (0x90b147...). Within 10 minutes of the exploit, the attacker transferred 10,000 USDT to a secondary address (0xb20c...), and approximately 33 minutes later bridged 130,180.18 USDT out of Polygon via Jumper.exchange (LiFi Relay Depository) to an unknown destination chain. The attacker EOA's current USDT balance is zero.",
   "transactions": [
     {
       "txHash": "0xa276737acee23c4d9e6b741f411c5f8c6c4acef910eb5f477e1157b548e68023",
-      "chain": "polygon",
       "role": "setup",
-      "description": "Attacker EOA 0x90b147... received 22.306 MATIC from 0x8c826f... at block 86710080 (2026-05-11 06:52:28 UTC), likely to fund gas for the upcoming exploit. Confirmed via eth_getCode (0x8c826f... is an EOA with extensive outbound funding history)."
+      "description": "Attacker EOA 0x90b147... received 22.306 MATIC from 0x8c826f... at block 86710080 (2026-05-11 06:52:28 UTC), likely to fund gas for the upcoming exploit. Confirmed via eth_getCode (0x8c826f... is an EOA with extensive outbound funding history).",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0xb469a24ec737be16fe41367a7b5b315c7f03b4e0ff3af50b3a2db03b3066b982",
-      "chain": "polygon",
       "role": "exploit",
-      "description": "Core exploit transaction at block 86711192 (2026-05-11 07:24:54 UTC). The attacker deployed contract 0x74f28b9a... (runtime size: 58 bytes) whose constructor executed the entire attack. Constructor parameters embedded Balancer Vault (0xba12...), victim Treasury Proxy (0xef2c77f3...), intermediate contract (0xa184af4b...), USDT (0xc2132d...), and attacker EOA. Gas used: 847,380. Transaction receipt contains 9 logs including USDT Transfer events, a Balancer Vault flash-loan event, and an event from the victim Treasury Proxy logging a 165,162.83 USDT authorization."
+      "description": "Core exploit transaction at block 86711192 (2026-05-11 07:24:54 UTC). The attacker deployed contract 0x74f28b9a... (runtime size: 58 bytes) whose constructor executed the entire attack. Constructor parameters embedded Balancer Vault (0xba12...), victim Treasury Proxy (0xef2c77f3...), intermediate contract (0xa184af4b...), USDT (0xc2132d...), and attacker EOA. Gas used: 847,380. Transaction receipt contains 9 logs including USDT Transfer events, a Balancer Vault flash-loan event, and an event from the victim Treasury Proxy logging a 165,162.83 USDT authorization.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0xfb515fca3a876824e5f32649bd45606cf78685a91dd7d97ff08960108ccbbd00",
-      "chain": "polygon",
       "role": "laundering",
-      "description": "Post-exploit laundering at block 86711501 (2026-05-11 07:33:55 UTC). Attacker EOA transferred exactly 10,000.000000 USDT to secondary address 0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5 via direct ERC-20 transfer (function selector 0xa9059cbb). Gas used: 59,408."
+      "description": "Post-exploit laundering at block 86711501 (2026-05-11 07:33:55 UTC). Attacker EOA transferred exactly 10,000.000000 USDT to secondary address 0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5 via direct ERC-20 transfer (function selector 0xa9059cbb). Gas used: 59,408.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0xdfda91ba711f36a139e2280606d4a6d82026dab3e2f0d1e32ead3a17d789115b",
-      "chain": "polygon",
       "role": "laundering",
-      "description": "Cross-chain laundering at block 86712295 (2026-05-11 07:57:05 UTC). Attacker EOA called Jumper.exchange / LiFi Diamond contract (0x89c634...) with `callDiamondWithEIP2612Signature` and embedded `startBridgeTokensViaRelayDepository` (selector 0x092e8fa4), bridging 130,180.175578 USDT out of Polygon via Relay Depository. The transaction routed USDT through LiFi Diamond (0x1231de...) and Relay Depository (0x4cd00e...). Gas used: 178,209."
+      "description": "Cross-chain laundering at block 86712295 (2026-05-11 07:57:05 UTC). Attacker EOA called Jumper.exchange / LiFi Diamond contract (0x89c634...) with `callDiamondWithEIP2612Signature` and embedded `startBridgeTokensViaRelayDepository` (selector 0x092e8fa4), bridging 130,180.175578 USDT out of Polygon via Relay Depository. The transaction routed USDT through LiFi Diamond (0x1231de...) and Relay Depository (0x4cd00e...). Gas used: 178,209.",
+      "blockchain": "polygon"
     }
   ],
   "attackers": [
     {
       "address": "0x90b147592191388e955401af43842e19faa87ee2",
-      "chain": "polygon",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA). Received gas funding 32 minutes before the exploit, deployed the exploit contract, received net stolen USDT, and subsequently laundered funds. Confirmed EOA via eth_getCode (no contract code).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "polygon"
     },
     {
       "address": "0x74f28b9a35d72504e007c60803ef47f1a44b109e",
-      "chain": "polygon",
       "role": "exploit_contract",
       "description": "One-time attack smart contract deployed and executed in transaction 0xb469a2... Runtime bytecode is only 58 bytes, indicating all attack logic was performed inside the constructor. Received flash-loaned USDT and orchestrated the treasury withdrawal.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     },
     {
       "address": "0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5",
-      "chain": "polygon",
       "role": "fund_recipient",
       "description": "Secondary EOA that received 10,000 USDT directly from the primary attacker 9 minutes after the exploit. No further outgoing transactions detected in the immediate window. Confirmed EOA via eth_getCode.",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "polygon"
     }
   ],
   "victims": [
     {
       "address": "0xef2c77f3b9b8aaa067239bc6b4588bae26433494",
-      "chain": "polygon",
       "role": "protocol_contract",
       "description": "INK Finance Workspace Treasury Proxy on Polygon. The target of the exploit. Unverified source code. Emitted an event logging a 165,162.83 USDT treasury authorization during the attack transaction.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     },
     {
       "address": "0xa184af4b1c01815a4b57422a3419e4fb78a96ee4",
-      "chain": "polygon",
       "role": "intermediate_contract",
       "description": "Unverified intermediate contract interacted with during the exploit sequence. The exploit contract sent 24,982.65 USDT to this address and received back 165,162.83 USDT, suggesting it functioned as a liquidity pool or claim eligibility intermediary in the attack path.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     }
   ],
-  "description": "On May 11, 2026, at approximately 07:24:54 UTC, an attacker exploited the Workspace Treasury Proxy of INK Finance on Polygon, draining approximately 140,180.18 USDT (valued at ~$140,180). According to security researchers at ExVul and Blockaid, the attacker deployed a smart contract whose address matched a whitelisted claimer entry, allowing them to pass eligibility checks and trigger an unauthorized treasury transfer. On-chain analysis reveals the attack was executed entirely within the constructor of a newly deployed contract (0x74f28b9a...) at block 86711192. The attacker utilized a flash loan of 24,982.65 USDT from the Balancer Vault as part of the exploit sequence, interacted with an intermediate unverified contract (0xa184af4b...), and ultimately extracted 140,180.18 USDT in net profit to their externally owned account (0x90b147...). Within 10 minutes of the exploit, the attacker transferred 10,000 USDT to a secondary address (0xb20c...), and approximately 33 minutes later bridged 130,180.18 USDT out of Polygon via Jumper.exchange (LiFi Relay Depository) to an unknown destination chain. The attacker EOA's current USDT balance is zero.",
   "rootCause": "According to security researcher analysis (ExVul, Blockaid), the root cause was a flaw in the Treasury Proxy's access-control verification. The attacker was able to deploy a contract at an address that matched a whitelisted claimer entry in the protocol's eligibility system. This allowed the attacker to bypass or satisfy the claimant verification logic and trigger an authorized treasury withdrawal. Because the victim contract's source code has not been verified on-chain, the exact mechanism of the 'address matching' is unconfirmed. The attack pattern indicates a weakness in how the protocol validates claimant addresses—potentially through incomplete address comparison, address-mask matching, or a predictable whitelisted-address pattern that the attacker reproduced via CREATE2 or similar address-generation techniques.",
   "attackVector": "1. **Funding (06:52:28 UTC):** Attacker EOA 0x90b147... received 22.306 MATIC from 0x8c826f... to cover gas fees.\n2. **Contract Deployment & Exploit (07:24:54 UTC):** At block 86711192, the attacker deployed contract 0x74f28b9a... with embedded constructor parameters pointing to Balancer Vault (0xba12...), victim Treasury Proxy (0xef2c77f3...), intermediate contract (0xa184af4b...), USDT (0xc2132d...), and attacker EOA.\n3. **Flash Loan:** The exploit contract's constructor borrowed 24,982.65 USDT from the Balancer Vault (event signature 0x0d7d75e0...).\n4. **Intermediate Interaction:** The borrowed USDT was routed through unverified contract 0xa184af4b..., and 165,162.83 USDT was returned—suggesting a pool interaction or manipulation step that amplified the exploitable balance.\n5. **Treasury Withdrawal:** The contract called a privileged function on the victim Treasury Proxy (0xef2c77f3...) using the 'matched whitelisted claimer' address to satisfy access checks. The victim emitted an event (0xf9692701...) logging a 165,162.83 USDT transfer authorization.\n6. **Repayment:** The flash loan of 24,982.65 USDT was repaid to Balancer Vault.\n7. **Profit Extraction:** Net profit of 140,180.18 USDT was transferred to attacker EOA 0x90b147... during the same transaction.\n8. **Laundering:** At 07:33:55 UTC, 10,000 USDT was transferred to EOA 0xb20c...; at 07:57:05 UTC, 130,180.18 USDT was bridged out via Jumper.exchange (LiFi Relay Depository) using `callDiamondWithEIP2612Signature` and `startBridgeTokensViaRelayDepository`.",
   "lessons": [
@@ -117,12 +120,6 @@
     "https://polygonscan.com/address/0x90b147592191388e955401af43842e19faa87ee2",
     "https://polygonscan.com/address/0x74f28b9a35d72504e007c60803ef47f1a44b109e"
   ],
-  "metadata": {
-    "dateAdded": "2026-05-22",
-    "lastUpdated": "2026-05-22",
-    "human_verified": false
-  },
-  "date": "2026-05-11",
   "locales": {
     "zh-TW": {
       "title": "INK Finance Treasury Proxy 存取控制攻擊",
@@ -132,66 +129,66 @@
       "transactions": [
         {
           "txHash": "0xa276737acee23c4d9e6b741f411c5f8c6c4acef910eb5f477e1157b548e68023",
-          "chain": "polygon",
           "role": "setup",
-          "description": "攻擊者 EOA 0x90b147... 於區塊 86710080（2026-05-11 06:52:28 UTC）從 0x8c826f... 收到 22.306 MATIC，應為後續攻擊準備的 gas 費用。經由 eth_getCode 確認 0x8c826f... 為 EOA，且該地址有大量對外出金紀錄。"
+          "description": "攻擊者 EOA 0x90b147... 於區塊 86710080（2026-05-11 06:52:28 UTC）從 0x8c826f... 收到 22.306 MATIC，應為後續攻擊準備的 gas 費用。經由 eth_getCode 確認 0x8c826f... 為 EOA，且該地址有大量對外出金紀錄。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xb469a24ec737be16fe41367a7b5b315c7f03b4e0ff3af50b3a2db03b3066b982",
-          "chain": "polygon",
           "role": "exploit",
-          "description": "核心攻擊交易，採掛於區塊 86711192（2026-05-11 07:24:54 UTC）。攻擊者部署合約 0x74f28b9a...（runtime 大小僅 58 bytes），所有攻擊邏輯均在建構函式中執行。建構函式參數嵌入了 Balancer Vault（0xba12...）、受害者 Treasury Proxy（0xef2c77f3...）、中間合約（0xa184af4b...）、USDT（0xc2132d...）及攻擊者 EOA。Gas 使用量：847,380。交易收據包含 9 個日誌，包括 USDT Transfer 事件、Balancer Vault 閃電貸事件，以及受害者 Treasury Proxy 發出的 165,162.83 USDT 授權事件。"
+          "description": "核心攻擊交易，採掛於區塊 86711192（2026-05-11 07:24:54 UTC）。攻擊者部署合約 0x74f28b9a...（runtime 大小僅 58 bytes），所有攻擊邏輯均在建構函式中執行。建構函式參數嵌入了 Balancer Vault（0xba12...）、受害者 Treasury Proxy（0xef2c77f3...）、中間合約（0xa184af4b...）、USDT（0xc2132d...）及攻擊者 EOA。Gas 使用量：847,380。交易收據包含 9 個日誌，包括 USDT Transfer 事件、Balancer Vault 閃電貸事件，以及受害者 Treasury Proxy 發出的 165,162.83 USDT 授權事件。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xfb515fca3a876824e5f32649bd45606cf78685a91dd7d97ff08960108ccbbd00",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻擊後洗錢交易，採掛於區塊 86711501（2026-05-11 07:33:55 UTC）。攻擊者 EOA 直接以 ERC-20 transfer（selector 0xa9059cbb）將 10,000.000000 USDT 轉移至次要地址 0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5。Gas 使用量：59,408。"
+          "description": "攻擊後洗錢交易，採掛於區塊 86711501（2026-05-11 07:33:55 UTC）。攻擊者 EOA 直接以 ERC-20 transfer（selector 0xa9059cbb）將 10,000.000000 USDT 轉移至次要地址 0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5。Gas 使用量：59,408。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xdfda91ba711f36a139e2280606d4a6d82026dab3e2f0d1e32ead3a17d789115b",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "跨鏈洗錢交易，採掛於區塊 86712295（2026-05-11 07:57:05 UTC）。攻擊者 EOA 呼叫 Jumper.exchange / LiFi Diamond 合約（0x89c634...），使用 `callDiamondWithEIP2612Signature` 並嵌入 `startBridgeTokensViaRelayDepository`（selector 0x092e8fa4），透過 Relay Depository 將 130,180.175578 USDT 橋接離開 Polygon。該交易將 USDT 路由經過 LiFi Diamond（0x1231de...）與 Relay Depository（0x4cd00e...）。Gas 使用量：178,209。"
+          "description": "跨鏈洗錢交易，採掛於區塊 86712295（2026-05-11 07:57:05 UTC）。攻擊者 EOA 呼叫 Jumper.exchange / LiFi Diamond 合約（0x89c634...），使用 `callDiamondWithEIP2612Signature` 並嵌入 `startBridgeTokensViaRelayDepository`（selector 0x092e8fa4），透過 Relay Depository 將 130,180.175578 USDT 橋接離開 Polygon。該交易將 USDT 路由經過 LiFi Diamond（0x1231de...）與 Relay Depository（0x4cd00e...）。Gas 使用量：178,209。",
+          "blockchain": "polygon"
         }
       ],
       "attackers": [
         {
           "address": "0x90b147592191388e955401af43842e19faa87ee2",
-          "chain": "polygon",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA）。在攻擊前 32 分鐘接收 gas 資金，部署攻擊合約，接收被盜 USDT，並執行後續洗錢。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         },
         {
           "address": "0x74f28b9a35d72504e007c60803ef47f1a44b109e",
-          "chain": "polygon",
           "role": "exploit_contract",
           "description": "一次性攻擊智能合約，於交易 0xb469a2... 中部署並執行。Runtime bytecode 僅 58 bytes，表示所有攻擊邏輯均在建構函式內完成。接收閃電貸 USDT 並協調國庫提領操作。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5",
-          "chain": "polygon",
           "role": "fund_recipient",
           "description": "次要 EOA，於攻擊完成後 9 分鐘直接收到 10,000 USDT。在緊接的時間窗口內未偵測到進一步出金交易。經由 eth_getCode 確認為 EOA。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         }
       ],
       "victims": [
         {
           "address": "0xef2c77f3b9b8aaa067239bc6b4588bae26433494",
-          "chain": "polygon",
           "role": "protocol_contract",
           "description": "INK Finance Workspace Treasury Proxy（Polygon）。攻擊目標。原始碼尚未在鏈上驗證。在攻擊交易中發出事件日誌，記錄了 165,162.83 USDT 的國庫授權。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xa184af4b1c01815a4b57422a3419e4fb78a96ee4",
-          "chain": "polygon",
           "role": "intermediate_contract",
           "description": "未驗證的中間合約，於攻擊序列中被互動。攻擊合約傳入 24,982.65 USDT 並收回 165,162.83 USDT，顯示其可能作為流動性池或 claim 資格中介角色。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "lessons": [
@@ -213,66 +210,66 @@
       "transactions": [
         {
           "txHash": "0xa276737acee23c4d9e6b741f411c5f8c6c4acef910eb5f477e1157b548e68023",
-          "chain": "polygon",
           "role": "setup",
-          "description": "攻撃者EOA 0x90b147...はブロック86710080（2026-05-11 06:52:28 UTC）で0x8c826f...から22.306 MATICを受け取った。これは後続の攻撃用ガス代と推定される。eth_getCodeにより0x8c826f...がEOAであり、大量の出金履歴を持つことが確認された。"
+          "description": "攻撃者EOA 0x90b147...はブロック86710080（2026-05-11 06:52:28 UTC）で0x8c826f...から22.306 MATICを受け取った。これは後続の攻撃用ガス代と推定される。eth_getCodeにより0x8c826f...がEOAであり、大量の出金履歴を持つことが確認された。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xb469a24ec737be16fe41367a7b5b315c7f03b4e0ff3af50b3a2db03b3066b982",
-          "chain": "polygon",
           "role": "exploit",
-          "description": "核心攻撃トランザクション。ブロック86711192（2026-05-11 07:24:54 UTC）に採掛。攻撃者はコントラクト0x74f28b9a...（runtimeサイズ：58 bytes）をデプロイし、すべての攻撃ロジックはコンストラクタ内で実行された。コンストラクタパラメータにはBalancer Vault（0xba12...）、被害者Treasury Proxy（0xef2c77f3...）、中間コントラクト（0xa184af4b...）、USDT（0xc2132d...）、および攻撃者EOAが埋め込まれた。Gas使用量：847,380。トランザクションレシートには9個のログが含まれ、USDT Transferイベント、Balancer Vaultフラッシュローンイベント、および被害者Treasury Proxyからの165,162.83 USDT承認イベントが記録されている。"
+          "description": "核心攻撃トランザクション。ブロック86711192（2026-05-11 07:24:54 UTC）に採掛。攻撃者はコントラクト0x74f28b9a...（runtimeサイズ：58 bytes）をデプロイし、すべての攻撃ロジックはコンストラクタ内で実行された。コンストラクタパラメータにはBalancer Vault（0xba12...）、被害者Treasury Proxy（0xef2c77f3...）、中間コントラクト（0xa184af4b...）、USDT（0xc2132d...）、および攻撃者EOAが埋め込まれた。Gas使用量：847,380。トランザクションレシートには9個のログが含まれ、USDT Transferイベント、Balancer Vaultフラッシュローンイベント、および被害者Treasury Proxyからの165,162.83 USDT承認イベントが記録されている。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xfb515fca3a876824e5f32649bd45606cf78685a91dd7d97ff08960108ccbbd00",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻撃後のマネーロンダリングトランザクション。ブロック86711501（2026-05-11 07:33:55 UTC）に採掛。攻撃者EOAはERC-20 transfer（selector 0xa9059cbb）を使い、10,000.000000 USDTを副次アドレス0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5に直接移転した。Gas使用量：59,408。"
+          "description": "攻撃後のマネーロンダリングトランザクション。ブロック86711501（2026-05-11 07:33:55 UTC）に採掛。攻撃者EOAはERC-20 transfer（selector 0xa9059cbb）を使い、10,000.000000 USDTを副次アドレス0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5に直接移転した。Gas使用量：59,408。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0xdfda91ba711f36a139e2280606d4a6d82026dab3e2f0d1e32ead3a17d789115b",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "クロスチェーンマネーロンダリングトランザクション。ブロック86712295（2026-05-11 07:57:05 UTC）に採掛。攻撃者EOAはJumper.exchange / LiFi Diamondコントラクト（0x89c634...）を`callDiamondWithEIP2612Signature`で呼び出し、`startBridgeTokensViaRelayDepository`（selector 0x092e8fa4）を埋め込んで130,180.175578 USDTをPolygonからブリッジした。このトランザクションはUSDTをLiFi Diamond（0x1231de...）およびRelay Depository（0x4cd00e...）を経由してルーティングした。Gas使用量：178,209。"
+          "description": "クロスチェーンマネーロンダリングトランザクション。ブロック86712295（2026-05-11 07:57:05 UTC）に採掛。攻撃者EOAはJumper.exchange / LiFi Diamondコントラクト（0x89c634...）を`callDiamondWithEIP2612Signature`で呼び出し、`startBridgeTokensViaRelayDepository`（selector 0x092e8fa4）を埋め込んで130,180.175578 USDTをPolygonからブリッジした。このトランザクションはUSDTをLiFi Diamond（0x1231de...）およびRelay Depository（0x4cd00e...）を経由してルーティングした。Gas使用量：178,209。",
+          "blockchain": "polygon"
         }
       ],
       "attackers": [
         {
           "address": "0x90b147592191388e955401af43842e19faa87ee2",
-          "chain": "polygon",
           "role": "primary_attacker",
           "description": "攻撃者の外部所有アカウント（EOA）。攻撃前32分にガス資金を受け取り、攻撃コントラクトをデプロイし、盗まれたUSDTを受け取って後続のマネーロンダリングを実行した。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         },
         {
           "address": "0x74f28b9a35d72504e007c60803ef47f1a44b109e",
-          "chain": "polygon",
           "role": "exploit_contract",
           "description": "使い捨て攻撃スマートコントラクト。トランザクション0xb469a2...でデプロイおよび実行された。Runtime bytecodeは58 bytesのみで、すべての攻撃ロジックはコンストラクタ内で完了した。フラッシュローンされたUSDTを受け取り、トレジャリー引き出しを調整した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xb20c1a1c328998ce8bd42c98c6a9754dd432a9c5",
-          "chain": "polygon",
           "role": "fund_recipient",
           "description": "副次EOA。攻撃完了後9分で10,000 USDTを直接受け取った。直後の時間窓でさらなる出金トランザクションは検出されなかった。eth_getCodeによりEOAと確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         }
       ],
       "victims": [
         {
           "address": "0xef2c77f3b9b8aaa067239bc6b4588bae26433494",
-          "chain": "polygon",
           "role": "protocol_contract",
           "description": "INK Finance Workspace Treasury Proxy（Polygon）。攻撃の対象。オンチェーンで未検証のソースコード。攻撃トランザクション中にイベントログを発行し、165,162.83 USDTのトレジャリー承認を記録した。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xa184af4b1c01815a4b57422a3419e4fb78a96ee4",
-          "chain": "polygon",
           "role": "intermediate_contract",
           "description": "未検証の中間コントラクト。攻撃シーケンス中に相互作用された。攻撃コントラクトは24,982.65 USDTを送金し、165,162.83 USDTを受け取り返した——これは流動性プールまたはクレーム資格仲介として機能していたことを示唆している。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "lessons": [
@@ -286,5 +283,10 @@
         "被害者コントラクトが攻撃後も未検証のままである場合、コミュニティは根本原因の主張を独立して検証したり、効果的な検出ヒューリスティックを構築したりすることができない。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-05-22",
+    "human_verified": false
   }
 }

@@ -1,11 +1,18 @@
 {
-  "id": "huma-finance-2026",
+  "id": "HumaFinance-20260511",
+  "date": "2026-05-11",
   "title": "Huma Finance V1 BaseCreditPool Exploit",
   "protocol": "Huma Finance",
-  "blockchain": ["polygon"],
-  "category": ["access_control"],
+  "blockchain": [
+    "polygon"
+  ],
+  "category": [
+    "access_control"
+  ],
   "ecosystem": "evm",
-  "language": "solidity",
+  "language": [
+    "solidity"
+  ],
   "estimatedLoss": {
     "totalUSD": "101389",
     "breakdown": [
@@ -34,78 +41,78 @@
     "note": "The entire exploit was executed in a single transaction (0x7b8d641d...) at Polygon block 86725404. No multi-block attack sequence was detected.",
     "date": "2026-05-11"
   },
+  "description": "On May 11, 2026, an attacker exploited three deprecated V1 BaseCreditPool deployments of Huma Finance on Polygon, draining a combined total of approximately 101,390 USDC/USDC.e (valued at ~$101,389). The attacker deployed a custom exploit contract (0x44D4a434...) and called its executeCalls() function to batch-execute drawdown(uint256) on each pool in a single transaction. On-chain evidence from the exploit transaction shows nine event logs: three ERC-20 Transfer events from pools to exploit contract, three DrawdownMade events from the pools, and two subsequent sweepToken transfers from exploit contract to attacker EOA. The precise mechanism by which the exploit contract obtained a valid credit line state (Approved or GoodStanding) on the deprecated pools remains unclear from public on-chain data alone—no CreditInitiated or CreditApproved events were emitted for the exploit contract address prior to the attack. Exvul's initial security alert classified the root cause as 'Under investigation.' The stolen funds were subsequently laundered through LI.FI's Permit2Proxy bridge contracts within 12 minutes of the exploit.",
   "transactions": [
     {
       "txHash": "0xa55219f89619a26aa29e311a60419740f04e0f6b472f45eacaba7d7f20859ec0",
-      "chain": "polygon",
       "role": "funding",
-      "description": "Attacker EOA funded with 21.81 MATIC for gas at block 86725365 (2026-05-11 14:03:56 UTC). Source: 0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f."
+      "description": "Attacker EOA funded with 21.81 MATIC for gas at block 86725365 (2026-05-11 14:03:56 UTC). Source: 0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0x0adf9953c4e2506ffd4526ceee962a9bb61c573eaef60f669605cca68d0ef5aa",
-      "chain": "polygon",
       "role": "setup",
-      "description": "Attacker EOA deploys exploit contract 0x44D4a434aE1529106e4B801315E22721978022A3 at block 86725382 (2026-05-11 14:15:43 UTC). Contract creation nonce: 0."
+      "description": "Attacker EOA deploys exploit contract 0x44D4a434aE1529106e4B801315E22721978022A3 at block 86725382 (2026-05-11 14:15:43 UTC). Contract creation nonce: 0.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0x7b8d641d76affcc029fd0e0f06ab81ad675b1da21ef79b82e1343016040ba359",
-      "chain": "polygon",
       "role": "exploit",
-      "description": "Core exploit transaction at block 86725404 (2026-05-11 14:19:25 UTC). Attacker calls executeCalls() on exploit contract, which batch-calls drawdown() on three deprecated V1 BaseCreditPool deployments and sweeps stolen USDC/USDC.e to attacker EOA. Gas used: 292,262. Status: Success."
+      "description": "Core exploit transaction at block 86725404 (2026-05-11 14:19:25 UTC). Attacker calls executeCalls() on exploit contract, which batch-calls drawdown() on three deprecated V1 BaseCreditPool deployments and sweeps stolen USDC/USDC.e to attacker EOA. Gas used: 292,262. Status: Success.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0x5cc610f589024e6f187456ab2bba7947270a17137f79ef6d09abd0eec4d7d15d",
-      "chain": "polygon",
       "role": "laundering",
-      "description": "Attacker bridges 82,315.57 USDC via LI.FI Permit2Proxy (0x89c6340b1a1f4b25d36cd8b063d49045caf3f818) at block 86725441 (2026-05-11 14:30:02 UTC). Likely routed through jumper.exchange or across bridge protocol."
+      "description": "Attacker bridges 82,315.57 USDC via LI.FI Permit2Proxy (0x89c6340b1a1f4b25d36cd8b063d49045caf3f818) at block 86725441 (2026-05-11 14:30:02 UTC). Likely routed through jumper.exchange or across bridge protocol.",
+      "blockchain": "polygon"
     },
     {
       "txHash": "0x1725db3dcfff88d064ef746e800af7299b0884b2a4ab7d0a7c96140c86033d31",
-      "chain": "polygon",
       "role": "laundering",
-      "description": "Attacker bridges 19,074.73 USDC.e via LI.FI Permit2Proxy at block 86725444 (2026-05-11 14:31:07 UTC). Likely routed through jumper.exchange or across bridge protocol."
+      "description": "Attacker bridges 19,074.73 USDC.e via LI.FI Permit2Proxy at block 86725444 (2026-05-11 14:31:07 UTC). Likely routed through jumper.exchange or across bridge protocol.",
+      "blockchain": "polygon"
     }
   ],
   "attackers": [
     {
       "address": "0x13B44e416e0f66359502E843AF2e1191f1260DaF",
-      "chain": "polygon",
       "role": "primary_attacker",
       "description": "Attacker externally owned account (EOA). Funded with MATIC for gas, deployed exploit contract, executed the attack, and laundered stolen funds via LI.FI bridging. Confirmed EOA via eth_getCode (no contract code).",
-      "accountType": "eoa"
+      "accountType": "EOA",
+      "blockchain": "polygon"
     },
     {
       "address": "0x44D4a434aE1529106e4B801315E22721978022A3",
-      "chain": "polygon",
       "role": "exploit_contract",
       "description": "Attacker-deployed batch execution and token sweeper contract. Unverified source code. Function executeCalls((address,uint256,bytes)[]) delegates to target contracts. Includes sweepToken(address,address) to extract ERC-20s to attacker EOA. Deployed 2 minutes before the exploit.",
-      "accountType": "contract_close_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     }
   ],
   "victims": [
     {
       "address": "0x3EBc1f0644A69c565957EF7cEb5AEafE94Eb6FcE",
-      "chain": "polygon",
       "role": "pool_contract",
       "description": "Deprecated V1 BaseCreditPool deployment (proxy) holding USDC. TransparentUpgradeableProxy with implementation 0x57107d02c2b70e09ad77240dbde7ad77fe91ea1c. Lost 82,315.57 USDC.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     },
     {
       "address": "0x95533e56f397152B0013A39586bC97309e9A00a7",
-      "chain": "polygon",
       "role": "pool_contract",
       "description": "Deprecated V1 BaseCreditPool deployment (proxy) holding USDC.e. Lost 17,290.76 USDC.e.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     },
     {
       "address": "0xe8926aDbFADb5DA91CD56A7d5aCC31AA3FDF47E5",
-      "chain": "polygon",
       "role": "pool_contract",
       "description": "Deprecated V1 BaseCreditPool deployment (proxy) holding USDC.e. Lost 1,783.97 USDC.e.",
-      "accountType": "contract_open_source"
+      "accountType": "Contract",
+      "blockchain": "polygon"
     }
   ],
-  "description": "On May 11, 2026, an attacker exploited three deprecated V1 BaseCreditPool deployments of Huma Finance on Polygon, draining a combined total of approximately 101,390 USDC/USDC.e (valued at ~$101,389). The attacker deployed a custom exploit contract (0x44D4a434...) and called its executeCalls() function to batch-execute drawdown(uint256) on each pool in a single transaction. On-chain evidence from the exploit transaction shows nine event logs: three ERC-20 Transfer events from pools to exploit contract, three DrawdownMade events from the pools, and two subsequent sweepToken transfers from exploit contract to attacker EOA. The precise mechanism by which the exploit contract obtained a valid credit line state (Approved or GoodStanding) on the deprecated pools remains unclear from public on-chain data alone—no CreditInitiated or CreditApproved events were emitted for the exploit contract address prior to the attack. Exvul's initial security alert classified the root cause as 'Under investigation.' The stolen funds were subsequently laundered through LI.FI's Permit2Proxy bridge contracts within 12 minutes of the exploit.",
   "rootCause": "The attacker was able to call drawdown() on deprecated V1 BaseCreditPool contracts and receive underlying stablecoins. The BaseCreditPool.drawdown() function uses msg.sender as the borrower and enforces credit line eligibility via _checkDrawdownEligibility(), which requires the borrower's credit record to be in Approved or GoodStanding state. No on-chain CreditInitiated or CreditApproved events were found for the exploit contract address prior to the attack, indicating either a pre-existing but undocumented credit line configuration on the deprecated pools, a protocol-specific deprecation-path vulnerability not visible in the current implementation, or an access control bypass mechanism that was not captured in public event logs. The definitive root cause requires additional protocol-level investigation.",
   "attackVector": "1. Attacker EOA 0x13B44e416e0f66359502E843AF2e1191f1260DaF received 21.81 MATIC for gas from 0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f at block 86725365 (2026-05-11 14:03:56 UTC). 2. Attacker deployed exploit contract 0x44D4a434aE1529106e4B801315E22721978022A3 at block 86725382 (2026-05-11 14:15:43 UTC). 3. In a single transaction at block 86725404 (2026-05-11 14:19:25 UTC), attacker called executeCalls() on exploit contract with a batch of five operations: a) drawdown(82,315.571143) on pool 0x3EBc1f...; b) drawdown(17,290.759830) on pool 0x95533e...; c) drawdown(1,783.970571) on pool 0xe8926a...; d) sweepToken(USDC, attacker) from exploit contract; e) sweepToken(USDC.e, attacker) from exploit contract. 4. Within 12 minutes, attacker laundered all stolen funds through LI.FI Permit2Proxy (0x89c6340b1a1f4b25d36cd8b063d49045caf3f818) using cross-chain bridge routes.",
   "lessons": [
@@ -129,12 +136,6 @@
     "https://polygonscan.com/tx/0x5cc610f589024e6f187456ab2bba7947270a17137f79ef6d09abd0eec4d7d15d",
     "https://polygonscan.com/tx/0x1725db3dcfff88d064ef746e800af7299b0884b2a4ab7d0a7c96140c86033d31"
   ],
-  "metadata": {
-    "dateAdded": "2026-05-22",
-    "lastUpdated": "2026-05-22",
-    "human_verified": false
-  },
-  "date": "2026-05-11",
   "locales": {
     "zh-TW": {
       "title": "Huma Finance V1 BaseCreditPool 攻擊事件",
@@ -144,72 +145,72 @@
       "transactions": [
         {
           "txHash": "0xa55219f89619a26aa29e311a60419740f04e0f6b472f45eacaba7d7f20859ec0",
-          "chain": "polygon",
           "role": "funding",
-          "description": "攻擊者 EOA 於區塊 86725365（2026-05-11 14:03:56 UTC）從 0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f 收到 21.81 MATIC 作為 gas 費。"
+          "description": "攻擊者 EOA 於區塊 86725365（2026-05-11 14:03:56 UTC）從 0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f 收到 21.81 MATIC 作為 gas 費。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x0adf9953c4e2506ffd4526ceee962a9bb61c573eaef60f669605cca68d0ef5aa",
-          "chain": "polygon",
           "role": "setup",
-          "description": "攻擊者 EOA 於區塊 86725382（2026-05-11 14:15:43 UTC）部署 exploit 合約 0x44D4a434aE1529106e4B801315E22721978022A3。合約建立 nonce 為 0。"
+          "description": "攻擊者 EOA 於區塊 86725382（2026-05-11 14:15:43 UTC）部署 exploit 合約 0x44D4a434aE1529106e4B801315E22721978022A3。合約建立 nonce 為 0。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x7b8d641d76affcc029fd0e0f06ab81ad675b1da21ef79b82e1343016040ba359",
-          "chain": "polygon",
           "role": "exploit",
-          "description": "核心攻擊交易，採掛於區塊 86725404（2026-05-11 14:19:25 UTC）。攻擊者呼叫 exploit 合約的 executeCalls()，批次對三個已棄用 V1 BaseCreditPool 部署合約執行 drawdown()，並將被盜的 USDC/USDC.e 掃描至攻擊者 EOA。Gas 使用量：292,262。狀態：成功。"
+          "description": "核心攻擊交易，採掛於區塊 86725404（2026-05-11 14:19:25 UTC）。攻擊者呼叫 exploit 合約的 executeCalls()，批次對三個已棄用 V1 BaseCreditPool 部署合約執行 drawdown()，並將被盜的 USDC/USDC.e 掃描至攻擊者 EOA。Gas 使用量：292,262。狀態：成功。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x5cc610f589024e6f187456ab2bba7947270a17137f79ef6d09abd0eec4d7d15d",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻擊者於區塊 86725441（2026-05-11 14:30:02 UTC）透過 LI.FI Permit2Proxy（0x89c6340b1a1f4b25d36cd8b063d49045caf3f818）橋接 82,315.57 USDC。可能經由 jumper.exchange 或 across 橋接協議路由。"
+          "description": "攻擊者於區塊 86725441（2026-05-11 14:30:02 UTC）透過 LI.FI Permit2Proxy（0x89c6340b1a1f4b25d36cd8b063d49045caf3f818）橋接 82,315.57 USDC。可能經由 jumper.exchange 或 across 橋接協議路由。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x1725db3dcfff88d064ef746e800af7299b0884b2a4ab7d0a7c96140c86033d31",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻擊者於區塊 86725444（2026-05-11 14:31:07 UTC）透過 LI.FI Permit2Proxy 橋接 19,074.73 USDC.e。可能經由 jumper.exchange 或 across 橋接協議路由。"
+          "description": "攻擊者於區塊 86725444（2026-05-11 14:31:07 UTC）透過 LI.FI Permit2Proxy 橋接 19,074.73 USDC.e。可能經由 jumper.exchange 或 across 橋接協議路由。",
+          "blockchain": "polygon"
         }
       ],
       "attackers": [
         {
           "address": "0x13B44e416e0f66359502E843AF2e1191f1260DaF",
-          "chain": "polygon",
           "role": "primary_attacker",
           "description": "攻擊者外部擁有帳戶（EOA）。接收 MATIC 作為 gas 費，部署 exploit 合約，執行攻擊，並透過 LI.FI 橋接洗錢。經由 eth_getCode 確認為純粹錢包（無合約程式碼）。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         },
         {
           "address": "0x44D4a434aE1529106e4B801315E22721978022A3",
-          "chain": "polygon",
           "role": "exploit_contract",
           "description": "攻擊者部署的批次執行與代幣掃描合約。原始碼未經驗證。executeCalls((address,uint256,bytes)[]) 函式可委派呼叫至目標合約。包含 sweepToken(address,address) 以將 ERC-20 提領至攻擊者 EOA。於攻擊前 2 分鐘部署。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "victims": [
         {
           "address": "0x3EBc1f0644A69c565957EF7cEb5AEafE94Eb6FcE",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "已棄用 V1 BaseCreditPool 部署合約（代理），持有 USDC。TransparentUpgradeableProxy，實作位址 0x57107d02c2b70e09ad77240dbde7ad77fe91ea1c。損失 82,315.57 USDC。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0x95533e56f397152B0013A39586bC97309e9A00a7",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "已棄用 V1 BaseCreditPool 部署合約（代理），持有 USDC.e。損失 17,290.76 USDC.e。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xe8926aDbFADb5DA91CD56A7d5aCC31AA3FDF47E5",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "已棄用 V1 BaseCreditPool 部署合約（代理），持有 USDC.e。損失 1,783.97 USDC.e。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "lessons": [
@@ -230,72 +231,72 @@
       "transactions": [
         {
           "txHash": "0xa55219f89619a26aa29e311a60419740f04e0f6b472f45eacaba7d7f20859ec0",
-          "chain": "polygon",
           "role": "funding",
-          "description": "攻撃者EOAがブロック86725365（2026-05-11 14:03:56 UTC）に0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4fからガス代として21.81 MATICを受け取った。"
+          "description": "攻撃者EOAがブロック86725365（2026-05-11 14:03:56 UTC）に0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4fからガス代として21.81 MATICを受け取った。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x0adf9953c4e2506ffd4526ceee962a9bb61c573eaef60f669605cca68d0ef5aa",
-          "chain": "polygon",
           "role": "setup",
-          "description": "攻撃者EOAがブロック86725382（2026-05-11 14:15:43 UTC）にexploitコントラクト0x44D4a434aE1529106e4B801315E22721978022A3をデプロイ。コントラクト作成nonceは0。"
+          "description": "攻撃者EOAがブロック86725382（2026-05-11 14:15:43 UTC）にexploitコントラクト0x44D4a434aE1529106e4B801315E22721978022A3をデプロイ。コントラクト作成nonceは0。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x7b8d641d76affcc029fd0e0f06ab81ad675b1da21ef79b82e1343016040ba359",
-          "chain": "polygon",
           "role": "exploit",
-          "description": "主要な攻撃トランザクション。ブロック86725404（2026-05-11 14:19:25 UTC）に採掛。攻撃者がexploitコントラクトのexecuteCalls()を呼び出し、3つの非推奨V1 BaseCreditPoolデプロイメントに対してdrawdown()をバッチ実行し、盗まれたUSDC/USDC.eを攻撃者EOAにスイープ。ガス使用量：292,262。ステータス：成功。"
+          "description": "主要な攻撃トランザクション。ブロック86725404（2026-05-11 14:19:25 UTC）に採掛。攻撃者がexploitコントラクトのexecuteCalls()を呼び出し、3つの非推奨V1 BaseCreditPoolデプロイメントに対してdrawdown()をバッチ実行し、盗まれたUSDC/USDC.eを攻撃者EOAにスイープ。ガス使用量：292,262。ステータス：成功。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x5cc610f589024e6f187456ab2bba7947270a17137f79ef6d09abd0eec4d7d15d",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻撃者がブロック86725441（2026-05-11 14:30:02 UTC）にLI.FI Permit2Proxy（0x89c6340b1a1f4b25d36cd8b063d49045caf3f818）を通じて82,315.57 USDCをブリッジ。jumper.exchangeまたはacrossブリッジプロトコルを経由した可能性がある。"
+          "description": "攻撃者がブロック86725441（2026-05-11 14:30:02 UTC）にLI.FI Permit2Proxy（0x89c6340b1a1f4b25d36cd8b063d49045caf3f818）を通じて82,315.57 USDCをブリッジ。jumper.exchangeまたはacrossブリッジプロトコルを経由した可能性がある。",
+          "blockchain": "polygon"
         },
         {
           "txHash": "0x1725db3dcfff88d064ef746e800af7299b0884b2a4ab7d0a7c96140c86033d31",
-          "chain": "polygon",
           "role": "laundering",
-          "description": "攻撃者がブロック86725444（2026-05-11 14:31:07 UTC）にLI.FI Permit2Proxyを通じて19,074.73 USDC.eをブリッジ。jumper.exchangeまたはacrossブリッジプロトコルを経由した可能性がある。"
+          "description": "攻撃者がブロック86725444（2026-05-11 14:31:07 UTC）にLI.FI Permit2Proxyを通じて19,074.73 USDC.eをブリッジ。jumper.exchangeまたはacrossブリッジプロトコルを経由した可能性がある。",
+          "blockchain": "polygon"
         }
       ],
       "attackers": [
         {
           "address": "0x13B44e416e0f66359502E843AF2e1191f1260DaF",
-          "chain": "polygon",
           "role": "primary_attacker",
           "description": "攻撃者の外部所有アカウント（EOA）。ガス代としてMATICを受け取り、exploitコントラクトをデプロイし、攻撃を実行し、LI.FIブリッジを通じて資金を洗浄した。eth_getCodeにより純粋なウォレット（コントラクトコードなし）と確認されている。",
-          "accountType": "eoa"
+          "accountType": "EOA",
+          "blockchain": "polygon"
         },
         {
           "address": "0x44D4a434aE1529106e4B801315E22721978022A3",
-          "chain": "polygon",
           "role": "exploit_contract",
           "description": "攻撃者がデプロイしたバッチ実行およびトークンスイーパーコントラクト。ソースコードは未検証。executeCalls((address,uint256,bytes)[])関数は対象コントラクトへの委譲呼び出しを実行。sweepToken(address,address)を含み、ERC-20を攻撃者EOAに抽出する。攻撃の2分前にデプロイされた。",
-          "accountType": "contract_close_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "victims": [
         {
           "address": "0x3EBc1f0644A69c565957EF7cEb5AEafE94Eb6FcE",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "非推奨V1 BaseCreditPoolデプロイメント（プロキシ）、USDCを保有。TransparentUpgradeableProxy、実装アドレス0x57107d02c2b70e09ad77240dbde7ad77fe91ea1c。損失：82,315.57 USDC。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0x95533e56f397152B0013A39586bC97309e9A00a7",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "非推奨V1 BaseCreditPoolデプロイメント（プロキシ）、USDC.eを保有。損失：17,290.76 USDC.e。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         },
         {
           "address": "0xe8926aDbFADb5DA91CD56A7d5aCC31AA3FDF47E5",
-          "chain": "polygon",
           "role": "pool_contract",
           "description": "非推奨V1 BaseCreditPoolデプロイメント（プロキシ）、USDC.eを保有。損失：1,783.97 USDC.e。",
-          "accountType": "contract_open_source"
+          "accountType": "Contract",
+          "blockchain": "polygon"
         }
       ],
       "lessons": [
@@ -308,5 +309,10 @@
         "セキュリティ研究者およびプロトコルチームは、根本原因が確認された後に詳細な事後分析を公開し、業界全体での非推奨パス脆弱性に関する知識を強化すべきである。"
       ]
     }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-05-22",
+    "human_verified": false
   }
 }

@@ -2,98 +2,104 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-30"
+    "lastUpdated": "2026-05-31"
   },
   "files": [
     {
-      "id": "dao-2016",
+      "id": "TheDAO-20160617",
       "date": "2016-06-17",
       "protocol": "The DAO",
       "file": "20160617-TheDAO.json"
     },
     {
-      "id": "paritymultisig-2017",
+      "id": "ParityMultisigWallet-20170719",
       "date": "2017-07-19",
       "protocol": "Parity Multisig Wallet",
       "file": "20170719-ParityMultisig.json"
     },
     {
-      "id": "parity-2017",
+      "id": "ParityMultisigWallet-20171106",
       "date": "2017-11-06",
       "protocol": "Parity Multisig Wallet",
       "file": "20171106-Parity.json"
     },
     {
-      "id": "harvest-2020",
+      "id": "HarvestFinance-20201026",
       "date": "2020-10-26",
       "protocol": "Harvest Finance",
       "file": "20201026-HarvestFinance.json"
     },
     {
-      "id": "cream-2021-08",
+      "id": "CreamFinance-20210830",
       "date": "2021-08-30",
       "protocol": "Cream Finance",
       "file": "20210830-CreamFinance.json"
     },
     {
-      "id": "penpie-2024",
+      "id": "Penpie-20240903",
       "date": "2024-09-03",
       "protocol": "Penpie",
       "file": "20240903-Penpie.json"
     },
     {
-      "id": "radiant-2024-1",
+      "id": "RadiantCapital-20241016",
       "date": "2024-10-16",
       "protocol": "Radiant Capital",
       "file": "20241016-RadiantCapital.json"
     },
     {
-      "id": "drift-2026",
+      "id": "DriftProtocol-20260401",
       "date": "2026-04-01",
       "protocol": "Drift Protocol",
       "file": "20260401-Drift-Protocol.json"
     },
     {
-      "id": "purrlend-2026",
+      "id": "Purrlend-20260425",
       "date": "2026-04-25",
       "protocol": "Purrlend",
       "file": "20260425-Purrlend.json"
     },
     {
-      "id": "aftermathfi-2026",
+      "id": "AftermathFi-20260429",
       "date": "2026-04-29",
       "protocol": "AftermathFi",
       "file": "20260429-AftermathFi.json"
     },
     {
-      "id": "ekubo-2026",
+      "id": "EkuboProtocol-20260505",
       "date": "2026-05-05",
       "protocol": "Ekubo Protocol",
       "file": "20260505-EkuboProtocol.json"
     },
     {
-      "id": "huma-finance-2026",
+      "id": "HumaFinance-20260511",
       "date": "2026-05-11",
       "protocol": "Huma Finance",
       "file": "20260511-HumaFinance.json"
     },
     {
-      "id": "inkfinance-2026",
+      "id": "INKFinance-20260511",
       "date": "2026-05-11",
       "protocol": "INK Finance",
       "file": "20260511-INKFinance.json"
     },
     {
-      "id": "echo-protocol-2026",
+      "id": "EchoProtocol-20260518",
       "date": "2026-05-18",
       "protocol": "Echo Protocol",
       "file": "20260518-EchoProtocol.json"
     },
     {
-      "id": "dxsale-2026",
+      "id": "DxSale-20260528",
       "date": "2026-05-28",
       "protocol": "DxSale",
       "file": "20260528-DxSale.json"
+    },
+    {
+      "id": "GravityBridge-20260530",
+      "date": "2026-05-30",
+      "protocol": "Gravity Bridge",
+      "file": "20260530-GravityBridge.json"
     }
   ]
 }
