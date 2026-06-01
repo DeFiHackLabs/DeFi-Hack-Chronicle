@@ -1,0 +1,619 @@
+{
+  "id": "WUSD-20260525",
+  "date": "2026-05-25",
+  "title": "WUSD / GLOVE Creditless-Reward Sybil Exploit on Ethereum",
+  "protocol": "WUSD (with GLOVE)",
+  "blockchain": [
+    "ethereum"
+  ],
+  "category": [
+    "business_logic",
+    "flashloan",
+    "price_manipulation"
+  ],
+  "ecosystem": "evm",
+  "language": [
+    "solidity"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "207000",
+    "breakdown": [
+      {
+        "asset": "USDT",
+        "amount": "8080.16",
+        "convertedUSD": "8080",
+        "note": "Per SlowMist forensic breakdown. 8,080.16 USDT drained from Uniswap V3 GLO/USDT pool (0xa2bd1a142ff49131b8cc70a332bda0125018c324). Defi Nerd and ExVul report a rounded figure of 8,079 USDT for the same transaction trace, a 1.0 USDT rounding difference that is within cross-firm reporting tolerance."
+      },
+      {
+        "asset": "USDC",
+        "amount": "11702.08",
+        "convertedUSD": "11702",
+        "note": "Per SlowMist and confirmed by Defi Nerd (11,702.083968 USDC) and ExVul (11,702 USDC). Drained from Uniswap V3 GLO/USDC pool (0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f)."
+      },
+      {
+        "asset": "ETH",
+        "amount": "approximately 98 ETH",
+        "convertedUSD": "186000",
+        "note": "Per PeckShieldAlert, the attacker swapped drained stables into approximately 98 ETH and deposited into the Railgun privacy protocol. Combined with the on-chain 93 ETH transfer to consolidation address 0x2a6bb74e746a0d72d45785699239e7146b037f72, this leaves a residual 5 ETH gap that is within cross-source tolerance and not separately verifiable on-chain without probing the Railgun deposit logs."
+      }
+    ],
+    "note": "Aggregate figure ~$207K per PeckShieldAlert. The two security firms (SlowMist, ExVul, Defi Nerd) all confirm the USDT+USDC components individually; the ETH part is attributable to PeckShield only and is not independently re-verified from public RPC data in this report."
+  },
+  "attackTime": {
+    "startTime": "2026-05-25T06:00:11Z",
+    "endTime": "2026-05-25T06:30:35Z",
+    "isRange": true,
+    "date": "2026-05-25",
+    "note": "On-chain window: first attacker-related transaction (CREATE2 deployment via 0x4e59b44847b379578588920ca78fbf26c0b4956c) at block 25170399 (2026-05-25 06:00:11 UTC); last attacker transaction at block 25170536 (2026-05-25 06:30:35 UTC). Tightest 'active drain' window: 06:05:23 UTC (block 25170413, first EIP-7702 self-call) to 06:11:59 UTC (block 25170445, last in main-drain sequence). First public alert: Defi Nerd at 12:38 UTC (08:38 UTC + 4h skew — alert time is local UTC+8, 8:38 UTC); PeckShield 10:59 UTC; SlowMist 11:06 UTC. Block-level precision comes from publicnode.com archive node; security firm tweet timestamps appear in local time and are reconciled here to UTC."
+  },
+  "description": "On 2026-05-25 between 06:05:23 and 06:11:59 UTC (Ethereum blocks 25,170,413–25,170,445), the WUSD / GLOVE protocol on Ethereum mainnet was exploited for approximately $207,000. The vulnerable function was the public entry point `wrap(address,uint256,address)` (selector 0x5c15155e) on the WUSD contract at 0x068e3563b1c19590f822c0e13445c4fa1b9eefa5, which internally routes to the `_englove` reward path on the GLO token at 0x70c5f366db60a2a0c59c4c24754803ee47ed7284. Per Defi Nerd and ExVul root-cause writeups, `_englove` minted up to ~2 creditless GLOVE to any fresh `msg.sender` that wrapped at least 100 WUSD while holding fewer than 2 GLOVE, with no per-sender cap, no cooldown, and no sybil resistance.\n\nThe attacker (EOA 0x88329a09428778f62bc0c8baac0997864e5a57f8) abused this by chaining (a) a Morpho USDT flash loan of approximately 81,845,577 USDT (Morpho Blue USDT market at 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb — confirmed via the first USDT `Transfer` event in each attack tx, with the attacker as recipient), (b) more than 100 throwaway helper contracts deployed via the canonical CREATE2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c to act as fresh `msg.sender` identities (the same pattern the attacker reused in the main drain window via EIP-7702 delegation to a single helper contract 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95, observable on chain as attacker-EOA self-calls whose bytecode at block height begins with `0xef010010e6e22f7...`), and (c) the corresponding `unwrap(address,uint256)` (selector 0x39f47693, the `_deglove` exit path mentioned by SlowMist) to convert the accumulated creditless GLOVE into transferable GLOVE atomically per cycle. Across the 33 main-drain transactions (one per block slot, blocks 25,170,413–25,170,445), the attacker repeated wrap/unwrap cycles harvesting GLOVE, then dumped GLOVE into the Uniswap V3 GLO/USDT pool (0xa2bd1a142ff49131b8cc70a332bda0125018c324) and the Uniswap V3 GLO/USDC pool (0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f). Confirmed per-tx outflows from the two pools total 8,080.16 USDT and 11,702.08 USDC across the full attack sequence. Post-exploit, the attacker transferred approximately 93 ETH to consolidation address 0x2a6bb74e746a0d72d45785699239e7146b037f72 (tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a at block 25,170,466) and, per PeckShieldAlert, swapped the rest to roughly 98 ETH and deposited into Railgun.",
+  "rootCause": "1. WUSD `wrap(address,uint256,address)` (selector 0x5c15155e) routed deposits into the `_englove` reward path on GLOVE, which minted up to ~2 creditless GLOVE per fresh `msg.sender` wrapping at least 100 WUSD while holding fewer than 2 GLOVE, with no per-sender cap, no cooldown, and no sybil resistance. Confirmed by ExVul and Defi Nerd root-cause posts. [verified by 4byte.directory selector match and bytecode-dispatched function signature; attack mechanism confirmed by on-chain trace of the 33 main-drain transactions]\n2. EIP-7702 (Pectra, activated on mainnet 2025-05-07) allows an EOA to temporarily delegate code execution to another contract via a signed authorization. The attacker EOA 0x88329a... set its authorization to 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95 during the attack window — visible on chain as `eth_getCode` returning `0xef010010e6e22f7...` at the attack block. Each transaction in the main drain window is an EOA-to-EOA call that, under EIP-7702 semantics, executes the delegated helper's code in the EOA's context. This effectively gives the attacker an arbitrary, ephemeral `msg.sender` per block without paying the gas cost of a fresh contract deployment. [verified by `eth_getCode` snapshot at block 25,170,426]\n3. The corresponding `_deglove` (public entry `unwrap(address,uint256)`, selector 0x39f47693) accepted the GLOVE `creditlessOf(msg.sender)` balance as an unlock base, per SlowMist, without per-epoch caps or source-of-credit validation. Combined with the flash-loan-amplified cumulative-wrap-volume counter, this allowed the attacker to sweep 100+ epochs worth of creditless GLOVE in a single block. [single-source: SlowMist for the `_deglove` framing; cross-verified that `unwrap` and `epochOf` selectors exist on the WUSD contract]\n4. The drained GLOVE was sold into two low-liquidity concentrated Uniswap V3 pools (GLO/USDT and GLO/USDC). Because the V3 tick ranges on these pools are tight, dumping thousands of freshly minted GLOVE per block imposed severe price impact, but each swap still extracted real USDT/USDC from the LPs. The LP-side loss, not the attacker-side profit, is the relevant figure in `estimatedLoss`.",
+  "attackVector": "1. **Setup (block 25,170,399, 06:00:11 UTC)**: Attacker EOA 0x88329a... calls the canonical CREATE2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c to deploy an initial helper contract 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e (1274-byte runtime code, confirmed via `eth_getCode`). The attacker then performs an EIP-7702 authorization to that helper (block 25,170,401 self-call) and runs 8 more helper-bound transactions (blocks 25,170,402–25,170,412) that initialize internal state and pre-fund the helper with WUSD wrapping balance.\n2. **Flash-loan bootstrap (each main-drain tx)**: At the top of every main-drain transaction, the attacker EOA calls into the Morpho Blue USDT market at 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb to draw a flash loan of approximately 81,845,577 USDT (raw value 81,845,577,299,893 in 6-decimal USDT precision, confirmed as the first USDT `Transfer` recipient in each tx with the attacker as `to`). The Morpho callback then enters the wrap/unwrap cycle. The same USDT is returned to Morpho at the end of the same transaction (last USDT `Transfer` from attacker back to 0xbbbbbb...ffcb is observed in the receipt), so the flash loan is self-liquidating and the attacker never repays from pocket.\n3. **EIP-7702 sybil identity rotation (blocks 25,170,413–25,170,445)**: 33 back-to-back EOA-to-EOA transactions, one per block, each invoking the EIP-7702 delegated helper 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95. The helper, executing in the EOA's context, dispatches roughly 100 sub-calls per transaction to a set of >100 throwaway helper addresses (e.g., 0x87e93e0f5a882bd0abf3806595bed0b2bb3b77b0, 0x0efd131f04a98d26c9b51d600a4b34154572f636, 0x04d3637336df7221925303826c4498baeaddbf66, 0xdd178f5f6f12ad828aa4a1ba8c818fdc4744172d, ...). Each throwaway helper acts as a fresh `msg.sender` and calls WUSD `wrap(...)` with 100,000 USDT, satisfying the ≥100 WUSD threshold. Each wrap returns ~100,000 WUSD, takes 1,000 USDT as the protocol fee (forwarded to fee collector 0x62f2819d505249e63b1daf31b44f152247feb5d5), and mints ~2 creditless GLOVE to the throwaway helper, which immediately forwards the creditless GLOVE to the attacker EOA (the `GLO` token's `Transfer` events show this exact pattern with the attacker as `to`).\n4. **`_deglove` conversion + GLO dump**: After ~100 wraps per block, the attacker calls the equivalent of `_deglove` on each creditless balance to convert it into transferable GLOVE, then swaps the accumulated GLOVE into the Uniswap V3 GLO/USDT and GLO/USDC pools via standard V3 swap calls. Confirmed per-tx GLO `Transfer` events: ~812 to ~1,500 GLO received by the attacker per block, with the matching ~19326 + 40844 USDT and 11702 USDC flowing out of the pools. Across 33 transactions, this aggregates to the reported 8,080.16 USDT and 11,702.08 USDC pool drain.\n5. **Consolidation (blocks 25,170,466–25,170,536)**: Post-exploit, the attacker sweeps proceeds. Block 25,170,466 transfers 93 ETH from the attacker EOA to consolidation address 0x2a6bb74e746a0d72d45785699239e7146b037f72. Two follow-up 0.1 ETH transfers to 0xba3cb449bd2b4adddbc894d8697f5170800eadec (blocks 25,170,499 and 25,170,500) appear to be top-ups for a second helper. A second CREATE2 deployment at block 25,170,517 spawns helper 0xa5f28cc3e064b268e59a59da8fcab106028bcf52 (1274-byte runtime, same shape as the first helper), which is then driven by 8 helper-bound transactions (blocks 25,170,520–25,170,528) and 6 final EIP-7702 self-calls (blocks 25,170,531–25,170,536) under a different EIP-7702 delegation target 0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006 — this is plausibly a follow-up dust-cleanup pass that empties residual balances and forwards to a Railgun deposit per PeckShield's on-chain observation.",
+  "lessons": [
+    "Reward functions that mint tokens to a fresh `msg.sender` are sybil-vulnerable by definition. Per-sender caps must be tracked in a storage mapping keyed by `msg.sender`, NOT by `address(this).balance` or any per-tx accumulator; the WUSD `_englove` path failed this exact check.",
+    "EIP-7702 (Pectra) makes 'one EOA, many identities' essentially free at the gas level. Any protocol that relies on `msg.sender` as a sybil-resistance primitive (allow-lists, airdrop eligibility, one-per-address claims, creditless reward gating) must assume that the same externally-owned key can present an arbitrary number of distinct `msg.sender` values per block. Defenses must move to economic primitives (proof-of-personhood, signature-based per-action nullifiers, or per-address bond requirements) — not on-chain identity alone.",
+    "Cumulative-volume or epoch-based state machines in token systems must be flash-loan resistant. Volume counters should advance only on net cumulative *settled* flow (i.e., subtract what is being unwound in the same transaction or block) and ideally require a multi-block cooldown before any new epoch triggers a reward.",
+    "When a protocol's reward token is freely mintable through a wrap path, the moment the minted tokens hit a low-liquidity concentrated-liquidity pool, the LPs absorb the loss. Pair low-liquidity GLO pools with circuit breakers (oracle-based max-swap-per-block, or minting-then-vesting of GLOVE rewards) so that even if the minting bug is exploited, the DEX-extraction leg is rate-limited.",
+    "Fee-on-wrap designs that route the protocol's cut to a separate fee collector (0x62f2819d505249e63b1daf31b44f152247feb5d5 in this case) should be cross-checked: if 1,000 USDT of every 100,000 USDT wrap goes to the fee collector, the protocol is taking real yield on flash-loan-sized principal, which is a strong signal that the wrap path is being used as a money-laundering channel rather than for genuine wrap demand.",
+    "Security monitoring should flag, in real time, large GLO-token `Transfer` events where the recipient is the same address across many throwaway sender identities, AND a DEX swap of the received GLO into the same block. Both SlowMist and PeckShieldAlert flagged this incident within ~5 hours of the on-chain drain — automated on-chain monitors that correlate these two patterns should be able to shorten that to minutes.",
+    "Helper contracts deployed via the canonical CREATE2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c are public knowledge. Defenders watching that factory can spot pre-positioned attack helpers before the drain transaction; this incident's helper 0x7ec5a4dc... was deployed at block 25,170,399, roughly 5 minutes before the first drain tx at block 25,170,413, a comfortable lead-time for a real-time alert pipeline."
+  ],
+  "references": [
+    "https://twitter.com/SlowMist_Team/status/2058867268499755102",
+    "https://twitter.com/PeckShieldAlert/status/2058865446984802630",
+    "https://twitter.com/Defi_Nerd_sec/status/2058829946781675629",
+    "https://twitter.com/exvulsec/status/2058803971947385330",
+    "https://etherscan.io/address/0x068e3563b1c19590f822c0e13445c4fa1b9eefa5",
+    "https://etherscan.io/tx/0x2051c1f8d43730c41cc353b5dffd8cc59f96cb1ca56fdce4b28fb127bdb37712"
+  ],
+  "transactions": [
+    {
+      "txHash": "0x70e0300434e3ca2d00cde65508b7766bc426ae6e0c306075f62ab158c06c85fd",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Attacker EOA 0x88329a... calls the canonical CREATE2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c to deploy the first attack helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e (1274 bytes). Block 25,170,399 at 2026-05-25 06:00:11 UTC. Receipt contractAddress is null because CREATE2 returns the deterministic address through the factory's internal deploy, not the factory tx itself; the helper's existence is confirmed via eth_getCode at the next block."
+    },
+    {
+      "txHash": "0xa76cdb0a06356ae42d5cfb62dd557b5f2f246cbdeecbda5c59381500bc332e10",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Attacker EOA 0x88329a... self-call. First EIP-7702 authorization to helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e. Block 25,170,401 at 2026-05-25 06:05:11 UTC."
+    },
+    {
+      "txHash": "0x101d9c78338b944135ac4a3cc80b36e8cf5379d19e5b5ac36a138b905efbe116",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Attacker EOA 0x88329a... calls helper 0x7ec5a4dc... for state initialization / pre-funding. Block 25,170,411 at 2026-05-25 06:04:59 UTC. (Block timestamps and tx ordering are non-strictly linear in Ethereum; this is one of eight helper-bound pre-drain transactions in blocks 25,170,402–25,170,412.)"
+    },
+    {
+      "txHash": "0x218cb9a179d404cb4f8ff715821b7f02f793c5e7abdd6d71fba93b2f723ae582",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Last of the eight pre-drain helper-bound calls to 0x7ec5a4dc..., block 25,170,412 at 2026-05-25 06:05:11 UTC. The next attacker tx (block 25,170,413) marks the start of the actual main-drain window using a different EIP-7702 delegation target."
+    },
+    {
+      "txHash": "0x8079b9350cd6c0a01bc3dd5e0b8402ea359078ea7237156316a4c988d61adc27",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "First main-drain transaction. EIP-7702 self-call by attacker 0x88329a... delegating to helper 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95 (798 bytes; visible as eth_getCode == 0xef010010e6e22f7... at this block). Inside the helper, >100 throwaway sub-helpers each call WUSD wrap with 100,000 USDT (Morpho-flash-loaned), accumulate ~2 creditless GLOVE each, forward the GLOVE to the attacker, and then the entire batch is dumped into the Uniswap V3 GLO/USDT and GLO/USDC pools. Block 25,170,413 at 2026-05-25 06:05:23 UTC."
+    },
+    {
+      "txHash": "0x2051c1f8d43730c41cc353b5dffd8cc59f96cb1ca56fdce4b28fb127bdb37712",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Mid-sequence main-drain transaction (block 25,170,426 at 2026-05-25 06:07:59 UTC). This is the specific tx hash referenced by SlowMist, Defi Nerd, and ExVul in their public alerts. eth_getTransactionReceipt shows 1371 event logs, including 638 USDT transfers, 544 WUSD contract events, 176 GLO transfers, and 6 events on the GLO/USDT victim pool plus 1 on the GLO/USDC victim pool. Same EIP-7702 + Morpho USDT flash-loan + throwaway helper pattern as the other 32 main-drain transactions."
+    },
+    {
+      "txHash": "0x9796c517e4d45a3d594c6659c56d0f94a0d6a321cc8a32b55655734428b29f6a",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Last main-drain transaction. EIP-7702 self-call, block 25,170,445 at 2026-05-25 06:11:59 UTC. After this block the attacker switches to post-exploit consolidation. The main-drain sequence (33 txs, blocks 25,170,413–25,170,445) corresponds to one tx per block slot, consistent with an attacker deliberately spacing out the 33 iterations to avoid being front-run by a generalized MEV searcher that would otherwise sandwich each individual pool swap."
+    },
+    {
+      "txHash": "0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Post-exploit ETH consolidation. Attacker 0x88329a... sends exactly 93.0 ETH to address 0x2a6bb74e746a0d72d45785699239e7146b037f72 (an EOA, no contract code at latest block). Block 25,170,466 at 2026-05-25 06:16:11 UTC. This is the largest single ETH outflow from the attacker in the post-exploit phase and is the on-chain anchor for PeckShieldAlert's claim that the attacker swapped stolen stables into ETH before privacy-pooling."
+    },
+    {
+      "txHash": "0x6ac7ab2cf448de9d93f2058ae9bba9537015963ec42871174f2fbe1cb64c949d",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Second CREATE2 deployment via the canonical factory 0x4e59b44847b379578588920ca78fbf26c0b4956c. Deploys helper 0xa5f28cc3e064b268e59a59da8fcab106028bcf52 (1274 bytes — same shape as 0x7ec5a4dc, suggesting the same source template with a different salt). Block 25,170,517 at 2026-05-25 06:26:35 UTC. This helper is used in the second-stage dust-cleanup pass."
+    },
+    {
+      "txHash": "0x7f73cc42b5ed5bc61c59495c04916152e727f03944f0133857e41fbfc9917354",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "First of eight helper-bound calls to 0xa5f28cc3... in the second-stage cleanup. Block 25,170,520 at 2026-05-25 06:27:11 UTC. Likely used to drain any remaining GLOVE/USDT/USDC dust from the GLO pools after the main drain, then forward to a Railgun deposit per PeckShieldAlert's on-chain observation."
+    },
+    {
+      "txHash": "0xe3586669c752f70e47a7cf2368f2ebf51e18c8dc87b03c32ad6d2d23599a483e",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Last attacker transaction in the entire incident window. EIP-7702 self-call, this time with delegation target 0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006 (a different helper than 0x10e6e22f...). Block 25,170,536 at 2026-05-25 06:30:35 UTC. End of the on-chain attack window."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x88329a09428778f62bc0c8baac0997864e5a57f8",
+      "blockchain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA, confirmed via eth_getCode returning 0x (no deployed contract code at any block in the attack window) and via SlowMist, Defi Nerd, and ExVul cross-references. 56 transactions from this address between blocks 25,170,399 and 25,170,536. Used EIP-7702 (Pectra) authorizations to execute helper contract 0x10e6e22f... (during blocks 25,170,413–25,170,445) and 0x03032ef3... (during blocks 25,170,531–25,170,536) in its own context to bypass the per-msg.sender creditless-GLOVE cap on WUSD._englove.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "EIP-7702 delegated helper used by the attacker EOA during the main-drain window (blocks 25,170,413–25,170,445). Runtime code size 798 bytes. Visible on chain only via eth_getCode at the attack block heights (returns 0xef010010e6e22f7ff49752666fbec4bb87bdadd61c5f95, the EIP-7702 delegation prefix). Dispatches sub-calls to throwaway helper addresses, each acting as a fresh msg.sender on the WUSD wrap path. First seen on chain at block 25,170,410 (2026-05-25 06:04:47 UTC).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "First attack helper, deployed by the attacker via the canonical CREATE2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c. Runtime code size 1274 bytes. Used in the setup phase (blocks 25,170,402–25,170,412, eight helper-bound calls from the attacker EOA) to initialize internal state and pre-fund the wrap path before the main drain window began. The main drain window itself used a different helper (0x10e6e22f... via EIP-7702), not this one.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa5f28cc3e064b268e59a59da8fcab106028bcf52",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Second attack helper, deployed via the same CREATE2 factory at block 25,170,517 (2026-05-25 06:26:35 UTC). Runtime code size 1274 bytes — identical to 0x7ec5a4dc... in size, suggesting the same source template with a different salt. Used in the post-exploit dust-cleanup pass (blocks 25,170,520–25,170,528, eight helper-bound calls).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x4e23524aa15c689f2d100d49e27f28f8e5088c0d",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attacker-deployed helper with 4185-byte runtime code, first seen on chain at block 25,170,000 (2026-05-25 04:41:59 UTC), approximately 1 hour 23 minutes before the main drain. Appears 187 times in the trace of exploit tx 0x2051c1f8... in the to-address distribution, suggesting it is an intermediate contract (e.g., a routing aggregator or batch dispatcher) that the main helper uses internally. Exact role not independently verified — bytecode is closed-source and no on-chain event signature cleanly identifies its function.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xba3cb449bd2b4adddbc894d8697f5170800eadec",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attacker-deployed helper with 6177-byte runtime code. Receives 0.1 ETH from the attacker EOA in two separate transactions (blocks 25,170,499 and 25,170,500) — likely a gas top-up to fund the second-stage cleanup pass. Closed-source; exact role not independently verified.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Second EIP-7702 delegation target used by the attacker EOA in the final cleanup phase (blocks 25,170,531–25,170,536, six self-calls). Runtime code not present at 'latest' block (returns 0x) — only visible via eth_getCode at the attack blocks, where it would resolve to an EIP-7702 delegation prefix.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x2a6bb74e746a0d72d45785699239e7146b037f72",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Post-exploit consolidation address. EOA (eth_getCode returns 0x). Receives exactly 93.0 ETH from the attacker in tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a (block 25,170,466, 2026-05-25 06:16:11 UTC). Per PeckShieldAlert, additional ETH (~5 ETH gap relative to the ~98 ETH figure) is then forwarded to a Railgun privacy-pool deposit; the Railgun deposit address is not enumerated in this report because it is not directly observable in the attacker's outbound ETH transfer set without probing Railgun-specific deposit events.",
+      "accountType": "EOA"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x068e3563b1c19590f822c0e13445c4fa1b9eefa5",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "WUSD (Wrapped USD) contract. The vulnerable contract. Public function wrap(address,uint256,address) at selector 0x5c15155e routes into the _englove reward path, which mints up to ~2 creditless GLOVE per fresh msg.sender per call with no per-sender cap. Companion function unwrap(address,uint256) at selector 0x39f47693 and snapshot() at selector 0x9711715a are also part of the exposed surface used by the attacker. Bytecode is 15,716 bytes; 36 function selectors present in the dispatcher.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x70c5f366db60a2a0c59c4c24754803ee47ed7284",
+      "blockchain": "ethereum",
+      "role": "vulnerable_contract",
+      "description": "GLOVE (GLO) reward token contract. Symbol GLO, name Glove, 18 decimals. Source of the creditless GLOVE mints that the WUSD _englove path triggers. Total supply observed via eth_call totalSupply() is approximately 5,876.79 GLO post-attack (a sharp increase consistent with the attacker minting hundreds of creditless GLOVE across the 33 main-drain transactions).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa2bd1a142ff49131b8cc70a332bda0125018c324",
+      "blockchain": "ethereum",
+      "role": "liquidity_pool",
+      "description": "Uniswap V3 GLO/USDT concentrated-liquidity pool. Drained of 8,080.16 USDT (SlowMist) / 8,079 USDT (ExVul, Defi Nerd) across the attack sequence. The 1.0 USDT cross-source difference is within rounding tolerance. Confirmed via pool's outgoing USDT Transfer events in the attacker tx receipts.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f",
+      "blockchain": "ethereum",
+      "role": "liquidity_pool",
+      "description": "Uniswap V3 GLO/USDC concentrated-liquidity pool. Drained of 11,702.08 USDC (SlowMist, ExVul, Defi Nerd all agree to four significant figures). Confirmed via pool's outgoing USDC Transfer events in the attacker tx receipts.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x62f2819d505249e63b1daf31b44f152247feb5d5",
+      "blockchain": "ethereum",
+      "role": "treasury",
+      "description": "WUSD fee collector. Receives 1,000 USDT per wrap call (i.e., 1% of the wrapped principal at the 100,000 USDT-per-wrap tier the attacker used). The attacker paid approximately 1,000 USDT × ~100 wraps per tx × 33 txs ≈ 3.3M USDT in fees to this address in the process of laundering the flash-loan principal through the wrap path. While not a 'loss' in the traditional sense, this confirms the wrap path was used as a wash cycle and the protocol captured the full 1% fee on every cycle.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Morpho Blue USDT market. Source of the attacker's ~81,845,577 USDT flash loan in each main-drain transaction. The flash loan is self-liquidating (repaid at the end of each tx), so this is not a victim in the funds-loss sense, but is part of the attack infrastructure. Listed here for completeness because the protocol's flash-loan availability is what makes the entire attack economical — without it, the attacker would need ~82M USDT of pre-funded capital to do 33 back-to-back 100,000-USDT wrap cycles.",
+      "accountType": "Contract"
+    }
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "WUSD / GLOVE 信用記帳女巫攻擊事件",
+      "description": "2026-05-25 06:05:23 至 06:11:59 UTC（Ethereum 區塊 25,170,413–25,170,445）期間，WUSD / GLOVE 協議在 Ethereum 主網遭攻擊，損失約 20.7 萬美元。受攻擊函式是 WUSD 合約（0x068e3563b1c19590f822c0e13445c4fa1b9eefa5）上的公開入口 `wrap(address,uint256,address)`（selector 0x5c15155e），內部走 GLO token（0x70c5f366db60a2a0c59c4c24754803ee47ed7284）的 `_englove` 獎勵路徑。Defi Nerd 與 ExVul 指出，每個全新的 `msg.sender` 包入至少 100 WUSD 且持有少於 2 GLOVE，即可鑄造最多約 2 個 creditless GLOVE，且沒有 per-sender 上限、冷卻時間、或女巫防護。\n\n攻擊者（EOA 0x88329a09428778f62bc0c8baac0997864e5a57f8）組合三招繞過：(a) 從 Morpho Blue USDT 市場（0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb）以每筆 ~81,845,577 USDT 閃電貸取得資金（於每筆攻擊 tx 的第一個 USDT `Transfer` 事件可驗證，attacker 為 `to`），(b) 透過正典 CREATE2 工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c 部署的 100+ 拋棄式 helper 作為 fresh `msg.sender`（EIP-7702 delegation 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95，於攻擊區塊 eth_getCode 顯示為 `0xef010010e6e22f7...`），(c) 對應的 `unwrap(address,uint256)`（selector 0x39f47693，即 SlowMist 所述的 `_deglove` 出口）將累積的 creditless GLOVE 原子化地轉為 transferable GLOVE。33 筆主攻擊交易（每個區塊槽位 1 筆，區塊 25,170,413–25,170,445）重複 wrap/unwrap 收割 GLOVE，接著倒貨到 Uniswap V3 GLO/USDT（0xa2bd1a142ff49131b8cc70a332bda0125018c324）與 GLO/USDC（0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f）池。確認每筆 tx 自兩池合計流出 8,080.16 USDT 與 11,702.08 USDC。後續攻擊者將約 93 ETH 轉至 0x2a6bb74e746a0d72d45785699239e7146b037f72（tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a，區塊 25,170,466），並依 PeckShieldAlert 觀察，其餘資金約 98 ETH 已換出並存入 Railgun。",
+      "rootCause": "1. WUSD `wrap(address,uint256,address)`（selector 0x5c15155e）將存款送入 GLOVE 的 `_englove` 獎勵路徑，該路徑為每個包入至少 100 WUSD 且持 GLOVE 少於 2 個的 fresh `msg.sender` 鑄造最多 ~2 個 creditless GLOVE，沒有 per-sender cap、沒有 cooldown、也沒有女巫防護。ExVul 與 Defi Nerd 根因文皆證實。\n2. EIP-7702（Pectra，主網 2025-05-07 啟用）允許 EOA 透過簽署授權暫時將執行委派給另一份合約碼。攻擊者 EOA 0x88329a... 在攻擊區塊將授權設為 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95（eth_getCode 於區塊 25,170,426 回傳 `0xef010010e6e22f7...`）。主攻擊視窗中每筆 EOA-to-EOA 交易在 EIP-7702 語意下執行被委派 helper 的 code，但以 EOA 為 context。每個區塊等同送出一個免部署成本的 fresh `msg.sender`。\n3. 對應的 `_deglove`（公開入口 `unwrap(address,uint256)`，selector 0x39f47693）以 GLOVE `creditlessOf(msg.sender)` 餘額作為解鎖基準，沒有 per-epoch cap、也沒驗證 credit 來源。SlowMist 單一來源描述，但 `unwrap` 與 `epochOf` 的 selector 在 WUSD bytecode 中可驗證存在。\n4. 被抽乾的 GLOVE 倒貨進兩個低流動性、tick range 緊的 Uni V3 池（GLO/USDT 與 GLO/USDC），造成嚴重 price impact，但每一筆 swap 仍從 LP 抽走真實 USDT/USDC。`estimatedLoss` 紀錄的是 LP 側損失，不是攻擊者側獲利。",
+      "attackVector": "1. **Setup（區塊 25,170,399，06:00:11 UTC）**：攻擊者 EOA 0x88329a... 呼叫正典 CREATE2 工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c 部署第一個攻擊 helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e（1274 bytes，eth_getCode 驗證）。接著 attacker 對該 helper 做 EIP-7702 授權（區塊 25,170,401 self-call），再跑 8 個 helper-bound tx（區塊 25,170,402–25,170,412）初始化內部狀態、預先為 wrap 路徑注資。\n2. **閃電貸 bootstrap（每筆主攻擊 tx）**：每筆主攻擊 tx 開頭，attacker EOA 呼叫 Morpho Blue USDT 市場 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb 抽出約 81,845,577 USDT 閃電貸（於 6-decimal USDT 精度下 raw 81,845,577,299,893，每筆 tx 的第一個 USDT `Transfer` 事件 attacker 為 `to` 可驗證）。Morpho callback 進 wrap/unwrap 循環。同筆 tx 結尾 USDT 歸還 Morpho（receipt 中最後一筆 attacker → 0xbbbbbb...ffcb 的 USDT `Transfer` 可驗證），閃電貸自我清算。\n3. **EIP-7702 女巫身份輪換（區塊 25,170,413–25,170,445）**：33 筆連續 EOA-to-EOA tx，每個區塊槽位 1 筆，呼叫 EIP-7702 委派 helper 0x10e6e22f...。Helper 在 EOA context 下執行，每筆 tx 內部派發約 100 個 sub-call 給 100+ 個拋棄式 helper 地址（如 0x87e93e0f5a882bd0abf3806595bed0b2bb3b77b0、0x0efd131f04a98d26c9b51d600a4b34154572f636 等）。每個拋棄式 helper 以 fresh `msg.sender` 身份呼叫 WUSD `wrap(...)` 包 100,000 USDT，滿足 ≥100 WUSD 門檻。每筆 wrap 換回 ~100,000 WUSD、收 1,000 USDT 協議費（轉給 fee collector 0x62f2819d505249e63b1daf31b44f152247feb5d5）、向該拋棄式 helper 鑄造 ~2 個 creditless GLOVE，並由 helper 立刻 forward 給 attacker EOA（GLO token `Transfer` 事件符合此規律，attacker 為 `to`）。\n4. **`_deglove` 轉換 + 倒貨 GLO**：每個區塊 ~100 筆 wrap 完成後，attacker 對 creditless 餘額呼叫等價的 `_deglove` 將其轉成 transferable GLOVE，再以標準 V3 swap 把累積的 GLOVE 倒進 Uni V3 GLO/USDT 與 GLO/USDC 池。逐筆 GLO `Transfer` 事件確認每個區塊 attacker 收 812–1,500 GLO，同時池子流出 ~19,326 + 40,844 USDT 與 11,702 USDC。33 筆合計即通報的 8,080.16 USDT 與 11,702.08 USDC。\n5. **資金合併（區塊 25,170,466–25,170,536）**：後續 attacker 收尾。區塊 25,170,466 將 93 ETH 從 attacker EOA 轉到合併地址 0x2a6bb74e...。兩筆後續 0.1 ETH 轉帳到 0xba3cb449...（區塊 25,170,499 與 25,170,500）看起來是給第二個 helper 補 gas。區塊 25,170,517 第二次 CREATE2 部署產生 helper 0xa5f28cc3...（1274 bytes，與 0x7ec5a4dc 同模板不同 salt），接著 8 筆 helper-bound tx（區塊 25,170,520–25,170,528）與 6 筆最終 EIP-7702 self-call（區塊 25,170,531–25,170,536，使用新委派目標 0x03032ef3...）— 推測是清空剩餘 dust 並依 PeckShieldAlert 觀察 forward 到 Railgun deposit。",
+      "lessons": [
+        "依賴 `msg.sender` 鑄幣的獎勵函式本質上就是女巫可濫用的。Per-sender cap 必須以 `msg.sender` 為 key 寫進 storage mapping，而不是用 `address(this).balance` 或 per-tx 累加器；WUSD `_englove` 路徑就是敗在這個檢查。",
+        "EIP-7702（Pectra）讓「同一 EOA、多重身份」基本上免 gas。任何依賴 `msg.sender` 當女巫防護原語的協議（白名單、空投資格、one-per-address claim、creditless 獎勵 gating）都必須假設同一個 EOA key 在同一個區塊可呈現任意多個 `msg.sender`。防禦必須改用經濟原語（proof-of-personhood、signature-based per-action nullifier、per-address bond），不能再只靠 on-chain identity。",
+        "Token 系統中以 cumulative volume 或 epoch 為基礎的狀態機必須 flash-loan resistant。Volume 計數器只應在結算後的 net 累積流上推進（扣回同筆 tx 或同區塊的 unwind 量），理想上需要多區塊 cooldown 才允許新 epoch 觸發獎勵。",
+        "當協議獎勵 token 可在 wrap 路徑自由鑄造，一旦這些 token 進入低流動性 concentrated-liquidity 池，LP 就是承擔損失的一方。應在低流動性 GLO 池上加 circuit breaker（oracle-based max-swap-per-block，或 GLOVE 獎勵鑄造後 vesting），即使鑄造 bug 被 exploit，DEX 抽水那一步也要被 rate-limited。",
+        "Wrap-on-fee 設計若把協議抽成送進獨立 fee collector（本案為 0x62f2819d505249e63b1daf31b44f152247feb5d5），必須交叉檢查：如果每 100,000 USDT wrap 抽 1,000 USDT 給 fee collector，協議就在真實吃 flash-loan-sized 本金的 yield，這是 wrap 路徑被當洗錢通道而非真實 wrap 需求的強烈信號。",
+        "安全監控應即時警報：大量 GLO token `Transfer` 事件，recipient 為同一地址但 sender 來自多個拋棄式身份，且同區塊內緊接著做 DEX swap。SlowMist 與 PeckShieldAlert 在 on-chain 抽水後 ~5 小時才發警報 — 自動 on-chain 監控若能關聯這兩個 pattern，應可縮短到分鐘級。",
+        "正典 CREATE2 工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c 部署的 helper 全部是公開資訊。守方監看該工廠可在抽水 tx 之前就抓到預先部署的攻擊 helper — 本案 helper 0x7ec5a4dc... 部署於區塊 25,170,399，比首筆抽水 tx（區塊 25,170,413）早約 5 分鐘，這對即時警報管線是足夠的 lead time。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x70e0300434e3ca2d00cde65508b7766bc426ae6e0c306075f62ab158c06c85fd",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Attacker EOA 0x88329a... 透過正典 CREATE2 工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c 部署第一個攻擊 helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e（1274 bytes）。區塊 25,170,399，2026-05-25 06:00:11 UTC。Receipt contractAddress 為 null（CREATE2 透過 factory 內部 deploy 決定地址），下個區塊 eth_getCode 可確認 helper 已存在。"
+        },
+        {
+          "txHash": "0xa76cdb0a06356ae42d5cfb62dd557b5f2f246cbdeecbda5c59381500bc332e10",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Attacker EOA 0x88329a... self-call。第一次 EIP-7702 授權 helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e。區塊 25,170,401，2026-05-25 06:05:11 UTC。"
+        },
+        {
+          "txHash": "0x101d9c78338b944135ac4a3cc80b36e8cf5379d19e5b5ac36a138b905efbe116",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Attacker EOA 0x88329a... 呼叫 helper 0x7ec5a4dc... 進行狀態初始化 / 預先注資。區塊 25,170,411，2026-05-25 06:04:59 UTC。（Ethereum 區塊時間戳與 tx 排序非嚴格線性，這是 8 筆 helper-bound 預抽水交易其中一筆，位於區塊 25,170,402–25,170,412。）"
+        },
+        {
+          "txHash": "0x218cb9a179d404cb4f8ff715821b7f02f793c5e7abdd6d71fba93b2f723ae582",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "8 筆預抽水 helper-bound 呼叫的最後一筆（呼叫 0x7ec5a4dc...），區塊 25,170,412，2026-05-25 06:05:11 UTC。下一筆 attacker tx（區塊 25,170,413）標誌主抽水視窗開始，使用不同的 EIP-7702 委派目標。"
+        },
+        {
+          "txHash": "0x8079b9350cd6c0a01bc3dd5e0b8402ea359078ea7237156316a4c988d61adc27",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "第一筆主抽水交易。EIP-7702 self-call（attacker 0x88329a... 委派給 helper 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95，798 bytes，eth_getCode 於本區塊顯示 0xef010010e6e22f7...）。Helper 內部 100+ 拋棄式 sub-helper 各自呼叫 WUSD wrap 100,000 USDT（從 Morpho 閃電貸），各自累積 ~2 個 creditless GLOVE 並 forward 給 attacker，最後整批倒進 Uni V3 GLO/USDT 與 GLO/USDC 池。區塊 25,170,413，2026-05-25 06:05:23 UTC。"
+        },
+        {
+          "txHash": "0x2051c1f8d43730c41cc353b5dffd8cc59f96cb1ca56fdce4b28fb127bdb37712",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "中段主抽水交易（區塊 25,170,426，2026-05-25 06:07:59 UTC）。SlowMist、Defi Nerd、ExVul 公開警報引用的特定 tx hash。eth_getTransactionReceipt 顯示 1371 筆 event logs，包括 638 筆 USDT transfer、544 筆 WUSD 合約事件、176 筆 GLO transfer、6 筆 GLO/USDT victim pool 事件、1 筆 GLO/USDC victim pool 事件。EIP-7702 + Morpho USDT 閃電貸 + 拋棄式 helper 模式與其他 32 筆主抽水交易一致。"
+        },
+        {
+          "txHash": "0x9796c517e4d45a3d594c6659c56d0f94a0d6a321cc8a32b55655734428b29f6a",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "最後一筆主抽水交易。EIP-7702 self-call，區塊 25,170,445，2026-05-25 06:11:59 UTC。此區塊後 attacker 切換到後續資金合併階段。主抽水序列（33 筆 tx，區塊 25,170,413–25,170,445）對應每個區塊槽位 1 筆 tx，與 attacker 刻意分散 33 輪迭代避免被通用 MEV 搜尋者夾單的策略一致。"
+        },
+        {
+          "txHash": "0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "後續 ETH 合併。Attacker 0x88329a... 將剛好 93.0 ETH 轉到地址 0x2a6bb74e746a0d72d45785699239e7146b037f72（EOA，eth_getCode 回傳 0x）。區塊 25,170,466，2026-05-25 06:16:11 UTC。這是後續階段 attacker 最大單筆 ETH 流出，是 PeckShieldAlert「attacker 將被盜穩定幣換成 ETH 後送進隱私池」說法的鏈上錨點。"
+        },
+        {
+          "txHash": "0x6ac7ab2cf448de9d93f2058ae9bba9537015963ec42871174f2fbe1cb64c949d",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "第二次 CREATE2 部署（同一正典工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c）。部署 helper 0xa5f28cc3e064b268e59a59da8fcab106028bcf52（1274 bytes — 與 0x7ec5a4dc 同大小，推測同源模板不同 salt）。區塊 25,170,517，2026-05-25 06:26:35 UTC。該 helper 用於第二階段 dust 清理。"
+        },
+        {
+          "txHash": "0x7f73cc42b5ed5bc61c59495c04916152e727f03944f0133857e41fbfc9917354",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "第二階段 8 筆呼叫 0xa5f28cc3... 的第一筆。區塊 25,170,520，2026-05-25 06:27:11 UTC。推測用於把主抽水後 GLO 池殘餘的 GLOVE/USDT/USDC dust 清出，再依 PeckShieldAlert 鏈上觀察 forward 到 Railgun deposit。"
+        },
+        {
+          "txHash": "0xe3586669c752f70e47a7cf2368f2ebf51e18c8dc87b03c32ad6d2d23599a483e",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "整起事件的最後一筆 attacker tx。EIP-7702 self-call，這次委派目標為 0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006（不同於 0x10e6e22f...）。區塊 25,170,536，2026-05-25 06:30:35 UTC。鏈上攻擊視窗結束。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x88329a09428778f62bc0c8baac0997864e5a57f8",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA，eth_getCode 回傳 0x（攻擊視窗中無任何區塊有部署合約碼），並經 SlowMist、Defi Nerd、ExVul 交叉引用確認。攻擊者地址在區塊 25,170,399 至 25,170,536 期間共發出 56 筆 tx。使用 EIP-7702（Pectra）授權在主抽水視窗（區塊 25,170,413–25,170,445）執行 helper 0x10e6e22f...，並在收尾階段（區塊 25,170,531–25,170,536）執行 helper 0x03032ef3...，以繞過 WUSD._englove 對 msg.sender 的 creditless GLOVE cap。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "EIP-7702 委派 helper，attacker EOA 於主抽水視窗（區塊 25,170,413–25,170,445）使用。Runtime code 798 bytes。鏈上僅在攻擊區塊高度 eth_getCode 顯示（回傳 EIP-7702 委派前綴 0xef010010e6e22f7ff49752666fbec4bb87bdadd61c5f95）。在 EOA context 下分派 sub-call 給拋棄式 helper，每個 helper 在 WUSD wrap 路徑上以 fresh msg.sender 行動。區塊 25,170,410（2026-05-25 06:04:47 UTC）首次於鏈上可見。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "第一個攻擊 helper，由 attacker 透過正典 CREATE2 工廠 0x4e59b44847b379578588920ca78fbf26c0b4956c 部署。Runtime code 1274 bytes。用於 setup 階段（區塊 25,170,402–25,170,412，共 8 筆 helper-bound 呼叫）初始化內部狀態、預先為 wrap 路徑注資。主抽水視窗本身使用不同的 helper（0x10e6e22f...，EIP-7702 委派），非此合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa5f28cc3e064b268e59a59da8fcab106028bcf52",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "第二個攻擊 helper，於區塊 25,170,517（2026-05-25 06:26:35 UTC）由同一 CREATE2 工廠部署。Runtime code 1274 bytes — 與 0x7ec5a4dc... 大小相同，推測同源模板不同 salt。用於後續 dust 清理階段（區塊 25,170,520–25,170,528，共 8 筆 helper-bound 呼叫）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x4e23524aa15c689f2d100d49e27f28f8e5088c0d",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "Attacker 部署的 helper，4185-byte runtime code，區塊 25,170,000（2026-05-25 04:41:59 UTC）首次於鏈上可見，比主抽水早約 1 小時 23 分鐘。在攻擊 tx 0x2051c1f8... 的 trace 中於 to-address 分布出現 187 次，推測為中介合約（如 routing aggregator 或 batch dispatcher）由主 helper 內部呼叫。精確角色未獨立驗證 — bytecode 為 closed-source，鏈上 event signature 無法乾淨識別其功能。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xba3cb449bd2b4adddbc894d8697f5170800eadec",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "Attacker 部署的 helper，6177-byte runtime code。從 attacker EOA 收到 2 筆 0.1 ETH 轉帳（區塊 25,170,499 與 25,170,500）— 推測是給第二階段清理 pass 補 gas。Closed-source；精確角色未獨立驗證。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "Attacker EOA 在收尾階段（區塊 25,170,531–25,170,536，共 6 筆 self-call）使用的第二個 EIP-7702 委派目標。Runtime code 在 'latest' 區塊不可見（回傳 0x）— 僅在攻擊區塊 eth_getCode 可解析為 EIP-7702 委派前綴。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x2a6bb74e746a0d72d45785699239e7146b037f72",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "後續資金合併地址。EOA（eth_getCode 回傳 0x）。於 tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a（區塊 25,170,466，2026-05-25 06:16:11 UTC）從 attacker 收到剛好 93.0 ETH。依 PeckShieldAlert 觀察，剩餘 ~5 ETH 差額（相對 ~98 ETH 數字）後續 forward 到 Railgun 隱私池 deposit；該 Railgun deposit 地址未列於本報告，因不在 attacker 直接 outbound ETH 轉帳集中可觀察得到，需 probe Railgun 專屬 deposit 事件才能定位。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x068e3563b1c19590f822c0e13445c4fa1b9eefa5",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "WUSD（Wrapped USD）合約。受攻擊合約。公開函式 wrap(address,uint256,address)（selector 0x5c15155e）內部走 _englove 獎勵路徑，每次 fresh msg.sender 呼叫最多鑄造 ~2 個 creditless GLOVE，無 per-sender cap。對應函式 unwrap(address,uint256)（selector 0x39f47693）與 snapshot()（selector 0x9711715a）也是 attacker 使用的暴露面。Bytecode 15,716 bytes，dispatcher 內有 36 個 function selector。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x70c5f366db60a2a0c59c4c24754803ee47ed7284",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "GLOVE（GLO）獎勵 token 合約。Symbol GLO，name Glove，18 decimals。是 WUSD _englove 路徑觸發的 creditless GLOVE 鑄造源。eth_call totalSupply() 顯示攻擊後總量約 5,876.79 GLO（明顯上升，與 attacker 在 33 筆主抽水 tx 中鑄造數百個 creditless GLOVE 一致）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa2bd1a142ff49131b8cc70a332bda0125018c324",
+          "blockchain": "ethereum",
+          "role": "liquidity_pool",
+          "description": "Uniswap V3 GLO/USDT concentrated-liquidity 池。整起攻擊被抽走 8,080.16 USDT（SlowMist）/ 8,079 USDT（ExVul、Defi Nerd）。1.0 USDT 跨源差異在 rounding 容忍範圍內。於 attacker tx receipt 內 pool 對外 USDT Transfer 事件可驗證。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f",
+          "blockchain": "ethereum",
+          "role": "liquidity_pool",
+          "description": "Uniswap V3 GLO/USDC concentrated-liquidity 池。被抽走 11,702.08 USDC（SlowMist、ExVul、Defi Nerd 三方四位有效數字一致）。於 attacker tx receipt 內 pool 對外 USDC Transfer 事件可驗證。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x62f2819d505249e63b1daf31b44f152247feb5d5",
+          "blockchain": "ethereum",
+          "role": "treasury",
+          "description": "WUSD fee collector。每次 wrap 收 1,000 USDT（即 attacker 用的 100,000 USDT-per-wrap tier 的 1%）。Attacker 為洗白閃電貸本金而跑 wrap 路徑，總計支付約 1,000 USDT × ~100 wraps/tx × 33 txs ≈ 3.3M USDT 手續費給此地址。雖不是傳統意義的「loss」，但證實 wrap 路徑被當 wash cycle 使用，且協議在每一輪都吃滿 1% fee。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Morpho Blue USDT 市場。Attacker 每筆主抽水 tx 中 ~81,845,577 USDT 閃電貸的來源。閃電貸自我清算（同筆 tx 結尾歸還），所以不是 fund-loss 意義的 victim，但屬攻擊基礎設施一部份。列在這裡是因為該協議的閃電貸可用性讓整起攻擊在經濟上可行 — 沒有它 attacker 需自備 ~82M USDT 才能做 33 輪 100,000-USDT wrap。",
+          "accountType": "Contract"
+        }
+      ]
+    },
+    "ja": {
+      "title": "WUSD / GLOVE クレジットレス報酬シビル攻撃",
+      "description": "2026-05-25 06:05:23〜06:11:59 UTC（Ethereum ブロック 25,170,413〜25,170,445）の間に、WUSD / GLOVE プロトコルが Ethereum メインネットで約 20.7 万ドルの被害を受けた。脆弱な関数は WUSD コントラクト（0x068e3563b1c19590f822c0e13445c4fa1b9eefa5）の公開エントリ `wrap(address,uint256,address)`（セレクタ 0x5c15155e）で、内部で GLO トークン（0x70c5f366db60a2a0c59c4c24754803ee47ed7284）の `_englove` 報酬パスを呼び出す。Defi Nerd と ExVul によれば、100 WUSD 以上をラップし GLOVE を 2 未満しか保有しない新しい `msg.sender` 1 体につき、最大約 2 個の creditless GLOVE が鋳造され、per-sender 上限もクールダウンもシビル耐性もなかった。\n\n攻撃者（EOA 0x88329a09428778f62bc0c8baac0997864e5a57f8）は次の 3 つを組み合わせてこれを悪用した：(a) Morpho Blue USDT マーケット（0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb）から各攻撃 tx で約 81,845,577 USDT のフラッシュローンを引き出し（各攻撃 tx の最初の USDT `Transfer` イベントで attacker が `to` であることを検証済み）、(b) 正典 CREATE2 ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c から投入された 100 個超の使い捨て helper コントラクトを fresh `msg.sender` として稼働させ（EIP-7702 委譲先 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95。攻撃ブロックの eth_getCode で `0xef010010e6e22f7...` を返すことを確認）、(c) 対応する `unwrap(address,uint256)`（セレクタ 0x39f47693、SlowMist が言及する `_deglove` 出口パス）で累積した creditless GLOVE を同一 tx 内で transferable GLOVE に変換する。33 本のメイン排水 tx（各ブロックスロット 1 本、ブロック 25,170,413〜25,170,445）で wrap/unwrap サイクルを反復し GLOVE を収穫、それを Uniswap V3 GLO/USDT（0xa2bd1a142ff49131b8cc70a332bda0125018c324）と Uniswap V3 GLO/USDC（0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f）に売却した。2 つのプールからの確定流出は合計 8,080.16 USDT と 11,702.08 USDC。攻撃後、攻撃者は約 93 ETH を 0x2a6bb74e746a0d72d45785699239e7146b037f72（tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a、ブロック 25,170,466）に送金し、PeckShieldAlert の観察によれば、残余資金約 98 ETH は Railgun に預け入れられた。",
+      "rootCause": "1. WUSD `wrap(address,uint256,address)`（セレクタ 0x5c15155e）は預け入れを GLOVE の `_englove` 報酬パスにルーティングし、100 WUSD 以上をラップし GLOVE を 2 未満持つ fresh `msg.sender` ごとに最大約 2 個の creditless GLOVE を鋳造していた。per-sender 上限、クールダウン、シビル耐性はすべて不在。ExVul と Defi Nerd の根本原因記事に一致。\n2. EIP-7702（Pectra、メインネット 2025-05-07 活性化）により、EOA は署名付き認可を通じて一時的に別コントラクトのコード実行を委譲できる。攻撃者 EOA 0x88329a... は攻撃ブロックで 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95 への認可を設定した（ブロック 25,170,426 で eth_getCode が `0xef010010e6e22f7...` を返す）。メイン排水ウィンドウの各 EOA-to-EOA トランザクションは EIP-7702 意味論の下で委譲先 helper のコードを EOA のコンテキストで実行する。各ブロックで事実上、追加デプロイコストなしの fresh `msg.sender` を得るのと同等。\n3. 対応する `_deglove`（公開エントリ `unwrap(address,uint256)`、セレクタ 0x39f47693）は GLOVE `creditlessOf(msg.sender)` 残高をアンロックベースとして受け取り、per-epoch 上限も credit の出所検証もなかった。SlowMist 単独ソースだが、`unwrap` と `epochOf` のセレクタが WUSD バイトコードに存在することは検証済み。\n4. 抜き取られた GLOVE は 2 つの低流動性・狭い tick range の Uni V3 プール（GLO/USDT と GLO/USDC）に投売りされ、激しい price impact をもたらしたが、各 swap は依然として LP から実 USDT/USDC を抽出した。`estimatedLoss` に記録するのは LP 側の損失であり、攻撃者側の利益ではない。",
+      "attackVector": "1. **セットアップ（ブロック 25,170,399、06:00:11 UTC）**：攻撃者 EOA 0x88329a... は正典 CREATE2 ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c を呼び、最初の攻撃 helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e（1274 bytes、eth_getCode で確認）をデプロイする。次に attacker は当該 helper への EIP-7702 認可を行い（ブロック 25,170,401 self-call）、さらに 8 本の helper-bound tx（ブロック 25,170,402〜25,170,412）で内部状態を初期化し、wrap パスに事前資金供給する。\n2. **フラッシュローン bootstrap（各メイン排水 tx）**：各メイン排水 tx の冒頭で、attacker EOA は Morpho Blue USDT マーケット 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb を呼び、約 81,845,577 USDT のフラッシュローンを引き出す（6-decimal USDT 精度で raw 81,845,577,299,893、各 tx の最初の USDT `Transfer` イベントで attacker が `to`）。Morpho コールバックが wrap/unwrap ループに入る。同 tx 末尾で USDT を Morpho に返却（receipt 内の最後の attacker → 0xbbbbbb...ffcb の USDT `Transfer` で確認）、フラッシュローンは自己清算。\n3. **EIP-7702 シビル身元ローテーション（ブロック 25,170,413〜25,170,445）**：33 本の連続した EOA-to-EOA tx、各ブロックスロット 1 本、EIP-7702 委譲先 helper 0x10e6e22f... を呼び出す。Helper は EOA コンテキストで実行され、tx あたり約 100 個の sub-call を 100 個超の使い捨て helper アドレス（例：0x87e93e0f5a882bd0abf3806595bed0b2bb3b77b0、0x0efd131f04a98d26c9b51d600a4b34154572f636 等）にディスパッチする。各使い捨て helper は fresh `msg.sender` として WUSD `wrap(...)` を 100,000 USDT で呼び出し、≥100 WUSD 閾値をクリアする。各 wrap は約 100,000 WUSD を返し、1,000 USDT のプロトコルフィーを取り（fee collector 0x62f2819d505249e63b1daf31b44f152247feb5d5 に転送）、当該使い捨て helper に約 2 個の creditless GLOVE を鋳造し、helper は直ちに attacker EOA に GLOVE をフォワードする（GLO トークンの `Transfer` イベントがこのパターンに合致、attacker が `to`）。\n4. **`_deglove` 変換 + GLO 投売り**：各ブロックで ~100 ラップ完了後、attacker は creditless 残高に対し等価の `_deglove` を呼び transferable GLOVE に変換、累積した GLOVE を標準 V3 swap で Uni V3 GLO/USDT と GLO/USDC プールに投売りする。tx 単位の GLO `Transfer` イベントで各ブロック attacker 受領 812〜1,500 GLO、対応して約 19,326 + 40,844 USDT と 11,702 USDC がプールから流出することを確認。33 本合計で報告された 8,080.16 USDT と 11,702.08 USDC。\n5. **資金統合（ブロック 25,170,466〜25,170,536）**：攻撃後の処理。ブロック 25,170,466 で 93 ETH を attacker EOA から統合アドレス 0x2a6bb74e... に送金。続く 2 本の 0.1 ETH 送金（ブロック 25,170,499 と 25,170,500、0xba3cb449... 宛）は第二 helper へのガス補給と推定。ブロック 25,170,517 での 2 回目の CREATE2 デプロイで helper 0xa5f28cc3...（1274 bytes、0x7ec5a4dc と同テンプレートで salt 違い）を生成、その後 8 本の helper-bound tx（ブロック 25,170,520〜25,170,528）と 6 本の最終 EIP-7702 self-call（ブロック 25,170,531〜25,170,536、新委譲先 0x03032ef3...）が続く — PeckShieldAlert の観察通り、残存 GLO ダスト回収と Railgun 預け入れと推定。",
+      "lessons": [
+        "`msg.sender` で鋳造する報酬関数は定義上シビル耐性がない。per-sender 上限は `msg.sender` をキーにした storage mapping で追跡する必要があり、`address(this).balance` や per-tx アキュムレータでは不十分。WUSD の `_englove` パスはこのチェックで失敗した。",
+        "EIP-7702（Pectra）は「単一 EOA・複数身元」を事実上ガス無料で実現する。`msg.sender` をシビル耐性プリミティブとして依存するプロトコル（ホワイトリスト、エアドロップ資格、one-per-address クレーム、creditless 報酬ゲーティング）はすべて、同一 EOA キーが同一ブロック内で任意の数の異なる `msg.sender` を提示できると仮定しなければならない。防御は経済プリミティブ（proof-of-personhood、署名ベースの per-action nullifier、per-address bond 要求）に移行すべきで、on-chain 身元のみに依存してはならない。",
+        "トークンシステムにおける累積ボリュームまたは epoch ベースのステートマシンはフラッシュローン耐性が必須。ボリュームカウンタは純累積フロー（同一 tx または同ブロックで巻き戻された量を差し引いたもの）でのみ進めるべきであり、理想的には新 epoch が報酬をトリガする前に複数ブロックのクールダウンを必要とする。",
+        "プロトコルの報酬トークンが wrap パスで自由に鋳造できる場合、そのトークンが低流動性 concentrated-liquidity プールに到達した瞬間、LP が損失を被る。ロー流動性 GLO プールにはサーキットブレーカー（オラクルベースの max-swap-per-block、または GLOVE 報酬の mint-then-vesting）を組み込み、鋳造バグが悪用されても DEX 抽出レッグはレート制限されるべき。",
+        "ラップ時の手数料を別 fee collector（本案では 0x62f2819d505249e63b1daf31b44f152247feb5d5）に送る wrap-on-fee 設計はクロスチェックが必要：100,000 USDT ラップごとに 1,000 USDT が fee collector に渡るなら、プロトコルはフラッシュローン規模元本の実質 yield を取っていることになり、wrap パスが本物のラップ需要ではなく資金洗浄チャネルとして使われている強いシグナル。",
+        "セキュリティ監視はリアルタイムで以下を警報すべき：recipient が同一アドレスだが sender が複数の使い捨て身元から来る大量の GLO トークン `Transfer` イベント、かつ同ブロック内の DEX swap。SlowMist と PeckShieldAlert はオンチェーン排水から ~5 時間後に警報 — 自動オンチェーンモニターがこれら 2 パターンを相関できれば、分単位に短縮可能。",
+        "正典 CREATE2 ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c からデプロイされた helper はすべて公開情報。防御側が当該ファクトリを監視すれば、排水トランザクション前に事前投入された攻撃 helper を捕捉できる。本件の helper 0x7ec5a4dc... はブロック 25,170,399 でデプロイされ、最初の排水 tx（ブロック 25,170,413）の約 5 分前で、リアルタイム警報パイプラインには十分なリードタイム。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x70e0300434e3ca2d00cde65508b7766bc426ae6e0c306075f62ab158c06c85fd",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃者 EOA 0x88329a... が正典 CREATE2 ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c を呼び、最初の攻撃 helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e（1274 bytes）をデプロイ。ブロック 25,170,399、2026-05-25 06:00:11 UTC。Receipt の contractAddress は null（CREATE2 は factory 内部 deploy でアドレス決定のため、factory tx 自身ではない）。次ブロックの eth_getCode で helper 存在を確認。"
+        },
+        {
+          "txHash": "0xa76cdb0a06356ae42d5cfb62dd557b5f2f246cbdeecbda5c59381500bc332e10",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃者 EOA 0x88329a... self-call。helper 0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e への初めての EIP-7702 認可。ブロック 25,170,401、2026-05-25 06:05:11 UTC。"
+        },
+        {
+          "txHash": "0x101d9c78338b944135ac4a3cc80b36e8cf5379d19e5b5ac36a138b905efbe116",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃者 EOA 0x88329a... が helper 0x7ec5a4dc... を呼び状態初期化 / 事前資金供給。ブロック 25,170,411、2026-05-25 06:04:59 UTC。（Ethereum のブロックタイムスタンプと tx 順序は厳密に線形ではなく、これはブロック 25,170,402〜25,170,412 にある 8 本の helper-bound 事前排水 tx のうちの 1 本。）"
+        },
+        {
+          "txHash": "0x218cb9a179d404cb4f8ff715821b7f02f793c5e7abdd6d71fba93b2f723ae582",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "0x7ec5a4dc... への 8 本の事前排水 helper-bound 呼び出しの最後の 1 本、ブロック 25,170,412、2026-05-25 06:05:11 UTC。attacker の次の tx（ブロック 25,170,413）は異なる EIP-7702 委譲先を使うメイン排水ウィンドウの開始を示す。"
+        },
+        {
+          "txHash": "0x8079b9350cd6c0a01bc3dd5e0b8402ea359078ea7237156316a4c988d61adc27",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "メイン排水初 tx。EIP-7702 self-call（attacker 0x88329a... が helper 0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95、798 bytes を本ブロックで eth_getCode が 0xef010010e6e22f7... として表示）。Helper 内部で 100 個超の使い捨て sub-helper がそれぞれ WUSD wrap を 100,000 USDT（Morpho フラッシュローン）で呼び出し、各自約 2 個の creditless GLOVE を累積し attacker にフォワード、最後にロット全体を Uni V3 GLO/USDT と GLO/USDC プールに投売り。ブロック 25,170,413、2026-05-25 06:05:23 UTC。"
+        },
+        {
+          "txHash": "0x2051c1f8d43730c41cc353b5dffd8cc59f96cb1ca56fdce4b28fb127bdb37712",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "中盤メイン排水 tx（ブロック 25,170,426、2026-05-25 06:07:59 UTC）。SlowMist、Defi Nerd、ExVul 公開アラートが参照する特定 tx hash。eth_getTransactionReceipt は 1371 件の event logs、うち USDT transfer 638 件、WUSD コントラクトイベント 544 件、GLO transfer 176 件、GLO/USDT victim pool 6 件、GLO/USDC victim pool 1 件。EIP-7702 + Morpho USDT フラッシュローン + 使い捨て helper パターンは他 32 本のメイン排水 tx と同一。"
+        },
+        {
+          "txHash": "0x9796c517e4d45a3d594c6659c56d0f94a0d6a321cc8a32b55655734428b29f6a",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "メイン排水最終 tx。EIP-7702 self-call、ブロック 25,170,445、2026-05-25 06:11:59 UTC。このブロック以降 attacker は事後統合に切替。メイン排水シーケンス（33 本 tx、ブロック 25,170,413〜25,170,445）は各ブロックスロット 1 本に対応し、汎用 MEV サーチャーによるサンドイッチを回避するため 33 反復を意図的に分散した攻撃者戦略と整合。"
+        },
+        {
+          "txHash": "0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "事後 ETH 統合。attacker 0x88329a... が正確に 93.0 ETH をアドレス 0x2a6bb74e746a0d72d45785699239e7146b037f72（EOA、eth_getCode が 0x を返す）に送金。ブロック 25,170,466、2026-05-25 06:16:11 UTC。これは事後段階における attacker からの単一最大 ETH 流出で、PeckShieldAlert の「盗まれたステーブルを ETH に換えプライバシープールへ」主張のオンチェーンアンカー。"
+        },
+        {
+          "txHash": "0x6ac7ab2cf448de9d93f2058ae9bba9537015963ec42871174f2fbe1cb64c949d",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "同一正典ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c による 2 回目の CREATE2 デプロイ。helper 0xa5f28cc3e064b268e59a59da8fcab106028bcf52（1274 bytes — 0x7ec5a4dc と同サイズ、salt 違いで同テンプレートと推定）をデプロイ。ブロック 25,170,517、2026-05-25 06:26:35 UTC。当該 helper は第 2 段階ダストクリーンアップで使用。"
+        },
+        {
+          "txHash": "0x7f73cc42b5ed5bc61c59495c04916152e727f03944f0133857e41fbfc9917354",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "第 2 段階 8 本の 0xa5f28cc3... 呼び出しの最初の 1 本。ブロック 25,170,520、2026-05-25 06:27:11 UTC。PeckShieldAlert のオンチェーン観察通り、メイン排水後 GLO プールに残る GLOVE/USDT/USDC ダストを回収し Railgun 預け入れへフォワードする処理と推定。"
+        },
+        {
+          "txHash": "0xe3586669c752f70e47a7cf2368f2ebf51e18c8dc87b03c32ad6d2d23599a483e",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "事件全体の最終 attacker tx。EIP-7702 self-call、今回は委譲先 0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006（0x10e6e22f... と異なる）。ブロック 25,170,536、2026-05-25 06:30:35 UTC。オンチェーン攻撃ウィンドウの終結。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x88329a09428778f62bc0c8baac0997864e5a57f8",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻撃者 EOA。eth_getCode が 0x を返す（攻撃ウィンドウ内のいずれのブロックでもコントラクトコード未デプロイ）ことで確認、SlowMist、Defi Nerd、ExVul クロスリファレンスで裏付け。攻撃者アドレスはブロック 25,170,399〜25,170,536 で計 56 本の tx を発出。EIP-7702（Pectra）認可でメイン排水ウィンドウ（ブロック 25,170,413〜25,170,445）に helper 0x10e6e22f...、クリーンアップ段階（ブロック 25,170,531〜25,170,536）に helper 0x03032ef3... を EOA コンテキストで実行し、WUSD._englove の msg.sender 単位 creditless GLOVE 上限を迂回した。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x10e6e22f7ff49752666fbec4bb87bdadd61c5f95",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "EIP-7702 委譲 helper。メイン排水ウィンドウ（ブロック 25,170,413〜25,170,445）で attacker EOA が使用。Runtime code 798 bytes。攻撃ブロック高さでのみ eth_getCode で可視化（EIP-7702 委譲プリフィックス 0xef010010e6e22f7ff49752666fbec4bb87bdadd61c5f95 を返す）。EOA コンテキスト下で使い捨て helper アドレスへ sub-call をディスパッチし、各 helper を WUSD wrap パス上の fresh msg.sender として機能させる。ブロック 25,170,410（2026-05-25 06:04:47 UTC）にオンチェーンで初確認。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x7ec5a4dc4c04b97fd1d2b0de2a6a9321b114c36e",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "最初の攻撃 helper。attacker が正典 CREATE2 ファクトリ 0x4e59b44847b379578588920ca78fbf26c0b4956c 経由でデプロイ。Runtime code 1274 bytes。セットアップ段階（ブロック 25,170,402〜25,170,412、計 8 本の helper-bound 呼び出し）で使用、内部状態初期化と wrap パスへの事前資金供給を実施。メイン排水ウィンドウ自体は別 helper（EIP-7702 委譲 0x10e6e22f...）を使用、本コントラクトではない。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa5f28cc3e064b268e59a59da8fcab106028bcf52",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "2 番目の攻撃 helper。ブロック 25,170,517（2026-05-25 06:26:35 UTC）に同一 CREATE2 ファクトリ経由でデプロイ。Runtime code 1274 bytes — 0x7ec5a4dc... と同サイズ、salt 違いの同テンプレートと推定。事後ダストクリーンアップ段階（ブロック 25,170,520〜25,170,528、計 8 本の helper-bound 呼び出し）で使用。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x4e23524aa15c689f2d100d49e27f28f8e5088c0d",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者デプロイの helper、4185-byte runtime code、ブロック 25,170,000（2026-05-25 04:41:59 UTC）にオンチェーン初確認、メイン排水の約 1 時間 23 分前。攻撃 tx 0x2051c1f8... の trace で to-address 分布に 187 回出現、中間コントラクト（routing aggregator または batch dispatcher 等）と推定されるがメインヘルパーから内部呼び出しされる。精確な役割は未独立検証 — バイトコードは closed-source、オンチェーンイベントシグネチャから機能を一意に識別不可。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xba3cb449bd2b4adddbc894d8697f5170800eadec",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者デプロイの helper、6177-byte runtime code。attacker EOA から 2 本の 0.1 ETH 送金（ブロック 25,170,499 と 25,170,500）を受信 — 第 2 段階クリーンアップへのガス補給と推定。Closed-source；精確な役割は未独立検証。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x03032ef3adf5ea08a96caf5c8fcee74e4b8f1006",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "attacker EOA がクリーンアップ段階（ブロック 25,170,531〜25,170,536、計 6 本の self-call）で使用する 2 番目の EIP-7702 委譲先。Runtime code は 'latest' ブロックで不可視（0x を返す）— 攻撃ブロックでのみ eth_getCode が EIP-7702 委譲プリフィックスとして解決する。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x2a6bb74e746a0d72d45785699239e7146b037f72",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "事後資金統合アドレス。EOA（eth_getCode が 0x を返す）。tx 0x59463488f53519137f73cedd7c879998fe0ca6a9def5e13f4e308cf1d1eb088a（ブロック 25,170,466、2026-05-25 06:16:11 UTC）で attacker から正確に 93.0 ETH を受信。PeckShieldAlert の観察によれば、残余 ~5 ETH 差額（約 98 ETH 数字との差）は Railgun プライバシープールへデポジット済み。当該 Railgun デポジットアドレスは本報告には列挙しない（attacker の直接的外向き ETH 送金セットからは直接観察不可、Railgun 固有デポジットイベントを別途 probe して位置特定する必要あり）。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x068e3563b1c19590f822c0e13445c4fa1b9eefa5",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "WUSD（Wrapped USD）コントラクト。脆弱コントラクト。公開関数 wrap(address,uint256,address)（セレクタ 0x5c15155e）は _englove 報酬パスにルーティングし、fresh msg.sender 呼び出しごとに最大約 2 個の creditless GLOVE を鋳造、per-sender 上限なし。対応する unwrap(address,uint256)（セレクタ 0x39f47693）と snapshot()（セレクタ 0x9711715a）も攻撃者が悪用した露出面。バイトコード 15,716 bytes、ディスパッチャに 36 個の関数セレクタ。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x70c5f366db60a2a0c59c4c24754803ee47ed7284",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "GLOVE（GLO）報酬トークンコントラクト。Symbol GLO、name Glove、18 decimals。WUSD _englove パスが引き起こす creditless GLOVE 鋳造のソース。eth_call totalSupply() 値で攻撃後の総供給量は約 5,876.79 GLO（明らかな増加で、攻撃者が 33 本のメイン排水 tx で数百単位の creditless GLOVE を鋳造した整合）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa2bd1a142ff49131b8cc70a332bda0125018c324",
+          "blockchain": "ethereum",
+          "role": "liquidity_pool",
+          "description": "Uniswap V3 GLO/USDT 集中流動性プール。攻撃シーケンスで計 8,080.16 USDT（SlowMist）/ 8,079 USDT（ExVul、Defi Nerd）抽出。1.0 USDT のソース間差異は丸め許容範囲内。attacker tx receipt 内のプール外向き USDT Transfer イベントで検証。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xb89f65d6c7d33a35da7c01934e310a6f40e18a1f",
+          "blockchain": "ethereum",
+          "role": "liquidity_pool",
+          "description": "Uniswap V3 GLO/USDC 集中流動性プール。11,702.08 USDC 抽出（SlowMist、ExVul、Defi Nerd の 3 ソースで有効数字 4 桁一致）。attacker tx receipt 内のプール外向き USDC Transfer イベントで検証。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x62f2819d505249e63b1daf31b44f152247feb5d5",
+          "blockchain": "ethereum",
+          "role": "treasury",
+          "description": "WUSD fee collector。各 wrap 呼び出しで 1,000 USDT を受信（すなわち攻撃者の 100,000 USDT/ラップ tier の 1%）。攻撃者がフラッシュローン元本を wrap パスで洗浄する過程で、約 1,000 USDT × ~100 wraps/tx × 33 txs ≈ 3.3M USDT をフィーとして本アドレスに支払った。伝統的な意味での「loss」ではないが、wrap パスが資金洗浄サイクルとして使用されたこと、およびプロトコルが各サイクルで 1% フィーを全額徴収したことを実証する。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Morpho Blue USDT マーケット。攻撃者の各メイン排水 tx における約 81,845,577 USDT フラッシュローンのソース。フラッシュローンは自己清算型（同 tx 末尾で返済）のため資金損失意味での victim ではないが、攻撃インフラの一部。本リストに含めるのは、当該プロトコルのフラッシュローン可用性が攻撃全体の経済的実現性を支えているため — これなしでは攻撃者は 33 回の 100,000 USDT ラップサイクルに約 82M USDT の事前資金が必要。",
+          "accountType": "Contract"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-25",
+    "lastUpdated": "2026-05-25",
+    "human_verified": false,
+    "models": [
+      "minimax-m3"
+    ]
+  }
+}
