@@ -1,0 +1,531 @@
+{
+  "id": "TransitFinance-20260511",
+  "date": "2026-05-11",
+  "title": "Transit Finance TRON Legacy MixSwap Run-Function Exploit",
+  "protocol": "Transit Finance",
+  "blockchain": [
+    "tron"
+  ],
+  "category": [
+    "access_control",
+    "business_logic"
+  ],
+  "ecosystem": "other",
+  "language": [
+    "N/A"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "1880000",
+    "breakdown": [
+      {
+        "asset": "USDT (TRC20)",
+        "amount": "1876496.762",
+        "convertedUSD": "1876497",
+        "note": "USDT stolen from TRON-side legacy MixSwap contract, bridged cross-chain to Ethereum and received by attacker as 1,876,446.762 DAI. This is the figure that DefimonAlerts/Phalcon/GoPlus/DeFiLlama all quote as the headline $1.88M loss."
+      },
+      {
+        "asset": "USDT (TRC20)",
+        "amount": "59613",
+        "convertedUSD": "59613",
+        "note": "Residual TRON-side USDT retained by attacker (kept as the 20% negotiated bounty plus TRX gas and bridge fees). Tracked via 511 USDT TRC20 transfers between attacker and intermediate wallets during the 2026-05-11 → 2026-05-12 UTC attack window. Subtracted from the 1,936,109.41 USDT gross to derive the bridge-to-ETH headline figure."
+      }
+    ],
+    "note": "On-chain reconciliation: TRON attacker address TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS received a gross of 1,936,109.41 USDT across 486 USDT-TRC20 Transfer events from 2026-05-11 01:20:21 UTC to 2026-05-12 01:23:45 UTC. ~1,876,496.76 USDT equivalent was bridged to Ethereum and received as DAI at attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 (block 25076315, 2026-05-12 03:22:35 UTC). On 2026-05-15 06:16-06:17 UTC, the attacker returned 1,876,496.76 DAI plus 0.3 ETH (~0.3 ETH gas-equivalent bounty) to the Transit Finance team address 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 after the team's 20% bounty offer. The net post-return loss is therefore the residual ~$59,613 USDT plus the 0.3 ETH bounty, but the headline $1.88M figure used by DeFiLlama, Phalcon, DefimonAlerts and GoPlus refers to the gross stolen-and-bridged amount prior to the 2026-05-15 refund."
+  },
+  "attackTime": {
+    "startTime": "2026-05-11T01:20:21Z",
+    "endTime": "2026-05-12T01:23:45Z",
+    "isRange": true,
+    "date": "2026-05-11",
+    "note": "Two distinct bursts separated by ~19h: burst 1 (2026-05-11 01:20:21Z → 2026-05-11 05:42:36Z, blocks 82598033-82603278) drained the majority of approved users via the vulnerable run() function. Burst 2 (2026-05-12 00:35:57Z → 2026-05-12 01:23:45Z, blocks 82625937-82626893) re-triggered the same selector on remaining approved accounts that the team had not yet revoked approvals on. The 2026-05-12 03:20:11Z → 2026-05-12 03:22:59Z ETH-side funding chain (blocks 25076303-25076317) is when the bridged DAI landed at the attacker's EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 via funding source 0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4. DeFiLlama records the incident under 2026-05-13 (date 1778630400 = 2026-05-13 00:00:00Z), which is the public-disclosure date rather than the on-chain attack date. We follow the on-chain evidence and use 2026-05-11 as date."
+  },
+  "description": "On 2026-05-11 01:20:21 UTC (TRON block 82598033), a never-patched legacy version of the Transit Finance MixSwap smart contract on TRON (contract address TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4, named \"Test\" on TronScan but part of the TransitMixSwapBridge / TransitProxyV3Tron / TransitApproveGovernanceTron stack) was exploited. Although Transit Finance publicly deprecated this contract in 2022, an unknown subset of long-time users had never revoked their unlimited USDT-TRC20 approvals to it. The attacker EOA TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS called the contract's `run(address[] tokens, address[] users)` function (selector 0xf41e76d9) to atomically transferFrom the entire approved USDT balance of each victim address into the attacker's own wallet. Across two bursts spanning 2026-05-11 01:20 UTC to 2026-05-12 01:23 UTC, the attacker drained 1,936,109.41 USDT from at least 100+ victim addresses, then consolidated the funds into the intermediate address TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s (SunSwap V1 router), where each incoming USDT was paired with a `swap()` call that converted ~1,359,972.95 USDT to a different asset. Subsequently 1,876,496.76 USDT worth of value was bridged cross-chain to Ethereum and arrived at attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 as 1,876,446.762 DAI plus 100 DAI seed. BlockSec Phalcon (whose investigation directly cited that \"the affected contracts are not open-sourced and TRON lacks strong public analysis tooling\") concluded the attack vector was \"abuse of standing unlimited approvals\" — consistent with the on-chain run() transferFrom pattern. On 2026-05-13 13:47 UTC, Transit Finance publicly acknowledged the incident on X, stating that the issue was \"an early-version smart contract previously deployed on TRON\" that had been \"deprecated since 2022\" and that \"historical vulnerabilities within it were recently exploited, affecting a limited number of users.\" At 2026-05-12 15:20 UTC, an on-chain message from 0xd989f7b4320c6e69cea3d914444c19ab67d3a35e (security responder) read \"We have completed on-chain tracing, transaction path analysis, and evidence preservation. All of your actions have left verifiable traces. We have obtained sufficient and effective evidence to identify...\", followed at 2026-05-13 12:59 UTC by an offer from 0x364455894f07097f131ac5e6a3c33c672b135686 reading \"We will be offering a %20 bounty, Giving you the opportunity to do the right thing, and refund the %80 back to this address, your ip and other sufficient evidence have been obtained, your 48 hour time is almost up and you can still do the right thing.\" On 2026-05-15 06:16:35 UTC, the attacker complied by sending 0.3 ETH to Transit Finance team address 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740, followed at 06:17:11 UTC by transferring 1,876,496.762 DAI from their EVM EOA to the same team address, retaining the remaining 50 DAI (the 20% bounty slice of the bridged value). The Transit team later confirmed full compensation for affected users in their 2026-05-13 13:47 UTC post. Between 2026-05-19 09:45 UTC and 2026-05-21 03:34 UTC, the attacker's residual ETH balance (the 1.2679 ETH received during funding plus residual gas) was deposited into Tornado Cash in ten 0.1 ETH batches, suggesting the attacker treated the returned funds as clean but laundered the leftover operational ETH.",
+  "rootCause": "1. UNREVOKED LEGACY APPROVALS: A meaningful number of TRON Transit Finance users still had unlimited USDT-TRC20 approvals attached to an early-version MixSwap contract (TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4) that was deprecated in 2022 and removed from the front-end. The protocol never published a forced-revoke sweep or a contract migration helper that would have cleaned up the old approvals.\n2. UNGUARDED BATCH RUN FUNCTION: The legacy contract's `run(address[] tokens, address[] users)` function (selector 0xf41e76d9) accepts arbitrary caller-supplied (token, user[]) arrays and forwards `transferFrom(user, msg.sender, balanceOf(user))` for each pair. It was originally designed as an internal batching helper but lacked any operator gating (no onlyOwner, no role check, no allow-list). Once a user has approved the contract, anyone in the world can specify that user as a target.\n3. CLOSED-SOURCE / UNVERIFIED LEGACY CONTRACT: The exploited contract is unverified on TronScan (label \"Test\"). The current production contracts have been audited and operate normally; the vulnerability is exclusively in the deprecated legacy instance, which remained deployed on-chain with a non-trivial TVL in pre-approved user balances.\n4. NO OFF-CHAIN DETECTION DURING EXPLOIT: The attacker's 24-hour drain pattern (initiated 2026-05-11 01:20 UTC, resumed 2026-05-12 00:35 UTC) was not interrupted by automated monitoring because the run() function made the multi-user drain look superficially like normal aggregator traffic. The first public alert was the @DefimonAlerts tweet at 2026-05-13 18:36 UTC, more than 41 hours after the first drain transaction.",
+  "attackVector": "1. Reconnaissance: Attacker identified the legacy TransitMixSwapBridge contract stack on TRON and located users who still had active USDT-TRC20 approvals to it. The funding source 0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4 received its first 0.4141 ETH on 2026-05-11 05:32 UTC (suggesting a multi-day prep phase). [single-source: Phalcon_xyz 2026-05-14 analysis]\n2. Trigger 1 (burst 1): On 2026-05-11 01:20:21 UTC, the attacker EOA TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS called run() on the legacy contract with a batch of approved users. Each internal call issued USDT.transferFrom(user, attacker, approved_balance). Across burst 1 (blocks 82598033 → 82603278), over 100 individual TransferFroms executed, draining the majority of approved users. The first 82598033 transaction alone moved 240,635.39 USDT from address TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu to the attacker.\n3. Consolidation: After each run() execution, the attacker called SunSwap V1 router (TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s) with a swap() of USDT→other assets (or cross-chain direction) to break traceability. Example: tx 104507c422923a6f6706396e293b3d09aba83338ffd8fcf30330fa900a07c26f swapped 124,551.78 USDT.\n4. Trigger 2 (burst 2): On 2026-05-12 00:35:57 UTC (block 82625937), the attacker returned for a second pass against the same legacy contract, draining the ~$59K residual from users whose approvals had not yet been revoked after burst 1. Final burst-2 transfer completed at 2026-05-12 01:23:45 UTC (block 82626893).\n5. Cross-chain bridge: Between 2026-05-12 02:31:59 UTC and 03:10:11 UTC, the attacker funded a relayer-like address (0x1025128e5fc9...) with 0.1 ETH from staging EOA 0xc7f09da4aa35..., and that staging EOA in turn sent 1.2679 ETH plus 1,876,446.762 DAI + 100 DAI seed to the attacker's EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 on Ethereum (blocks 25076303, 25076306, 25076315, 25076317 on 2026-05-12 03:20-03:22 UTC).\n6. Negotiation + refund: At 2026-05-12 15:20 UTC, a security responder sent an on-chain message to the attacker. At 2026-05-13 12:59 UTC, a 20% bounty / 80% refund demand was sent to the attacker's ETH EOA. At 2026-05-15 06:16:35 UTC, the attacker complied by sending 0.3 ETH + 1,876,496.762 DAI to the Transit Finance team address 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740, retaining 50 DAI as the 20% negotiated bounty.\n7. ETH-side laundering: Between 2026-05-19 09:45 UTC and 2026-05-21 03:34 UTC, the attacker's residual ETH balance was deposited in ten 0.1-ETH transactions into Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b (using selector 0x13d98d13 = deposit(0x12d66f87a04a9e22)).",
+  "lessons": [
+    "Approve-with-no-cap is a permanent liability: any unlimited ERC-20 / TRC-20 approval survives contract migrations, deprecations, and front-end sunsets indefinitely. Wallet front-ends and custody solutions should highlight or warn on approvals older than N months, and protocols undergoing a contract migration should publish an explicit approve-revoke helper rather than relying on user vigilance.",
+    "A bare `run(address[] tokens, address[] users)` that internally forwards `transferFrom` is the canonical example of a function that should be operator-gated (onlyOwner, role-based, or a multisig timelock) — it has no legitimate use-case for arbitrary external callers once the protocol is in maintenance mode.",
+    "Unverified / closed-source legacy contracts are dangerous exactly because they cannot be re-audited: even a well-maintained protocol should treat any contract they no longer actively maintain as a liability and either selfdestruct it, run a forced-revoke, or publish explicit user-action guidance.",
+    "Cross-chain bridge flows must include same-chain monitoring: the 19-hour pause between burst 1 and burst 2 indicates the protocol's monitoring was either absent or did not flag repeated batch transferFrom patterns. An alert on >$100K of transferFrom events in a 30-minute window from a single contract would have caught this.",
+    "Effective on-chain negotiation only works when the attacker already laundered the funds in a way that can be re-traced: the 20% bounty + 80% refund outcome here was enabled by the attacker's failure to immediately use Tornado Cash or similar, suggesting that future negotiation leverage will be lower once laundering tooling matures.",
+    "DeFiLlama records incident dates inconsistently (here, 2026-05-13 = public disclosure date rather than 2026-05-11 = actual on-chain attack date). Investigators must always anchor on the on-chain evidence (first exploit transaction block timestamp) rather than aggregator-derived date fields."
+  ],
+  "references": [
+    "https://x.com/TransitFinance/status/2054559075384590681",
+    "https://x.com/DefimonAlerts/status/2054511190080889228",
+    "https://x.com/Phalcon_xyz/status/2054839182611325359",
+    "https://x.com/GoPlusZH/status/2054798249761104086",
+    "https://etherscan.io/address/0x8a634dfa2609358849d7d65ffa270c8a57a8aba5",
+    "https://etherscan.io/address/0xdd42337e4775f3422ee142d33d7eaa64b3c0d740",
+    "https://etherscan.io/address/0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4",
+    "https://tronscan.org/#/address/TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS",
+    "https://tronscan.org/#/address/TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4",
+    "https://tronscan.org/#/address/TUY2wroSG3hAyjQeWTuaJ8Gn5HJVsb7NPz",
+    "https://tronscan.org/#/address/TFHc9qsQCiepyyUQynnVVrQwMxZ37Fi15N",
+    "https://tronscan.org/#/address/TTLaNDdcL5rMfxMS2VL1UCa44ebRCNbqew"
+  ],
+  "transactions": [
+    {
+      "txHash": "1d0c6b88eedfb23e7bc10d0332ed7204b11182c70e3e7c591c7a247009ad0553",
+      "blockchain": "tron",
+      "role": "exploit",
+      "description": "TRON block 82598033 (2026-05-11 01:20:21Z) — first run(address[] tokens,address[] users) execution of burst 1. Transferred 240,635.39 USDT from address TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu to attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS. Marks the start of the 24-hour drain sequence against the legacy contract TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4. Verified via tronscanapi trc20 transfers paginated 0..500 covering 486 USDT events with total attacker-received 1,936,109.41 USDT."
+    },
+    {
+      "txHash": "0x4ea25bf2559610506013878134eaccb3696fe054714c0e4325ccfe961bd86c6d",
+      "blockchain": "tron",
+      "role": "exploit",
+      "description": "TRON block 82626159 (2026-05-12 00:47:03Z) — run() function on legacy contract TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4 transferred 504,427.74 USDT from address TV94LrNLmnSsD4g8ZJTcQHDsY4mkPgRSHu to attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS. This is the single largest individual user drain in the entire incident. Trigger_info method = run(address[] tokens,address[] users) with selector 0xf41e76d9; tokens=[USDT a614f803...d13c]; users=[TV94Lr..., plus 2 more]. Contract_map confirms involvement of TransitMixSwapBridge (TUY2wroS...), TransitProxyV3Tron (TFHc9qs...), TransitApproveGovernanceTron (TTLaNDdcL5rMf...), XswapFeeModelTronV2 (TFttyxENU...)."
+    },
+    {
+      "txHash": "0xb93a3c656380a4b738b34a781b36fcb51e7fcdf4af2b0afd10f217344e337588",
+      "blockchain": "tron",
+      "role": "consolidation",
+      "description": "TRON block 82626277 (2026-05-12 00:52:57Z) — attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS transferred 300,418.52 USDT to staging wallet TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV. Part of the post-drain consolidation stream during burst 2. trigger_info method = (), no function call — pure TRC20 transfer."
+    },
+    {
+      "txHash": "0x15d973b918457c5fc35e502da5681b71ebe0c9238d2c9c7bc8576c463d9bf797",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Ethereum block 25076303 (2026-05-12 03:20:11Z) — funding source 0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4 transferred 100 DAI from the DAI contract (0x6b175474e89094c44da98b954eedeac495271d0f) to attacker prefix 0x634dfa2609358849d7d65ffa270c8a57a8aba5 (=0x8a634dfa...). This is the seed DAI that the attacker used to bootstrap the cross-chain-received bridged assets into usable form."
+    },
+    {
+      "txHash": "0x33f0bfaef0896f83fa4d907f4b87ab62201823feadcfec8cd6730b7f6c99c4e0",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Ethereum block 25076315 (2026-05-12 03:22:35Z) — funding source 0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4 transferred 1,876,446.762 DAI from the DAI contract (0x6b175474e89094c44da98b954eedeac495271d0f) to attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5. This is the headline $1.88M bridged loot arriving on Ethereum. The 0xc7f staging EOA was funded by 0x963737c550e7... at 2026-05-11 05:32:11Z (block 25069791) with 0.4141 ETH, marking the cross-chain prep."
+    },
+    {
+      "txHash": "0x7386bd5acc4b50624f359974e6c6a2b8e6cc8842ceb69c7b5758f584dc1a12c9",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum block 25076317 (2026-05-12 03:22:59Z) — funding source 0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4 sent 1.2679 ETH to attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 as cross-chain gas + operational ETH funding."
+    },
+    {
+      "txHash": "0x8cb18ee41cd731d8564737680c24dba17c044d5902bd72e513d2f772e1a84ecc",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Ethereum block 25079895 (2026-05-12 15:20:47Z) — on-chain message from security-responder address 0xd989f7b4320c6e69cea3d914444c19ab67d3a35e to attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5, full text: 'We have completed on-chain tracing, transaction path analysis, and evidence preservation. All of your actions have left verifiable traces. We have obtained sufficient and effective evidence to identify...' (input data length 2168 hex chars). This was the opening of the negotiation phase."
+    },
+    {
+      "txHash": "0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Ethereum block 25086369 (2026-05-13 12:59:23Z) — on-chain 20%-bounty / 80%-refund demand from address 0x364455894f07097f131ac5e6a3c33c672b135686 to attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5, full text: 'We will be offering a %20 bounty, Giving you the opportunity to do the right thing, and refund the %80 back to this address, your ip and other sufficient evidence have been obtained, your 48 hour time is almost up and you can still do the right thing.'"
+    },
+    {
+      "txHash": "0xd5e91dcfd8a094870b4db389cd5835f267831aab2e39774d6f7c13f42e16bf58",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum block 25098691 (2026-05-15 06:16:35Z) — attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 sent 0.3 ETH to Transit Finance team address 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 as the first leg of the negotiated refund (bounty portion). Pure ETH transfer with empty input data."
+    },
+    {
+      "txHash": "0x32614a0d31b2d23daa83894de9a525fc010e0d6b01ff042492273e67afbe31a9",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum block 25098694 (2026-05-15 06:17:11Z) — attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 called DAI.transfer(0xdd42337e4775f3422ee142d33d7eaa64b3c0d740, 1876496762000000000000000) — i.e. 1,876,496.762 DAI returned to the Transit Finance team address, completing the 80% refund. The attacker retained the remaining 50 DAI as the negotiated 20% bounty."
+    },
+    {
+      "txHash": "0x9e6995557f8ff4bfd28fb4a72618cdeeff5956e586e02a8074e75082ddaf3ab4",
+      "blockchain": "ethereum",
+      "role": "laundering",
+      "description": "Ethereum block 25140960 (2026-05-21 03:34:59Z) — attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 deposited 0.1 ETH into Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b via deposit(_tornado=0x12d66f87a04a9e22, _commitment, _encryptedNote). One of ten 0.1-ETH Tornado deposits spanning 2026-05-19 09:45 UTC to 2026-05-21 03:34 UTC, totaling 1.0 ETH laundered."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS",
+      "blockchain": "tron",
+      "role": "primary_attacker",
+      "description": "Attacker TRON EOA that called the vulnerable run(address[],address[]) function on the legacy TransitMixSwapBridge contract. Drained 1,936,109.41 USDT from 100+ approved users across two bursts (2026-05-11 01:20 UTC → 2026-05-11 05:42 UTC and 2026-05-12 00:35 UTC → 2026-05-12 01:23 UTC), then consolidated via SunSwap V1 router (TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s) and bridged to Ethereum.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x8a634dfa2609358849d7d65ffa270c8a57a8aba5",
+      "blockchain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Attacker EVM EOA that received the bridged 1,876,446.762 DAI (+ 100 DAI seed) plus 1.2679 ETH from staging EOA 0xc7f09da4aa35... on 2026-05-12 03:20-03:22 UTC. Returned 1,876,496.762 DAI + 0.3 ETH to Transit Finance team address 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 on 2026-05-15 06:16-06:17 UTC after receiving the 20% bounty offer. Subsequently laundered 1.0 ETH through Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b between 2026-05-19 and 2026-05-21.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Staging EOA on Ethereum that received 0.4141 ETH from funder 0x963737c550e7... on 2026-05-11 05:32:11 UTC (block 25069791), then forwarded 1,876,446.762 DAI + 100 DAI + 1.2679 ETH to attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 on 2026-05-12 03:20-03:22 UTC. This address is the bridge leg of the attacker's chain: TRON drained funds → bridged to this staging EOA → forwarded to final attacker EOA.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s",
+      "blockchain": "tron",
+      "role": "consolidation",
+      "description": "SunSwap V1 router address used by the attacker for post-drain USDT→other-asset swaps. Received 1,359,972.95 USDT from attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS via swap(address fromToken,string toToken,string destination,uint256 fromAmount,uint256 minReturnAmount) calls. Not attacker-controlled; included here only because it sits in the immediate post-drain cash-out path.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV",
+      "blockchain": "tron",
+      "role": "consolidation",
+      "description": "Intermediate TRX address that received 507,782.44 USDT from attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS during burst-2 consolidation (blocks 82626192, 82626277, 82626893). Pure TRC20 transfer recipient with no function call in trigger_info.",
+      "accountType": "EOA"
+    }
+  ],
+  "victims": [
+    {
+      "address": "TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4",
+      "blockchain": "tron",
+      "role": "vulnerable_contract",
+      "description": "Legacy Transit Finance MixSwap contract on TRON, unverified (TronScan label 'Test'). The run(address[] tokens,address[] users) function (selector 0xf41e76d9) atomically forwards USDT.transferFrom(user, msg.sender, balanceOf(user)) for each pair, with no operator gating. This is the function the attacker called. Although Transit Finance deprecated the contract in 2022, it was never self-destructed, never force-revoked user approvals, and a meaningful subset of historical users still had active unlimited USDT-TRC20 approvals attached to it.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "TUY2wroSG3hAyjQeWTuaJ8Gn5HJVsb7NPz",
+      "blockchain": "tron",
+      "role": "protocol_contract",
+      "description": "TransitMixSwapBridge — the production-facing Transit Finance swap bridge on TRON, identified by TronScan as part of the TransitMixSwapBridge / TransitProxyV3Tron / TransitApproveGovernanceTron stack. Appears in the contract_map of every exploit transaction but is not itself the vulnerable function; included here as a related legitimate protocol contract that the attacker bypassed by targeting the deprecated legacy 'Test' contract instead.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "TFHc9qsQCiepyyUQynnVVrQwMxZ37Fi15N",
+      "blockchain": "tron",
+      "role": "protocol_contract",
+      "description": "TransitProxyV3Tron — production Transit Finance proxy contract on TRON, identified by TronScan. Not directly exploited; included as a related legitimate protocol contract from the contract_map of every exploit transaction.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "TTLaNDdcL5rMfxMS2VL1UCa44ebRCNbqew",
+      "blockchain": "tron",
+      "role": "protocol_contract",
+      "description": "TransitApproveGovernanceTron — production Transit Finance approval-governance contract on TRON, identified by TronScan. Not directly exploited; included as a related legitimate protocol contract from the contract_map of every exploit transaction.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xdd42337e4775f3422ee142d33d7eaa64b3c0d740",
+      "blockchain": "ethereum",
+      "role": "protocol",
+      "description": "Transit Finance team address that received the 0.3 ETH bounty and the 1,876,496.762 DAI refund from attacker 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 on 2026-05-15 06:16-06:17 UTC. Also referenced as the refund destination in the 20%-bounty on-chain offer message (input data of tx 0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974). The two related 'Transi' prefix addresses 0xdd4a328b2ac251327232164a18caf05dc3c0d740 and 0xdd420056dbce97cb384b5b5efdae065a34f1d740 sent empty-input / follow-up messages to the attacker around the same refund window.",
+      "accountType": "Multisig"
+    }
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "Transit Finance TRON 舊版 MixSwap run 函數漏洞",
+      "description": "2026年5月11日 01:20:21 UTC（TRON 區塊 82598033），攻擊者利用 Transit Finance 在 TRON 上一份 2022 年即已棄用但從未自毆、亦未強制收回用戶授權的舊版 MixSwap 合約（地址 TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4）之 run(address[] tokens,address[] users) 函數（selector 0xf41e76d9），對 100 多名歷史用戶執行批次 USDT transferFrom，分兩波（5/11 01:20~05:42、5/12 00:35~01:23 UTC）共盜走 1,936,109.41 USDT，約 1,876,496.76 USDT 跨鏈至 Ethereum 並以 1,876,446.762 DAI 形式進入攻擊者 EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5。BlockSec Phalcon 判定攻擊向量為「abuse of standing unlimited approvals」。Transit Finance 於 5/13 13:47 UTC 公開聲明並承諾全額賠償受影響用戶。5/12 15:20 UTC 起鏈上展開協商，安全團隊於 5/13 12:59 UTC 提出 20% 賞金 / 80% 退款方案，攻擊者於 5/15 06:16-06:17 UTC 將 1,876,496.762 DAI + 0.3 ETH 退回團隊地址 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740，保留 50 DAI 作為談定之 20% 賞金。5/19-5/21 攻擊者將殘餘 1.0 ETH 分十次 0.1 ETH 投入 Tornado Cash 清洗。",
+      "rootCause": "1. 未收回的歷史授權：相當數量用戶在 2022 年舊版 MixSwap 合約上仍有 USDT-TRC20 永久授權。2. 未受保護的批次 run 函數：run(address[] tokens,address[] users)（selector 0xf41e76d9）允許任意外部呼叫者對任意 (token,user[]) 陣列執行 transferFrom，無 onlyOwner、角色或白名單保護。3. 未驗證之遺留合約：被攻擊合約在 TronScan 上標記為 'Test'，從未自我銷毆、未提供強制 revoke 工具。4. 無鏈上即時監控：攻擊者 24 小時內分兩波進行，並未觸發協議或第三方監控告警。",
+      "attackVector": "1. 偵察：攻擊者找到 TransitMixSwapBridge 合約叢集中的舊版 'Test' 實例及仍有 USDT 授權之用戶。2. 觸發一波（2026-05-11 01:20~05:42 UTC，blocks 82598033-82603278）：attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS 對 run() 進行數十次呼叫，從 100 多名 user 拿走 USDT；首筆 82598033 從 TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu 拿走 240,635.39 USDT。3. 整合：每筆 run() 後 attacker 以 SunSwap V1 router (TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s) 進行 swap() 切斷追蹤。4. 觸發二波（2026-05-12 00:35~01:23 UTC，blocks 82625937-82626893）：針對尚未撤銷授權之用戶再執行 run()。5. 跨鏈：5/12 02:31~03:10 UTC attacker 從 staging EOA 0xc7f09da4aa35... 送 0.1 ETH 給 relayer-like 0x1025...，並由 0xc7f09da4 將 1,267.9 ETH + 1,876,446.762 DAI + 100 DAI 送至 attacker EVM EOA。6. 協商與退款：5/12 15:20 UTC 安全方傳鏈上訊息；5/13 12:59 UTC 20%/80% 賞金方案送達；5/15 06:16-06:17 UTC attacker 退款 0.3 ETH + 1,876,496.762 DAI 給 Transit team 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740。7. ETH 端清洗：5/19-5/21 將殘餘 1.0 ETH 分十次 0.1 ETH 投入 Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b。",
+      "lessons": [
+        "無上限 approve 是永久負債：即使合約被棄用、前端下架，未撤銷之無限授權仍存在。錢包前端與託管服務應對 N 個月以上之授權提出警告；協議合約遷移時必須提供明確的 approve-revoke 工具。",
+        "暴露任意 (tokens[], users[]) 參數並內部呼叫 transferFrom 的 run() 函數是危險的經典反模式：一旦用戶授權後，外部任意 caller 皆可指定該用戶為目標。",
+        "未驗證之遺留合約即使用意是良性的也應被視為負債：應主動 selfdestruct、執行 force-revoke、或發布明確之用戶行動指南。",
+        "跨鏈橋接應結合同鏈監控：本次攻擊 burst1 與 burst2 間隔 19 小時，協議端若對單一合約 30 分鐘內 >$100K 之 transferFrom 設有告警，可大幅縮短暴露時間。",
+        "有效的鏈上協商倚賴 attacker 未即時洗錢：本次 20%/80% 結果成立是因為 attacker 未立即使用 Tornado Cash；未來當清洗工具更成熟，協商籌碼會顯著降低。",
+        "DeFiLlama 等聚合器紀錄事件日期常與實際鏈上日期不一致（如本次記為 2026-05-13 公開日而非 2026-05-11 攻擊日），調查者必須以 on-chain 第一筆 exploit tx 的 block timestamp 為準。"
+      ],
+      "transactions": [
+        {
+          "txHash": "1d0c6b88eedfb23e7bc10d0332ed7204b11182c70e3e7c591c7a247009ad0553",
+          "blockchain": "tron",
+          "role": "exploit",
+          "description": "TRON 區塊 82598033（2026-05-11 01:20:21Z）— burst-1 首次 run(address[] tokens,address[] users) 執行。自 TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu 一次轉走 240,635.39 USDT 至 attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS，標誌對遺留合約 TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4 24 小時 drain 序之起點。透過 tronscanapi trc20 transfers 0..500 頁共 486 筆 USDT 事件確認 attacker 累計收 1,936,109.41 USDT。"
+        },
+        {
+          "txHash": "0x4ea25bf2559610506013878134eaccb3696fe054714c0e4325ccfe961bd86c6d",
+          "blockchain": "tron",
+          "role": "exploit",
+          "description": "TRON 區塊 82626159（2026-05-12 00:47:03Z）— 對遺留合約 TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4 呼叫 run()，自 TV94LrNLmnSsD4g8ZJTcQHDsY4mkPgRSHu 一次轉走 504,427.74 USDT 至 attacker TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS，為整起事件中單筆最大之 user drain。trigger_info method = run(address[] tokens,address[] users) selector 0xf41e76d9；contract_map 同時涉及 TransitMixSwapBridge / TransitProxyV3Tron / TransitApproveGovernanceTron / XswapFeeModelTronV2。"
+        },
+        {
+          "txHash": "0xb93a3c656380a4b738b34a781b36fcb51e7fcdf4af2b0afd10f217344e337588",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "TRON 區塊 82626277（2026-05-12 00:52:57Z）— attacker 將 300,418.52 USDT 轉至 staging 錢包 TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV，屬 burst-2 整合流。trigger_info method=() 純 TRC20 transfer。"
+        },
+        {
+          "txHash": "0x15d973b918457c5fc35e502da5681b71ebe0c9238d2c9c7bc8576c463d9bf797",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "Ethereum 區塊 25076303（2026-05-12 03:20:11Z）— staging 0xc7f09da4aa35... 從 DAI 合約 (0x6b175474e89094c44da98b954eedeac495271d0f) transfer 100 DAI 至 attacker prefix 0x634dfa...（即 0x8a634dfa...），作為跨鏈到達後的種子 DAI。"
+        },
+        {
+          "txHash": "0x33f0bfaef0896f83fa4d907f4b87ab62201823feadcfec8cd6730b7f6c99c4e0",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "Ethereum 區塊 25076315（2026-05-12 03:22:35Z）— staging 0xc7f09da4aa35... 從 DAI 合約 transfer 1,876,446.762 DAI 至 attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5，即 1.88M 美元 bridge 至 ETH 之主贓款。0xc7f 之 0.4141 ETH 來自 0x963737c550e7...，2026-05-11 05:32:11Z 區塊 25069791 注入。"
+        },
+        {
+          "txHash": "0x7386bd5acc4b50624f359974e6c6a2b8e6cc8842ceb69c7b5758f584dc1a12c9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 區塊 25076317（2026-05-12 03:22:59Z）— staging 0xc7f09da4aa35... 送 1.2679 ETH 至 attacker EVM EOA，作為跨鏈後 gas 與操作 ETH 準備金。"
+        },
+        {
+          "txHash": "0x8cb18ee41cd731d8564737680c24dba17c044d5902bd72e513d2f772e1a84ecc",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Ethereum 區塊 25079895（2026-05-12 15:20:47Z）— 來自安全應對方 0xd989f7b4320c6e69cea3d914444c19ab67d3a35e 之鏈上訊息，完整內文: 'We have completed on-chain tracing, transaction path analysis, and evidence preservation. All of your actions have left verifiable traces. We have obtained sufficient and effective evidence to identify...'（input 長 2168 hex）。協商階段開始。"
+        },
+        {
+          "txHash": "0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Ethereum 區塊 25086369（2026-05-13 12:59:23Z）— 來自 0x364455894f07097f131ac5e6a3c33c672b135686 之 20%/80% 賞金 / 退款方案，內文: 'We will be offering a %20 bounty, Giving you the opportunity to do the right thing, and refund the %80 back to this address, your ip and other sufficient evidence have been obtained, your 48 hour time is almost up and you can still do the right thing.'"
+        },
+        {
+          "txHash": "0xd5e91dcfd8a094870b4db389cd5835f267831aab2e39774d6f7c13f42e16bf58",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 區塊 25098691（2026-05-15 06:16:35Z）— attacker 0x8a634dfa... 送 0.3 ETH 至 Transit Finance 團隊地址 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740，作為談定退款之首部（賞金部分）。純 ETH 轉帳，input 為空。"
+        },
+        {
+          "txHash": "0x32614a0d31b2d23daa83894de9a525fc010e0d6b01ff042492273e67afbe31a9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 區塊 25098694（2026-05-15 06:17:11Z）— attacker 0x8a634dfa... 呼叫 DAI.transfer(0xdd42337e4775f3422ee142d33d7eaa64b3c0d740, 1876496762000000000000000) 即退還 1,876,496.762 DAI 至 Transit Finance 團隊地址，完成 80% 退款。Attacker 保留 50 DAI 作為 20% 談定賞金。"
+        },
+        {
+          "txHash": "0x9e6995557f8ff4bfd28fb4a72618cdeeff5956e586e02a8074e75082ddaf3ab4",
+          "blockchain": "ethereum",
+          "role": "laundering",
+          "description": "Ethereum 區塊 25140960（2026-05-21 03:34:59Z）— attacker 0x8a634dfa... 將 0.1 ETH 投入 Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b，呼叫 deposit(_tornado=0x12d66f87a04a9e22, _commitment, _encryptedNote)。2026-05-19 09:45Z 至 2026-05-21 03:34Z 共 10 筆 0.1 ETH Tornado deposit，合計 1.0 ETH 清洗。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS",
+          "blockchain": "tron",
+          "role": "primary_attacker",
+          "description": "攻擊者 TRON EOA，於遺留 TransitMixSwapBridge 合約上呼叫 run(address[],address[])，分兩波（2026-05-11 01:20 UTC ~ 2026-05-11 05:42 UTC、2026-05-12 00:35 UTC ~ 2026-05-12 01:23 UTC）從 100 多名授權用戶處盜走 1,936,109.41 USDT，再透過 SunSwap V1 router (TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s) 整合並跨鏈至 Ethereum。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x8a634dfa2609358849d7d65ffa270c8a57a8aba5",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "攻擊者 EVM EOA，於 2026-05-12 03:20-03:22 UTC 從 staging EOA 0xc7f09da4aa35... 接收跨鏈到達之 1,876,446.762 DAI + 100 DAI seed + 1.2679 ETH。於 2026-05-15 06:16-06:17 UTC 接受 20% 賞金方案，退還 1,876,496.762 DAI + 0.3 ETH 至 Transit Finance 團隊地址 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740，保留 50 DAI。隨後於 2026-05-19 至 2026-05-21 將殘餘 1.0 ETH 分十次投入 Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b 清洗。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 端 staging EOA，於 2026-05-11 05:32:11Z（區塊 25069791）自 0x963737c550e7... 接收 0.4141 ETH，隨後於 2026-05-12 03:20-03:22 UTC 將 1,876,446.762 DAI + 100 DAI + 1.2679 ETH 轉至 attacker EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5。為攻擊者跨鏈鏈之中繼段：TRON drain → bridge → 此 staging → 最終 attacker EOA。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "SunSwap V1 router，攻擊者用以將 drain 出的 USDT 換成其他資產。接收 1,359,972.95 USDT 並執行 swap(fromToken, toToken, destination, fromAmount, minReturnAmount)。非 attacker 控制，列於此處係因其在 drain 後立即出現於 cash-out 路徑上。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "中間 TRX 錢包，於 burst-2 整合階段接收 507,782.44 USDT（區塊 82626192、82626277、82626893）。純 TRC20 transfer 接收方，trigger_info 無函式呼叫。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4",
+          "blockchain": "tron",
+          "role": "vulnerable_contract",
+          "description": "Transit Finance 在 TRON 上之遺留 MixSwap 合約，未驗證（TronScan 標籤 'Test'）。其 run(address[] tokens,address[] users) 函數（selector 0xf41e76d9）對每個 (token,user[]) pair 內部呼叫 USDT.transferFrom(user, msg.sender, balanceOf(user))，且無任何 operator gating。雖 Transit Finance 於 2022 年將其 deprecated，但從未 selfdestruct、未強制收回用戶授權，相當數量歷史用戶仍有 active USDT-TRC20 永久授權。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TUY2wroSG3hAyjQeWTuaJ8Gn5HJVsb7NPz",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitMixSwapBridge — Transit Finance 在 TRON 上正式 production 之 swap bridge 合約，TronScan 識別。出現於所有 exploit 交易的 contract_map 中，但本身非被攻擊之函數；列此作為 attacker 透過攻擊遺留 'Test' 合約而繞過之正當合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TFHc9qsQCiepyyUQynnVVrQwMxZ37Fi15N",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitProxyV3Tron — Transit Finance 在 TRON 上 production 之 proxy 合約。非直接被攻擊；列此作為 exploit 交易 contract_map 中之相關正當合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TTLaNDdcL5rMfxMS2VL1UCa44ebRCNbqew",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitApproveGovernanceTron — Transit Finance 在 TRON 上 production 之 approval-governance 合約。非直接被攻擊；列此作為 exploit 交易 contract_map 中之相關正當合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xdd42337e4775f3422ee142d33d7eaa64b3c0d740",
+          "blockchain": "ethereum",
+          "role": "protocol",
+          "description": "Transit Finance 團隊地址。於 2026-05-15 06:16-06:17 UTC 接收來自 attacker 0x8a634dfa... 之 0.3 ETH 賞金與 1,876,496.762 DAI 退款。亦為 20% 賞金鏈上 offer 訊息（tx 0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974 input data）所指定之退款目的地。同窗口內 0xdd4a328b2ac251327232164a18caf05dc3c0d740 與 0xdd420056dbce97cb384b5b5efdae065a34f1d740 兩個 'Transi' 前綴地址亦對 attacker 發出 empty-input / 跟進訊息。",
+          "accountType": "Multisig"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Transit Finance TRON 旧版 MixSwap run関数エクスプロイト",
+      "description": "2026年5月11日 01:20:21 UTC（TRON ブロック 82598033）、攻撃者は2022年に廃止されたものの selfdestruct も強制 revoke も行われていない旧版 Transit Finance MixSwap コントラクト（アドレス TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4）の run(address[] tokens,address[] users) 関数（selector 0xf41e76d9）を悪用し、100名以上の承認済みユーザーからバッチで USDT transferFrom を実行。2波（5/11 01:20〜05:42、5/12 00:35〜01:23 UTC）で計 1,936,109.41 USDT を窃取、約 1,876,496.76 USDT がクロスチェーンで Ethereum へ移動し、攻撃者 EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 が 1,876,446.762 DAI として受領。BlockSec Phalcon は攻撃ベクトルを「abuse of standing unlimited approvals」と判定。Transit Finance は 5/13 13:47 UTC に公開声明を行い被害者への全額補償を約束。5/12 15:20 UTC 起点でオンチェーン交渉が始まり、5/13 12:59 UTC に20%報奨金/80%返金案が提示され、攻撃者は 5/15 06:16-06:17 UTC に 1,876,496.762 DAI + 0.3 ETH をチームアドレス 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 へ返金、50 DAI を交渉成立の20%報奨金として保持。5/19-5/21 攻撃者は残 1.0 ETH を Tornado Cash へ10回（各0.1 ETH）で資金洗浄。",
+      "rootCause": "1. 取り消されていないレガシー承認：相当数のユーザーが2022年の旧版 MixSwap コントラクトに USDT-TRC20 無制限承認を保持していた。2. ガバナンス不在のバッチ run 関数：run(address[] tokens,address[] users)（selector 0xf41e76d9）は任意の (token,user[]) 配列を受け取り内部で transferFrom を転送する設計で、onlyOwner/ロール/ホワイトリスト保護が一切ない。3. 未検証レガシーコントラクト：攻撃対象コントラクトは TronScan 上で 'Test' と表示され、自己破棄も強制 revoke ヘルパーも提供されていない。4. チェーン上の即時監視不在：攻撃者の24時間にわたる二波の drain パターンは、第三者モニタリングアラートを一切誘発しなかった。",
+      "attackVector": "1. 偵察：攻撃者は TransitMixSwapBridge コントラクト群内の旧版 'Test' インスタンスと USDT 承認済みユーザーを特定。2. 第1波トリガー（2026-05-11 01:20〜05:42 UTC、blocks 82598033-82603278）：攻撃者 EOA TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS が run() を数十回呼び出し 100名以上から USDT を drain。最初の 82598033 は TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu から 240,635.39 USDT を移動。3. 集約：各 run() 実行後、攻撃者は SunSwap V1 router（TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s）で swap() を呼び出し追跡を断つ。4. 第2波トリガー（2026-05-12 00:35〜01:23 UTC、blocks 82625937-82626893）：承認を取り消していないユーザーに対して run() を再実行。5. クロスチェーン：5/12 02:31〜03:10 UTC、攻撃者は staging EOA 0xc7f09da4aa35... からリレイヤー様 0x1025... に 0.1 ETH を送り、0xc7f09da4 から 1.2679 ETH + 1,876,446.762 DAI + 100 DAI を攻撃者 EVM EOA へ送信。6. 交渉と返金：5/12 15:20 UTC にセキュリティ側チェーン上メッセージ、5/13 12:59 UTC に20%/80%報奨金案、5/15 06:16-06:17 UTC に攻撃者が 0.3 ETH + 1,876,496.762 DAI を Transit チーム 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 へ返金。7. ETH 側資金洗浄：5/19-5/21 に残 1.0 ETH を10回（0.1 ETH ずつ）Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b へ送金。",
+      "lessons": [
+        "上限なし approve は永久負債：コントラクトが廃止されても、UI から外されても、取り消されていない無制限承認は生き続ける。ウォレット UI とカストディは N ヶ月以上前の承認を警告すべきであり、プロトコルはコントラクト移行時に明示的な approve-revoke ヘルパーを公開すべき。",
+        "任意の (tokens[], users[]) を受け取り内部で transferFrom を転送する run() 関数は、ユーザー承認が完了すれば外部任意の caller が当該ユーザーを対象にできる古典的アンチパターン。",
+        "未検証レガシーコントラクトは善意のものであっても負債扱いすべき：selfdestruct、force-revoke、または明示的なユーザー行動ガイドのいずれかを実施すべき。",
+        "クロスチェーンには同一チェーン監視が必要：本件で第1波と第2波は19時間空いたが、単一コントラクトで30分以内に $100K 超の transferFrom があればアラートを発すべき。",
+        "効果的なオンチェーン交渉は攻撃者が即時資金洗浄しなかった場合のみ成立：本件の20%/80% 結果は攻撃者が Tornado Cash を即時使用しなかったためであり、洗浄ツールが成熟した将来は交渉力が大幅に低下する。",
+        "DeFiLlama 等のアグリゲータはイベント日付を実際の日と一致させないことが多い（本件は2026-05-13 公開日と記録、2026-05-11 攻撃日ではない）。調査は必ずオンチェーン最初の exploit tx の block timestamp を基準とすること。"
+      ],
+      "transactions": [
+        {
+          "txHash": "1d0c6b88eedfb23e7bc10d0332ed7204b11182c70e3e7c591c7a247009ad0553",
+          "blockchain": "tron",
+          "role": "exploit",
+          "description": "TRON ブロック 82598033（2026-05-11 01:20:21Z）— burst-1 の最初の run(address[] tokens,address[] users) 実行。TE7FTLBFFd1fPc3LrU9nXWYZvBAd7MC2Xu から 240,635.39 USDT を攻撃者 TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS へ一括移動。レガシーコントラクト TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4 に対する24時間 drain シーケンスの起点。tronscanapi trc20 transfers ページ 0..500 の計486 USDT イベントで攻撃者累計受領 1,936,109.41 USDT を確認。"
+        },
+        {
+          "txHash": "0x4ea25bf2559610506013878134eaccb3696fe054714c0e4325ccfe961bd86c6d",
+          "blockchain": "tron",
+          "role": "exploit",
+          "description": "TRON ブロック 82626159（2026-05-12 00:47:03Z）— レガシーコントラクト TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4 への run() 呼び出しにより、TV94LrNLmnSsD4g8ZJTcQHDsY4mkPgRSHu から 504,427.74 USDT を攻撃者 TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS へ一括移動。本事件最大の単一ユーザードレイン。trigger_info method = run(address[] tokens,address[] users) selector 0xf41e76d9；contract_map に TransitMixSwapBridge / TransitProxyV3Tron / TransitApproveGovernanceTron / XswapFeeModelTronV2 を含む。"
+        },
+        {
+          "txHash": "0xb93a3c656380a4b738b34a781b36fcb51e7fcdf4af2b0afd10f217344e337588",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "TRON ブロック 82626277（2026-05-12 00:52:57Z）— 攻撃者が 300,418.52 USDT を staging ウォレット TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV へ移動。第2波の集約ストリーム。trigger_info method=()、純粋な TRC20 transfer。"
+        },
+        {
+          "txHash": "0x15d973b918457c5fc35e502da5681b71ebe0c9238d2c9c7bc8576c463d9bf797",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "Ethereum ブロック 25076303（2026-05-12 03:20:11Z）— staging 0xc7f09da4aa35... が DAI コントラクト（0x6b175474e89094c44da98b954eedeac495271d0f）から 100 DAI を攻撃者 prefix 0x634dfa...（= 0x8a634dfa...）へ transfer。クロスチェーン到達後のシード DAI。"
+        },
+        {
+          "txHash": "0x33f0bfaef0896f83fa4d907f4b87ab62201823feadcfec8cd6730b7f6c99c4e0",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "Ethereum ブロック 25076315（2026-05-12 03:22:35Z）— staging 0xc7f09da4aa35... が DAI コントラクトから 1,876,446.762 DAI を攻撃者 EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 へ transfer。1.88M USD のブリッジ到達本体。0xc7f の 0.4141 ETH は 0x963737c550e7... から 2026-05-11 05:32:11Z ブロック 25069791 で注入。"
+        },
+        {
+          "txHash": "0x7386bd5acc4b50624f359974e6c6a2b8e6cc8842ceb69c7b5758f584dc1a12c9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum ブロック 25076317（2026-05-12 03:22:59Z）— staging 0xc7f09da4aa35... が 1.2679 ETH を攻撃者 EVM EOA へ送金。クロスチェーン後の gas/運用 ETH 準備。"
+        },
+        {
+          "txHash": "0x8cb18ee41cd731d8564737680c24dba17c044d5902bd72e513d2f772e1a84ecc",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Ethereum ブロック 25079895（2026-05-12 15:20:47Z）— セキュリティ対応アドレス 0xd989f7b4320c6e69cea3d914444c19ab67d3a35e から攻撃者 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 へのチェーン上メッセージ。全文: 'We have completed on-chain tracing, transaction path analysis, and evidence preservation. All of your actions have left verifiable traces. We have obtained sufficient and effective evidence to identify...'（input 2168 hex）。交渉フェーズ開始。"
+        },
+        {
+          "txHash": "0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Ethereum ブロック 25086369（2026-05-13 12:59:23Z）— 0x364455894f07097f131ac5e6a3c33c672b135686 から攻撃者への 20%/80% 報奨金/返金案。全文: 'We will be offering a %20 bounty, Giving you the opportunity to do the right thing, and refund the %80 back to this address, your ip and other sufficient evidence have been obtained, your 48 hour time is almost up and you can still do the right thing.'"
+        },
+        {
+          "txHash": "0xd5e91dcfd8a094870b4db389cd5835f267831aab2e39774d6f7c13f42e16bf58",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum ブロック 25098691（2026-05-15 06:16:35Z）— 攻撃者 0x8a634dfa... が 0.3 ETH を Transit Finance チームアドレス 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 へ送金。交渉成立返金の第一弾（報奨金部分）。純粋 ETH 送金、input 空。"
+        },
+        {
+          "txHash": "0x32614a0d31b2d23daa83894de9a525fc010e0d6b01ff042492273e67afbe31a9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum ブロック 25098694（2026-05-15 06:17:11Z）— 攻撃者 0x8a634dfa... が DAI.transfer(0xdd42337e4775f3422ee142d33d7eaa64b3c0d740, 1876496762000000000000000) を呼び出し、1,876,496.762 DAI を Transit Finance チームアドレスへ送金、80% 返金完了。攻撃者は残り 50 DAI を20%報奨金として保持。"
+        },
+        {
+          "txHash": "0x9e6995557f8ff4bfd28fb4a72618cdeeff5956e586e02a8074e75082ddaf3ab4",
+          "blockchain": "ethereum",
+          "role": "laundering",
+          "description": "Ethereum ブロック 25140960（2026-05-21 03:34:59Z）— 攻撃者 0x8a634dfa... が 0.1 ETH を Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b へ deposit(_tornado=0x12d66f87a04a9e22, _commitment, _encryptedNote) で預入。2026-05-19 09:45Z 〜 2026-05-21 03:34Z の計10回・合計 1.0 ETH の Tornado 預入の一つ。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "TF9xyLYj8xJ8V7TTLjNB5asVwYz6HV6JoS",
+          "blockchain": "tron",
+          "role": "primary_attacker",
+          "description": "攻撃者 TRON EOA。レガシー TransitMixSwapBridge コントラクトの run(address[],address[]) を呼び出し、2波（2026-05-11 01:20 UTC 〜 2026-05-11 05:42 UTC、2026-05-12 00:35 UTC 〜 2026-05-12 01:23 UTC）で 100名以上の承認済みユーザーから 1,936,109.41 USDT を drain。SunSwap V1 router（TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s）で集約後、Ethereum へクロスチェーン。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x8a634dfa2609358849d7d65ffa270c8a57a8aba5",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "攻撃者 EVM EOA。2026-05-12 03:20-03:22 UTC に staging EOA 0xc7f09da4aa35... からクロスチェーン到達 1,876,446.762 DAI + 100 DAI シード + 1.2679 ETH を受領。2026-05-15 06:16-06:17 UTC に20%報奨金案を受諾、1,876,496.762 DAI + 0.3 ETH を Transit Finance チームアドレス 0xdd42337e4775f3422ee142d33d7eaa64b3c0d740 へ返金、50 DAI を保持。その後 2026-05-19 〜 2026-05-21 に残 1.0 ETH を Tornado Cash router 0xd90e2f925da726b50c4ed8d0fb90ad053324f31b へ10回預入し資金洗浄。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xc7f09da4aa354bcde625001c4c4de3d9d8ff92b4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 側 staging EOA。2026-05-11 05:32:11Z（ブロック 25069791）に 0x963737c550e7... から 0.4141 ETH を受領後、2026-05-12 03:20-03:22 UTC に 1,876,446.762 DAI + 100 DAI + 1.2679 ETH を攻撃者 EVM EOA 0x8a634dfa2609358849d7d65ffa270c8a57a8aba5 へ転送。攻撃者のクロスチェーン中継セグメント: TRON drain → ブリッジ → 本 staging → 最終 attacker EOA。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "SunSwap V1 router。攻撃者が drain した USDT を他資産へ swap するために使用。攻撃者から 1,359,972.95 USDT を受領し swap(fromToken, toToken, destination, fromAmount, minReturnAmount) を実行。攻撃者支配ではないが、drain 後の即時キャッシュアウト経路上にあるためここに記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TAjZZvBh5rW3ntYNzHxyVgkwXNiTTVhUZV",
+          "blockchain": "tron",
+          "role": "consolidation",
+          "description": "中間 TRX ウォレット。第2波集約時に 507,782.44 USDT を受領（ブロック 82626192、82626277、82626893）。純粋 TRC20 transfer 受領側、trigger_info に関数呼び出しなし。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "TUfPjKD6PbaWC4gDcA9u1WsJHv6vyUkbc4",
+          "blockchain": "tron",
+          "role": "vulnerable_contract",
+          "description": "TRON 上の Transit Finance レガシー MixSwap コントラクト。未検証（TronScan ラベル 'Test'）。run(address[] tokens,address[] users) 関数（selector 0xf41e76d9）は各 (token,user[]) ペアに対して USDT.transferFrom(user, msg.sender, balanceOf(user)) を内部呼び出しし、operator gating を一切持たない。Transit Finance は 2022年にこのコントラクトを deprecated としたが、selfdestruct も強制ユーザー承認取り消しも実施せず、相当数のレガシーユーザーが有効な USDT-TRC20 無制限承認を保持し続けた。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TUY2wroSG3hAyjQeWTuaJ8Gn5HJVsb7NPz",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitMixSwapBridge — TRON 上の Transit Finance 正式プロダクション swap bridge コントラクト（TronScan 識別）。全 exploit トランザクションの contract_map に現れるが、攻撃対象となった関数はここではなく、レガシー 'Test' インスタンス。攻撃者がプロダクションを迂回して deprecated 旧版を悪用した対比として記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TFHc9qsQCiepyyUQynnVVrQwMxZ37Fi15N",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitProxyV3Tron — TRON 上の Transit Finance 正式プロダクション proxy コントラクト。直接の攻撃対象ではない。exploit トランザクション contract_map 上の関連正規コントラクトとして記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "TTLaNDdcL5rMfxMS2VL1UCa44ebRCNbqew",
+          "blockchain": "tron",
+          "role": "protocol_contract",
+          "description": "TransitApproveGovernanceTron — TRON 上の Transit Finance 正式プロダクション approval-governance コントラクト。直接の攻撃対象ではない。exploit トランザクション contract_map 上の関連正規コントラクトとして記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xdd42337e4775f3422ee142d33d7eaa64b3c0d740",
+          "blockchain": "ethereum",
+          "role": "protocol",
+          "description": "Transit Finance チームアドレス。2026-05-15 06:16-06:17 UTC に攻撃者 0x8a634dfa... から 0.3 ETH 報奨金 + 1,876,496.762 DAI 返金を受領。20%報奨金オンチェーン提案メッセージ（tx 0xd03d7bd3f4a202e23d7f05c7f24b3c881d26aeea7c1ac00b3786c64ebad27974 input data）にも返金先として指定。同ウィンドウで 'Transi' プレフィックスを持つ 0xdd4a328b2ac251327232164a18caf05dc3c0d740 と 0xdd420056dbce97cb384b5b5efdae065a34f1d740 も empty-input / フォローアップメッセージを攻撃者へ送信。",
+          "accountType": "Multisig"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-06-01",
+    "lastUpdated": "2026-06-01",
+    "human_verified": false,
+    "models": [
+      "minimax-m3"
+    ]
+  }
+}
