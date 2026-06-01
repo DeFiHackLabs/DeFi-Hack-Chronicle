@@ -206,6 +206,11 @@
         "id": "monad",
         "name": "Monad",
         "description": "Monad EVM-compatible Layer 1 blockchain"
+      },
+      {
+        "id": "monero",
+        "name": "Morero",
+        "description": "Monero private untraceable Layer 1 blockchain"
       }
     ],
     "languages": [
