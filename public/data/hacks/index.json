@@ -96,6 +96,12 @@
       "file": "20260518-EchoProtocol.json"
     },
     {
+      "id": "RetoSwap-20260520",
+      "date": "2026-05-20",
+      "protocol": "RetoSwap",
+      "file": "20260520-RetoSwap.json"
+    },
+    {
       "id": "WUSD-20260525",
       "date": "2026-05-25",
       "protocol": "WUSD (with GLOVE)",
