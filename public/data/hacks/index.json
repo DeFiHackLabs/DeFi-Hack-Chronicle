@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-05-31"
+    "lastUpdated": "2026-06-01"
   },
   "files": [
     {
@@ -84,10 +84,22 @@
       "file": "20260511-INKFinance.json"
     },
     {
+      "id": "TransitFinance-20260511",
+      "date": "2026-05-11",
+      "protocol": "Transit Finance",
+      "file": "20260511-TransitFinance.json"
+    },
+    {
       "id": "EchoProtocol-20260518",
       "date": "2026-05-18",
       "protocol": "Echo Protocol",
       "file": "20260518-EchoProtocol.json"
+    },
+    {
+      "id": "WUSD-20260525",
+      "date": "2026-05-25",
+      "protocol": "WUSD (with GLOVE)",
+      "file": "20260525-WUSD.json"
     },
     {
       "id": "DxSale-20260528",
