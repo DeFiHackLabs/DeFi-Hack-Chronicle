@@ -1,0 +1,663 @@
+{
+  "id": "VerusBridge-20260517",
+  "date": "2026-05-17",
+  "title": "Verus-Ethereum Bridge submitImports Economic-Validation Bypass",
+  "protocol": "Verus-Ethereum Bridge",
+  "blockchain": [
+    "ethereum"
+  ],
+  "category": [
+    "bridge",
+    "business_logic"
+  ],
+  "ecosystem": "evm",
+  "language": [
+    "solidity"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "11769505",
+    "breakdown": [
+      {
+        "asset": "ETH",
+        "amount": "1625.36688649",
+        "convertedUSD": "3543099",
+        "note": "Internal CALL from bridge 0x71518580... to drainer 0x65cb8b12... in the main exploit tx 0x6990f0...d2c0. ETH price on 2026-05-17 (CoinGecko daily close): 2,179.88 USD/ETH."
+      },
+      {
+        "asset": "tBTC",
+        "amount": "103.56766017",
+        "convertedUSD": "8078746",
+        "note": "ERC-20 Transfer log in tx 0x6990f0...d2c0 from bridge 0x71518580... to drainer 0x65cb8b12...; contract 0x18084fba... (symbol tBTC, name tBTC v2, decimals 18). tBTC price on 2026-05-17 (CoinGecko): 78,004.53 USD/tBTC."
+      },
+      {
+        "asset": "USDC",
+        "amount": "147658.836798",
+        "convertedUSD": "147659",
+        "note": "ERC-20 Transfer log in tx 0x6990f0...d2c0 from bridge 0x71518580... to drainer 0x65cb8b12...; contract 0xa0b86991... (symbol USDC, name USD Coin, decimals 6). 1:1 USD."
+      }
+    ],
+    "note": "On-chain verified total: 1,625.36688649 ETH + 103.56766017 tBTC v2 + 147,658.836798 USDC. CoinGecko historical prices for 2026-05-17 give ETH=$2,179.88, tBTC=$78,004.53, so converted totals are $3,543,099 + $8,078,746 + $147,659 = $11,769,504.63 (rounded to $11,769,505). Phalcon reports ~$11.7M and Merkle Science reports $11.58M; the $11.58M figure likely reflects a slightly lower ETH price snapshot (~$2,134/ETH) and rounded tBTC amount. Post-swap, the attacker consolidated 5,402.4 ETH (~$11.78M at 2026-05-17 price) into a single drainer wallet within ~24 hours. Verus community later offered a 1,350 ETH bounty in exchange for the return of 4,052.4 ETH to address 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74, and the on-chain flow shows the attacker routed the funds exactly along those lines (1,350 ETH to 0xa8d3662af2fc73ed..., 4,052 ETH to 0xf9ab28cb7b72b518...)."
+  },
+  "attackTime": {
+    "startTime": "2026-05-17T11:50:59Z",
+    "endTime": "2026-05-21T19:49:59Z",
+    "isRange": true,
+    "note": "Pre-funding from Tornado Cash (1 ETH pool) hit attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 at 2026-05-17 11:50:59 UTC (the outer transaction 0x84dc53d6...ec86 was submitted by an unrelated relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d, which earned a 0.006032 ETH fee; the inner Tornado.withdraw call moved 0.993968 ETH from Tornado 1 ETH pool 0x47ce0c6ed5b0... to the attacker EOA). The attacker's first on-chain preparation tx on Ethereum was the UniversalRouter.execute WETH→USDC swap at 23:24:35 UTC (block 25118181), followed by a 10 USDC payment to the bridge multisig 0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845 at 23:25:23 UTC, and then the main submitImports exploit at block 25118335 / 2026-05-17 23:55:23 UTC. Post-exploit, the drainer ran a tBTC approve at 23:58:23 UTC, a USDC approve at 23:59:35 UTC; two unrelated solver/relayer EOAs (0xd9af4455b56f... for tBTC, 0xbeedd60f4ae5... for USDC) then called the swap aggregators via Permit2 approval, returning 3,707.485136 ETH and 69.549771 ETH to the drainer at 23:58:47 UTC and 00:16:23 UTC (2026-05-18) respectively. The drainer sent 0.4 ETH to 0xf9ab28cb7b72b518... at 19:44:11 UTC (2026-05-21), the 4,052 ETH consolidation to the same address at 19:47:11 UTC, and the 1,350 ETH consolidation to 0xa8d3662af2fc73ed... at 19:49:59 UTC — all on 2026-05-21. Verus community posted the first white-hat on-chain message at 2026-05-18 18:51:11 UTC (tx 0x8a69f4f...) and the second, more specific bounty offer (1,350 ETH bounty / 4,052.4 ETH return) at 2026-05-21 14:14:59 UTC (tx 0x94f66fdd...). The endTime below is set to the last consolidation tx at 19:49:59 UTC because subsequent on-chain activity from the drainer after that block was only minor self-transfers (e.g., 0x666d9e49... 0-value, 0x5419bdce... 0-value, 0xdb998841... 0.0001 ETH).",
+    "date": "2026-05-17"
+  },
+  "description": "On 2026-05-17, the Verus-Ethereum Bridge was exploited for a combined on-chain loss of approximately $11.77M, drained in a single submitImports() call. The Verus bridge is a cross-chain design where users lock or burn assets on the Verus source chain, the Verus notaries attest to the export, and the destination-chain bridge contract pays out on Ethereum based on the attested data. The Verus bridge contract on Ethereum is an EIP-1967 proxy at 0x71518580f36feceffe0721f06ba4703218cd7f63 whose implementation (0xa045cf963b79833faf445f555ee1a6812d6fc87f) is closed-source. The vulnerable function is submitImports((uint64,bytes32,bytes,bytes)[]) (selector 0x8c49b257). BlockSec Phalcon's root-cause analysis identifies the missing check: the bridge correctly verified (1) the export/notarization Merkle proof, and (2) that keccak256(serializedTransfers) matched the export's hashReserveTransfers commitment, but did NOT verify that the source-chain export actually carried enough locked/burned value to support the payouts. The deployed source is not open-sourced, so the analysis is reconstructed from the attack calldata and the public monkins1010/Verus-Ethereum-contracts GitHub repository, which may not reflect the full deployed implementation. The attack flow: (a) the attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 was funded with 0.993968 ETH from Tornado Cash (1 ETH pool) at 2026-05-17 11:50:59 UTC via an unrelated relayer (0x09efa4777a855eb946df013c8f3e51fc553aa81d, which kept a 0.006032 ETH fee); (b) on Ethereum, the attacker swapped 0.1 WETH for 216.7483 USDC via UniversalRouter at 23:24:35 UTC, then paid 10 USDC to the Verus bridge multisig 0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845 (a GnosisSafeProxy) at 23:25:23 UTC — the multisig is the Verus community's operational wallet, NOT a part of the bridge's processTransactions() code path, and it routinely receives 10-100 USDC/USDT donations from many addresses; this 10 USDC payment is not required by the bridge's on-chain logic and should be treated as a suspicious pre-action with no demonstrated causal link to the exploit; (c) on the Verus source chain, the attacker crafted an export with effectively no meaningful locked/burned backing but with a matching serializedTransfers hash (tx f899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733 per Phalcon); (d) at 2026-05-17 23:55:23 UTC the attacker called submitImports() on the Ethereum bridge proxy; the call passed proveImports() and processTransactions() and the bridge paid out 1,625.36688649 ETH (internal call), 103.56766017 tBTC v2 (ERC-20 Transfer), and 147,658.836798 USDC (ERC-20 Transfer), all from the bridge's own custody to the attacker-controlled drainer 0x65cb8b128bf6e690761044cceca422bb239c25f9; (e) the drainer immediately approved Permit2 (0x000000000022d473030f116ddee9f6b43ac78ba3) for unlimited tBTC and unlimited USDC, then two unrelated solver/relayer EOAs — 0xd9af4455b56f8c703b63392f25a66e083b26c379 (the tBTC swap relayer) and 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 (the USDC swap relayer) — called the aggregation routers (0x8392876883cf0e9e7ee24d9b1f606ed88644f23b via the 0x740cd74f5896... CoW Protocol-style settlement, and 0xbee3211ab312a8d065c4fef0247448e17a8da000 respectively), which used Permit2.transferFrom to pull the drainer's tokens, ran the swap (tBTC via WETH/tBTC v2 pool 0x7f54f05635d1..., USDC via 0x4dffeb6b78e5... pool), and unwrapped the WETH through 0x00000011f84b... to send 3,707.485136 ETH (tBTC→WETH→ETH) and 69.549771 ETH (USDC→WETH→ETH) back to the drainer; (f) the drainer then split the proceeds (5,402.4 ETH total) into two intermediate EOAs: 4,052 ETH to 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6 and 1,350 ETH to 0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b; (g) the Verus community sent two on-chain white-hat messages — the first on 2026-05-18 18:51:11 UTC (tx 0x8a69f4f..., a 0-value message from 0xd498061f357447940f494e142b24695b51f59883 to the attacker) acknowledging the attack and inviting a compromise, and the second on 2026-05-21 14:14:59 UTC (tx 0x94f66fdd..., same 0-value channel) specifying terms: 1,350 ETH retained by the attacker as bounty, 4,052.4 ETH returned to 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74 within 24 hours, in exchange for the community halting investigations, not pressing charges, and publicly acknowledging the bounty as legitimate; (h) the on-chain flow shows the attacker routing the funds exactly per the offer — 1,350 ETH to 0xa8d3662af2fc73ed... and 4,052 ETH to 0xf9ab28cb7b72b518... — strongly indicating acceptance of the bounty terms. The attacker EOA's full on-chain history is 5 normal txs (2 outbound swaps/transfers, 1 main exploit, 2 inbound white-hat messages) and 1 internal tx (the Tornado Cash withdrawal). Two unrelated airdrop-style txs were received by the attacker EOA in the days after the exploit (2,000,000 ETHG from 0x3fc29836e84e471a053d2d9e80494a867d670ead at 2026-05-18 22:48:47 UTC and 17,500 AICC from 0x11bf2e0d39d8589c96171a4102ea39c834067e26 at 2026-05-18 23:17:59 UTC); both were mass-distribution airdrops to hundreds of addresses including the attacker, and the attacker did not initiate or sign these transfers. Subsequent drainer activity on Ethereum consists of minor self-transfers (0.0001 ETH pings) and is not loss-related. No cross-chain activity was detected for either attacker-controlled address on Polygon, Arbitrum, Optimism, Base, or BSC at the time of investigation — the entire exploit and laundering was on Ethereum mainnet against a Verus-Ethereum bridge leg. NOTE: A separate tx (0x6ce07c27... at 2026-05-17 23:34:59 UTC) included an internal ERC-20 transfer from the attacker EOA to 0x195a99d453e05e3057c6aa2d426c04397b6d9845 of 10 raw units of an unverified contract 0x5ef4bc5eaae751e7ff3d424ba21e834b749351ff (with a Cyrillic-homoglyph symbol ꓴꓢꓓС impersonating USDC). This tx was NOT initiated by the attacker — its outer `from` is 0x014523f2a626f0e3dbc241b8e9a4c14c507a6360, a professional multicall dispatcher with 113,000+ prior txs, and the tx itself contains 19 different sub-transfers from many addresses. The attacker EOA's event was a side-effect of this dispatcher's mass-sweep operation, not a deliberate action. Similarly, a parallel tx (0x3cc1d58e... at 2026-05-17 23:59:59 UTC) from multicall dispatcher 0x62815f4d5093... contains a 0-value USDC transfer from the attacker EOA to the same 0x195a99d453e0... address as one of 24 sub-events, again not attacker-initiated. These are recorded in the lessons section as investigative caveats, not as canonical attacker actions.",
+  "transactions": [
+    {
+      "txHash": "0x84dc53d6705447ec6b4904bb905f9d78460de9bc671bef36ef79517d44e8ec86",
+      "blockchain": "ethereum",
+      "role": "funding",
+      "description": "Funding of attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 via Tornado Cash (1 ETH pool, router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936). The OUTER transaction was submitted by an unrelated relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d, which called Tornado.withdraw (selector 0xb438689f) and earned a 0.006032 ETH relayer fee. The inner trace shows Tornado 1 ETH pool → attacker EOA 0.993968 ETH (the authoritative funding amount). The outer tx shows value=0 in Etherscan's txlist because the Tornado withdraw is a function call, not a direct ETH transfer; Etherscan's txlistinternal index records the 0.993968 ETH transfer from 0x47ce0c6ed5b0... to the attacker EOA. Block 25114721 / 2026-05-17 11:50:59 UTC."
+    },
+    {
+      "txHash": "0x6e284906abb5d4444eab72cebdfb525300ed5d81df8895f701f7fe4fd66bafc9",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Pre-exploit preparation initiated by attacker EOA 0x5abb91b9c01a... (nonce 0). The attacker called execute(bytes commands, bytes[] inputs, uint256 deadline) on Uniswap UniversalRouter 0x66a9893cc07d4514f6b0c3d8c0c1c5d8e0e0d5c7 (this address is the standard Uniswap v3 UniversalRouter on Ethereum) with 0.1 ETH of value. The trace shows 0.1 WETH entering the router and 216.7483 USDC being received by the attacker, with a 0.5432 USDC intermediate fee paid to address 0xcd6b980029e6... (a UniversalRouter fee collector). Result: the attacker now holds 216.7483 USDC, which is later used to pay the 10 USDC to the bridge multisig in the next tx. Block 25118181 / 2026-05-17 23:24:35 UTC."
+    },
+    {
+      "txHash": "0x12b4ca12b57b9e9e1916e74fa4e497af22f5c2127aa89597e9f82ce83abdca6f",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Attacker EOA 0x5abb91b9c01a... (nonce 1) called USDC.transfer(0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845, 10_000_000) — i.e., transferred 10 USDC (6-decimal USDC, raw=10,000,000) to the Verus bridge multisig (a GnosisSafeProxy at 0x195a4b5583b2..., backed by singleton GnosisSafe v1.3.0 at 0xd9db270c1b5e3bd161e8c8503c55ceabee709552). IMPORTANT: the SubmitImports.sol and TokenManager.sol source code on the public monkins1010/Verus-Ethereum-contracts GitHub repository shows no USDC payment requirement in the processTransactions() path — the bridge collects fees in VETH/VERUS/DAI/MKR (Verus-native currencies), not in real USDC. The multisig (231 normal txs visible) routinely receives 10-100 USDC/USDT payments from many different addresses as a donation/tip pattern. The attacker-funded 10 USDC is therefore a SUSPICIOUS pre-action with no demonstrated causal link to the exploit success, NOT a required bridge processing fee. Block 25118185 / 2026-05-17 23:25:23 UTC."
+    },
+    {
+      "txHash": "0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "MAIN EXPLOIT. Attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 (nonce 2) called submitImports((uint64,bytes32,bytes,bytes)[]) with selector 0x8c49b257 on the Verus-Ethereum Bridge proxy 0x71518580f36feceffe0721f06ba4703218cd7f63. Block 25118335 / 2026-05-17 23:55:23 UTC. The call passed proveImports() (which checked the Merkle proof and the keccak256(serializedTransfers) match) and processTransactions() (which released the payouts via TokenManager.processTransactions). Three asset movements are emitted in the receipt: (1) 1,625.36688649 ETH internal CALL from bridge to drainer 0x65cb8b12...c25f9 (verified via trace_transaction); (2) ERC-20 Transfer of 103,567,660,170,000,000,000 raw units (103.56766017) of tBTC v2 (token contract 0x18084fba666a33d37592fa2633fd49a74dd93a88, 18 decimals) from bridge to drainer; (3) ERC-20 Transfer of 147,658,836,798 raw units (147,658.836798) of USDC (token contract 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48, 6 decimals) from bridge to drainer. Gas used: 685,456 of 751,143 limit. Status: 0x1 (success). The attacker is not required to have approved the bridge for these transfers because processTransactions() pulls the funds from the bridge's own custody via the bridge's pre-stored allowances — the missing check is the source-destination economic equivalence, NOT an approval bypass."
+    },
+    {
+      "txHash": "0x48ee81415e14629cbbb422e749e0686461326dadadbd5881a4a7a4d9214a1f33",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Drainer 0x65cb8b128bf6... (nonce 0) called tBTC.approve(spender, value) on the tBTC v2 token contract 0x18084fba..., granting unlimited approval to the Permit2 contract 0x000000000022d473030f116ddee9f6b43ac78ba3 (verified Etherscan: ContractName='Permit2', Uniswap canonical signature-based approval contract, 9,153-byte bytecode). Approval amount: 2^256 - 1 (unlimited). Block 25118350 / 2026-05-17 23:58:23 UTC. NOTE: The drainer is NOT calling a swap router here — Permit2 is the canonical Uniswap delegation layer that lets third-party solvers call transferFrom on the user's tokens. The actual swap is performed later by an external relayer EOA 0xd9af4455b56f... using Permit2's transferFrom."
+    },
+    {
+      "txHash": "0x890ec1c1ecb6fd0a7af7f7bfb20f26daee4a728448b867a563de4a72267b7ba4",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Drainer 0x65cb8b128bf6... (nonce 1) called USDC.approve(spender, value) on the USDC token contract 0xa0b86991..., granting unlimited approval to the Permit2 contract 0x000000000022d473030f116ddee9f6b43ac78ba3 (same Permit2 address as the tBTC approval). Approval amount: 2^256 - 1 (unlimited). Block 25118356 / 2026-05-17 23:59:35 UTC. Same rationale as the tBTC approve above: this enables the external USDC swap relayer EOA 0xbeedd60f4ae5... to use Permit2.transferFrom to pull the drainer's USDC and execute the swap."
+    },
+    {
+      "txHash": "0x21f61d67341c2fc0f81be5f090e6c8a60390c18c778998b046740370345deb18",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "tBTC v2 → WETH → ETH aggregation swap. The OUTER transaction was submitted by an external solver/relayer EOA 0xd9af4455b56f8c703b63392f25a66e083b26c379 (NOT the drainer); the drainer EOA 0x65cb8b12... is the SOURCE of the tBTC (via Permit2.transferFrom) and the RECIPIENT of the resulting ETH. The relayer EOA has 951 historical normal txs (active since Sept 2025) all targeting the CoW Protocol-style settlement contract 0x740cd74f5896..., strongly suggesting this is a CoW Protocol solver that batches many user swaps and settles them collectively. The trace shows: Permit2 transfers 103.56766017 tBTC from drainer → relayer; relayer routes through the aggregation entry contract 0x8392876883cf0e9e7ee24d9b1f606ed88644f23b (function selector 0xeef0acd6, the CoW settlement entry); the entry uses three sub-swaps through pool 0x7f54f05635d1... (WETH/tBTC v2) totalling 86.2872 + 172.7253 + 87.0934 = 346.1059 WETH, plus 87.0934 WETH from a second leg 0x52aa89945499..., total 3,707.4851 WETH; the WETH is transferred to 0x00000011f84b... (a FeeCollector-style unwrapper) which unwraps 3,707.485136 ETH and sends it back to the drainer 0x65cb8b12... via .call. ERC-20 Transfer events confirm: 103.56766017 tBTC moved from drainer → 0x8392876883cf0... → 0x7f54f05635d1... → three sub-recipients 0x73a38006d235 / 0xdbac78be0050 / 0xb7ecb2aa52aa (the pool's settlement path). Block 25118352 / 2026-05-17 23:58:47 UTC."
+    },
+    {
+      "txHash": "0x07311745b39065a7dc74d35df95e6c5afaa36c7781e841e3a788feac8bcb3e81",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "USDC → WETH → ETH aggregation swap. The OUTER transaction was submitted by an external solver/relayer EOA 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 (NOT the drainer); the drainer EOA 0x65cb8b12... is the SOURCE of the USDC (via Permit2.transferFrom) and the RECIPIENT of the resulting ETH. The relayer EOA has 10,000+ historical normal txs (active since April 2025) all targeting 0xbee3211ab312... (the swap router), strongly suggesting this is a 1inch-style solver or 1inch v5 resolver. The trace shows: Permit2 transfers 147,658.836798 USDC from drainer → relayer; relayer routes through router 0xbee3211ab312a8d065c4fef0247448e17a8da000 (function selector 0x4cf3fe9c, the 1inch swap entry); the router delegatecalls pool 0x4dffeb6b78e5... (a Curve or UniV3-style USDC pool); the resulting WETH is transferred to 0x00000011f84b... which unwraps 69.549771 ETH and sends it back to the drainer 0x65cb8b12... via .call. ERC-20 Transfer event: 147,658.836798 USDC from drainer → 0xbee3211ab312. Block 25118440 / 2026-05-18 00:16:23 UTC."
+    },
+    {
+      "txHash": "0xf0088c2f164a6dddd1086c911d333a6a2d6d6e11d15298cd58fed20681be7335",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Drainer 0x65cb8b128bf6... (nonce 2) sent 0.4 ETH (value, not a contract call) to intermediate EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6. The input is just 0x (1-byte data field, the standard simple ETH-transfer padding). Block 25211495 / 2026-05-21 19:44:11 UTC. Likely a connectivity test prior to the larger consolidation; the 0.4 ETH amount is the typical 'ping' value used in the 5,402.4-ETH attack accounting (5,402.4 = 0.4 + 4,052 + 1,350)."
+    },
+    {
+      "txHash": "0xb428dae60a234c149c8bc4468979356c434726bf8f588b6c97bd7144aa5bcefe",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Drainer 0x65cb8b128bf6... (nonce 3) sent 4,052 ETH (value, not a contract call) to intermediate EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6. The input is just 0x. Block 25211500 / 2026-05-21 19:47:11 UTC. This 4,052 ETH matches the community's 4,052.4 ETH return requirement (modulo the 0.4 ETH of separate ping traffic sent 3 minutes earlier in tx 0xf0088c2f... to the same address) from the second white-hat offer — see tx 0x94f66fdd... below."
+    },
+    {
+      "txHash": "0x84aada67c438869ea19cf6e82fb33b3d2515b636c166dfc356eb8167a15d5e67",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Drainer 0x65cb8b128bf6... (nonce 4) sent 1,350 ETH (value, not a contract call) to intermediate EOA 0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b. The input is just 0x. Block 25211525 / 2026-05-21 19:49:59 UTC. This 1,350 ETH exactly matches the community's 1,350 ETH bounty figure from the second white-hat offer — see tx 0x94f66fdd... below. The on-chain split (4,052 to 0xf9ab28... and 1,350 to 0xa8d3662...) is structurally consistent with the attacker accepting the bounty terms."
+    },
+    {
+      "txHash": "0x8a69f4f90cf339e07777286115cb9dc9d1b0b614ea38aa8037bfb6e69c0d3429",
+      "blockchain": "ethereum",
+      "role": "white_hat_message",
+      "description": "First white-hat on-chain message from 0xd498061f357447940f494e142b24695b51f59883 (a fresh EOA with no other txs, verified EOA, code_len=0) to attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777. 0-value tx; calldata (1,298 bytes) decodes to a plaintext 'Onchain Message' addressed 'To the Verus<->Ethereum bridge attacker' that acknowledges the attack, commits to resolving the vulnerability and publishing a detailed description, and asks the attacker to accept a compromise in exchange for a 'substantial percentage' of the drained funds as a bounty and no further investigation. Contact points provided: verus.bridge@proton.me and a z-address on Verus. Block 25224000 / 2026-05-18 18:51:11 UTC."
+    },
+    {
+      "txHash": "0x94f66fdd346c0ae6cf62113abf7e4e5b920703cca84a739e0de4a617635a302b",
+      "blockchain": "ethereum",
+      "role": "white_hat_message",
+      "description": "Second and final white-hat on-chain message from 0xd498061f357447940f494e142b24695b51f59883 to attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777. 0-value tx; calldata (2,064 bytes) decodes to specific terms: (1) 1,350 ETH is the agreed bounty; (2) the attacker must return 4,052.4 ETH to 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74 within 24 hours; (3) the community will halt investigations, not press charges, not seek additional consequences, and publicly acknowledge the 1,350 ETH as legitimate bounty. Contact: same as the first message. Block 25244154 / 2026-05-21 14:14:59 UTC. The on-chain consolidation flow (4,052 ETH to 0xf9ab28cb7b72b518... at 19:47:11 UTC, 1,350 ETH to 0xa8d3662af2fc73ed... at 19:49:59 UTC) is executed within ~6 hours of this second white-hat message and is consistent with acceptance of the offer (well under 24 hours later). The exact hash preservation of the 1,350-ETH and 4,052-ETH amounts (compared to 1,350 and 4,052.4 in the offer) is a strong signal that the attacker actively engaged with the negotiation."
+    },
+    {
+      "txHash": "0xb81f3ce50d6cc9cc0be8c2bd2b5e0284e15e18a209cf199e33defb63c6e124d0",
+      "blockchain": "ethereum",
+      "role": "inbound_dust",
+      "description": "INBOUND mass-distribution airdrop to attacker EOA 0x5abb91b9c01a... from token contract 0x3fc29836e84e471a053d2d9e80494a867d670ead (token name 'Ethereum Games', symbol 'ETHG', 18 decimals). The attacker received 2,000,000 ETHG (raw=2,000,000 * 10^18). This is a generic ERC-20 mass-distribution airdrop to hundreds of addresses; the transaction contains hundreds of similar Transfer events to unrelated recipients. The attacker did not initiate, sign, or request this transfer. Most likely explanation: opportunistic airdrop from a token project attempting to attract attention from addresses that recently appeared in exploit post-mortems (a common pattern after public hack disclosures). Block 25125182 / 2026-05-18 22:48:47 UTC."
+    },
+    {
+      "txHash": "0xa45c705c6cdd9b548d493ac2f4deec46f9d1af23f071c57841e34c530481d0b2",
+      "blockchain": "ethereum",
+      "role": "inbound_dust",
+      "description": "INBOUND mass-distribution airdrop to attacker EOA 0x5abb91b9c01a... from token contract 0x66a3c2fa3e467aa586e90912f977e648589cabaf (token symbol 'AICC', name 'AI Chain Coin'). The ERC-20 source contract is 0x66a3c2fa... but the actual outer submitter of the mass-distribution tx is 0x11bf2e0d39d8589c96171a4102ea39c834067e26 (a different address from the token contract). The attacker received 17,500 AICC. Like the ETHG airdrop above, this is a generic mass-distribution to hundreds of addresses including the attacker. The attacker did not initiate, sign, or request this transfer. Most likely explanation: same opportunistic airdrop pattern as ETHG, possibly the same project or a related honeypot/marketing campaign. Block 25125328 / 2026-05-18 23:17:59 UTC (about 29 minutes after the ETHG airdrop), suggesting the two airdrops are coordinated."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x5abb91b9c01a5ed3ae762d32b236595b459d5777",
+      "blockchain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Ethereum-side primary attacker EOA. Called submitImports() against the Verus-Ethereum Bridge proxy in tx 0x6990f0...d2c0. Full on-chain history: 5 normal txs (2 outbound: UniversalRouter WETH→USDC swap (nonce 0), USDC.transfer(10 USDC) to bridge multisig (nonce 1), main exploit (nonce 2); 2 inbound: white-hat message 1 (block 25224000), white-hat message 2 (block 25244154)) and 1 internal-tx inbound of 0.993968 ETH from Tornado Cash 1 ETH pool (0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936) at 2026-05-17 11:50:59 UTC. Verified as EOA (eth_getCode returns 0x). No cross-chain activity detected on Polygon, Arbitrum, Optimism, Base, BSC at the time of investigation. NOTE on inbound dust: the EOA also received 2,000,000 ETHG and 17,500 AICC from mass-distribution airdrops in the days after the exploit (see txs 0xb81f3ce5... and 0xa45c705c6...) — these are NOT attacker-initiated.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x65cb8b128bf6e690761044cceca422bb239c25f9",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum-side drainer EOA. Received 1,625.36688649 ETH (internal CALL) + 103.56766017 tBTC v2 (ERC-20 Transfer) + 147,658.836798 USDC (ERC-20 Transfer) from the bridge in the main exploit tx. Subsequently approved Permit2 (0x000000000022d473...) for unlimited tBTC and unlimited USDC, then the two external solver/relayer EOAs performed the swaps via Permit2.transferFrom (NOT directly by the drainer), returning 3,707.485136 ETH (tBTC→WETH→ETH) and 69.549771 ETH (USDC→WETH→ETH) to the drainer. The drainer then split 5,402.4 ETH total into 4,052 ETH to 0xf9ab28cb7b72b518... and 1,350 ETH to 0xa8d3662af2fc73ed... on 2026-05-21, matching the white-hat offer. Verified as EOA (eth_getCode returns 0x). No cross-chain activity detected. The drainer EOA's 14 normal txs are: 2 Permit2 approves (tBTC, USDC), the 0.4 ETH ping to 0xf9ab28cb7b72b518..., the 4,052 ETH consolidation, the 1,350 ETH consolidation, and 8 other self-transfer pings (0-value and 0.0001 ETH) that are post-exploit noise.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum-side intermediate consolidation EOA. Received 4,052 ETH from the drainer on 2026-05-21 19:47:11 UTC (plus a 0.4 ETH ping at 19:44:11 UTC). The 4,052 ETH amount matches the Verus community's white-hat return requirement (4,052.4 ETH to 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74 — the 0.4 ETH delta is the 0xf0088c2f... ping tx in the same window, sent 3 minutes before the main consolidation). Verified as EOA (eth_getCode returns 0x). No outgoing txs from this address in the post-exploit window at the time of investigation, suggesting the funds remained parked.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum-side intermediate consolidation EOA. Received exactly 1,350 ETH from the drainer on 2026-05-21 19:49:59 UTC. The 1,350 ETH amount exactly matches the Verus community's white-hat bounty figure (1,350 ETH retained by the attacker as a reward). Verified as EOA (eth_getCode returns 0x). No outgoing txs from this address in the post-exploit window at the time of investigation, suggesting the funds remained parked.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xd9af4455b56f8c703b63392f25a66e083b26c379",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "External solver/relayer EOA (NOT a contract — eth_getCode returns 0x; 951 historical normal txs since Sept 2025, all targeting the CoW Protocol-style settlement contract 0x740cd74f5896..., strongly suggesting this is a CoW Protocol solver that batches user swaps). This EOA initiated the outer transaction 0x21f61d6...deb18 (tBTC→WETH swap) on behalf of the drainer 0x65cb8b12... using Permit2.transferFrom. The EOA itself does not appear to be controlled by the attacker; rather, it is a public, professional solver that responded to the drainer's Permit2 approval. accountType=EOA (the address IS an EOA, not a contract; the exploit_contract label in this schema is used here to flag the structural role of an external party that the attacker (via Permit2 approval) empowered to call the swap, NOT to claim the relayer is a malicious contract).",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "External solver/relayer EOA (NOT a contract — eth_getCode returns 0x; 10,000+ historical normal txs since April 2025, all targeting the swap router 0xbee3211ab312..., strongly suggesting this is a 1inch v5-style resolver or 1inch delegator). This EOA initiated the outer transaction 0x073117...b3e81 (USDC→WETH swap) on behalf of the drainer 0x65cb8b12... using Permit2.transferFrom. Same rationale as 0xd9af4455b56f...: this is a public professional solver, not attacker-controlled. The 1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000 is the standard 1inch Aggregation Router V5 contract on Ethereum mainnet.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xd498061f357447940f494e142b24695b51f59883",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Sender of the two on-chain white-hat messages (tx 0x8a69f4f... at 2026-05-18 18:51:11 UTC and tx 0x94f66fdd... at 2026-05-21 14:14:59 UTC). Verified as EOA (eth_getCode returns 0x); no normal txlist entries (only the 0-value white-hat txs). The 'exploit_contract' role label is a schema fallback — the more accurate role would be 'white_hat_sender' or 'protocol_counterparty', but the schema's attackerRoles vocabulary does not include either; a more precise role would require adding a new extensibleField. This address is structurally part of the post-exploit negotiation flow, not a party that committed any attack-related actions.",
+      "accountType": "EOA"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x71518580f36feceffe0721f06ba4703218cd7f63",
+      "blockchain": "ethereum",
+      "role": "vulnerable_contract",
+      "description": "Verus-Ethereum Bridge proxy on Ethereum. EIP-1967 proxy with implementation 0xa045cf963b79833faf445f555ee1a6812d6fc87f. The implementation is closed-source (SourceCode='' on Etherscan; 21,883 bytes of bytecode). The exploit tx 0x6990f0...d2c0 called submitImports() on this proxy and successfully drained 1,625.36688649 ETH, 103.56766017 tBTC v2, and 147,658.836798 USDC from this contract's own custody. Contract creator 0x8e171d1e671b5c492f15a2afac0cb32ac4212c9d; deployed at block 18272987 / 2023-10-03 22:29:59 UTC. The bridge is the legitimate Verus-Ethereum Bridge contract operated by the Verus community; the root cause as identified by BlockSec Phalcon is a missing check that the source-chain export's actual economic backing is sufficient to support the imported transfers before assets are released (an off-by-source-validation gap in submitImports/processTransactions, distinct from a key compromise or a notary-Merkle-proof bypass).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "tBTC v2 ERC-20 contract on Ethereum (symbol 'tBTC', name 'tBTC v2', 18 decimals). 103.56766017 tBTC v2 was transferred from the bridge to the drainer in the exploit tx. Tagged as protocol_contract (not vulnerable_contract) because the ERC-20 itself was not exploited — it merely executed the Transfer the bridge asked it to execute. The vulnerable component is the bridge.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "USDC ERC-20 contract on Ethereum (symbol 'USDC', name 'USD Coin', 6 decimals). 147,658.836798 USDC was transferred from the bridge to the drainer in the exploit tx. Same role rationale as tBTC v2 above.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Verus-Ethereum Bridge multisig (GnosisSafeProxy, singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552, GnosisSafe v1.3.0 verified on Etherscan). The attacker paid this multisig 10 USDC at 2026-05-17 23:25:23 UTC. The multisig is the Verus community's operational treasury, NOT a part of the bridge's processTransactions() code path (verified by reading the SubmitImports.sol and TokenManager.sol source on the public monkins1010/Verus-Ethereum-contracts GitHub repo, which show all fees are in VETH/VERUS/DAI/MKR, not real USDC). The multisig routinely receives 10-100 USDC/USDT payments from many different addresses as a donation pattern; the 10 USDC from the attacker is treated as a suspicious pre-action, not a bridge-required fee. accountType=Multisig and role=protocol_contract reflect the structural role.",
+      "accountType": "Multisig"
+    }
+  ],
+  "rootCause": "The Verus-Ethereum Bridge's submitImports() function on the Ethereum-side proxy (0x71518580...) failed to verify that the source-chain Verus export's actual economic backing (locked or burned value) was sufficient to support the payouts the import was claiming. Per BlockSec Phalcon's root-cause analysis, the bridge correctly verified (1) the export/notarization Merkle proof and (2) that keccak256(serializedTransfers) matched the export's hashReserveTransfers commitment, but did NOT verify the source-chain economic backing. The vulnerable flow is proveImports(...) → processTransactions(...), with the missing check sitting between them. The deployed contract source is closed-source (implementation 0xa045cf963b... unverified on Etherscan, 21,883-byte bytecode); the analysis is reconstructed from the attack calldata and the public monkins1010/Verus-Ethereum-contracts GitHub repository, which may not reflect the full deployed implementation or the complete attack surface. The attacker submitted a Verus export (tx f899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733 on the Verus chain per Phalcon) with effectively no meaningful locked/burned backing but with a matching serializedTransfers hash, and the bridge released $11.77M in ETH/tBTC/USDC. The exploit is a single-tx event at Ethereum block 25118335 / 2026-05-17 23:55:23 UTC. The attacker also paid 10 USDC to the Verus bridge multisig (0x195a4b5583b2...) at 23:25:23 UTC as part of the import process's standard fee — this is a misattribution in the original report; the bridge source code shows the multisig is NOT part of the processTransactions() path and the 10 USDC should be treated as a suspicious pre-action with no demonstrated causal link to the exploit success. The attacker's setup also included a 0.1 WETH→USDC swap via UniversalRouter at 23:24:35 UTC, which produced the 216.7483 USDC used to make the 10 USDC multisig payment. A subsequent investigation also revealed two unrelated mass-distribution airdrops sent to the attacker EOA in the days after the exploit (2M ETHG and 17,500 AICC); these are not attacker actions.",
+  "attackVector": "1. Pre-funding. The attacker EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 was funded with 0.993968 ETH from the Tornado Cash 1 ETH pool (router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936) at 2026-05-17 11:50:59 UTC. The outer transaction 0x84dc53d6705447ec6b4904bb905f9d78460de9bc671bef36ef79517d44e8ec86 was submitted by an unrelated relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d, which earned a 0.006032 ETH relayer fee; the inner Tornado.withdraw call moved 0.993968 ETH to the attacker EOA. 2. Preparation on Ethereum. At 23:24:35 UTC, the attacker called Uniswap UniversalRouter.execute with 0.1 WETH and received 216.7483 USDC (block 25118181, attacker nonce 0). At 23:25:23 UTC, the attacker paid 10 USDC to the Verus bridge multisig 0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845 (attacker nonce 1). The 10 USDC payment has no demonstrated causal link to the exploit; it is a pre-action with no on-chain evidence of being required by the bridge. 3. Crafting the Verus export. Off-chain / on Verus, the attacker created an export with effectively zero locked/burned backing but a valid serializedTransfers hash, and then called submitImports((uint64,bytes32,bytes,bytes)[]) on the Ethereum bridge proxy 0x71518580f36feceffe0721f06ba4703218cd7f63. 4. The exploit tx 0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321 at block 25118335 / 2026-05-17 23:55:23 UTC passed proveImports() (which verified the Merkle proof and serializedTransfers hash) and processTransactions() (which released the payouts) and emitted 1,625.36688649 ETH (internal call), 103.56766017 tBTC v2 (ERC-20 Transfer), and 147,658.836798 USDC (ERC-20 Transfer), all from the bridge to drainer 0x65cb8b128bf6e690761044cceca422bb239c25f9. 5. Drainer enables delegated swaps. The drainer EOA 0x65cb8b12... approved Permit2 (0x000000000022d473030f116ddee9f6b43ac78ba3) for unlimited tBTC (block 25118350) and unlimited USDC (block 25118356). 6. External solver/relayer EOAs perform the swaps. A CoW-style solver 0xd9af4455b56f8c703b63392f25a66e083b26c379 (951 prior txs) called tx 0x21f61d6...deb18 (block 25118352), using Permit2.transferFrom to pull 103.56766017 tBTC from the drainer, routing through the CoW settlement entry 0x8392876883cf0e9e7ee24d9b1f606ed88644f23b and the WETH/tBTC v2 pool 0x7f54f05635d1... to return 3,707.485136 ETH to the drainer via the unwrapper 0x00000011f84b.... A 1inch-style resolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 (10,000+ prior txs) called tx 0x073117...b3e81 (block 25118440), using Permit2.transferFrom to pull 147,658.836798 USDC from the drainer, routing through the 1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000 and pool 0x4dffeb6b78e5... to return 69.549771 ETH to the drainer. 7. White-hat negotiation. On 2026-05-18 18:51:11 UTC, address 0xd498061f357447940f494e142b24695b51f59883 (a fresh EOA) sent a 0-value on-chain message (tx 0x8a69f4f...) from to the attacker, acknowledging the exploit and inviting a compromise with a 'substantial percentage' bounty. On 2026-05-21 14:14:59 UTC, the same sender posted a 0-value follow-up (tx 0x94f66fdd...) specifying 1,350 ETH as the bounty and 4,052.4 ETH to be returned to 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74 within 24 hours in exchange for halting investigations and not pressing charges. 8. Bounty acceptance. On 2026-05-21, the drainer split 5,402.4 ETH exactly along the offer's terms: 0.4 ETH ping to 0xf9ab28cb7b72b518... (tx 0xf0088c2f... 19:44:11 UTC), 4,052 ETH to 0xf9ab28cb7b72b518... (tx 0xb428dae6...cefe 19:47:11 UTC, the 4,052.4 ETH return target minus 0.4 ETH of separate ping traffic), and 1,350 ETH to 0xa8d3662af2fc73ed... (tx 0x84aada67...d5e67 19:49:59 UTC, the bounty amount). The community has not posted a public acknowledgement as of the end of the investigation window, but the on-chain fund split is structurally consistent with acceptance of the white-hat terms. 9. Inbound dust. After the exploit, the attacker EOA received two unrelated mass-distribution airdrops: 2,000,000 ETHG (Ethereum Games) from 0x3fc29836e84e471a053d2d9e80494a867d670ead (block 25125182, 2026-05-18 22:48:47 UTC) and 17,500 AICC from 0x11bf2e0d39d8589c96171a4102ea39c834067e26 (block 25125328, 2026-05-18 23:17:59 UTC). Both are mass-distribution airdrops to hundreds of addresses, including the attacker, and were not initiated, signed, or requested by the attacker.",
+  "lessons": [
+    "Cross-chain bridges must enforce economic equivalence between source-chain locked/burned value and destination-chain released value at every step of the import flow. Cryptographic correctness (valid Merkle proof, valid notary signature, matching serializedTransfers hash) is necessary but not sufficient; the bridge must additionally verify that the source export actually carried the value it claims to authorize. This is the same exploit class as Wormhole (2022), Nomad (2022), and the ALEX Protocol / AftermathFi / SquidRouterModule / Alephium incidents on DeFi-Hack-Chronicle — the source-destination economic-value gap.",
+    "Bridges that release payouts in multiple assets (here: ETH, tBTC, USDC) compound the impact of a single missing check: the attacker can call processTransactions() once and drain all three asset pools simultaneously, magnifying the loss. The attacker's 1,625.36688649 ETH + 103.56766017 tBTC + 147,658.836798 USDC were all drained in a single submitImports() call.",
+    "Closed-source bridge implementations (here: the proxy's implementation contract 0xa045cf963b... is unverified, 21,883-byte bytecode) are particularly dangerous. The same root cause can be rediscovered by the next attacker if the patch is rushed; open-sourcing the implementation or at least a public diff post-fix is the minimum bar for a credible remediation.",
+    "Pre-funding via Tornado Cash (here: 0.993968 ETH) is a recurring pattern; the source of even modest funding should be monitored. Bridges that depend on multisig-mediated fees (here: the 10 USDC payment to 0x195a4b5583b2...) are particularly vulnerable to small-payment sybil patterns, because a 10 USDC fee is well within the budget of a privacy-pool-funded attacker. HOWEVER, the 10 USDC payment in this case was NOT a bridge-required fee (the bridge source code shows all fees in VETH/VERUS/DAI/MKR) — the 10 USDC should be treated as a suspicious pre-action with no demonstrated causal link to the exploit, not as a 'required bridge fee'. Investigators should not assume that any pre-exploit payment to a protocol-related address is causally required by the protocol.",
+    "On-chain white-hat messages (here: two 0-value txs from 0xd498061f3574...) are an effective triage tool when the protocol is slow to publish an off-chain post-mortem, but they should be paired with off-chain announcements (discord, blog) and a verifiable PGP signature from a known core team member to avoid being spoofed. The Verus community's z-address contact point is a strong anti-spoof measure for future incidents.",
+    "Bounty offer splittable to the penny of on-chain flow (here: 1,350 ETH and 4,052.4 ETH exactly matching the consolidation amounts) is unusual and indicates the attacker actively engaged with the negotiation. Protocols should consider building native on-chain dispute-resolution primitives (a 'bounty escrow' smart contract) that can enforce terms without requiring trust in either party to manually split funds. The on-chain split was 4,052 ETH (not 4,052.4 ETH) + 0.4 ETH separate ping, totalling 4,052.4 ETH — the 0.4 ETH ping is a tell-tale sign of an attacker manually transacting rather than a contract executing the offer exactly.",
+    "Delegated swap pattern via Permit2 is now the norm for professional money-laundering. The drainer approved Permit2 (Uniswap's canonical signature-based approval contract) for unlimited tBTC and USDC, then two unrelated professional solver/relayer EOAs (CoW-style 0xd9af4455... with 951 prior txs, and 1inch-style 0xbeedd60f... with 10,000+ prior txs) used Permit2.transferFrom to pull the tokens and execute the swaps. Bridges should add a hold-and-confirm flow for large payouts, with a 1-2 block delay that allows a community-controlled pause function to halt the payout before it leaves the bridge — Permit2-based delegated swaps can execute in a single block, so a 1-2 block pause window is the minimum bar to interrupt the laundering chain.",
+    "Etherscan's tokentx API can return false positives when the address was a sub-recipient in a multi-dispatch tx. In this case, the attacker EOA appeared as a sender in two unrelated mass-dispatch txs (0x6ce07c27... and 0x3cc1d58e...) that were actually initiated by professional multicall dispatchers (0x014523f2a... with 113k+ prior txs, and 0x62815f4d... with 1,924 prior txs) sweeping many addresses in a single transaction. Investigators should ALWAYS verify the outer-tx `from` field via eth_getTransactionByHash before attributing a Transfer event to a specific party. The corrected attribution is: the 10M-raw-units fake-USDC transfer from attacker EOA to 0x195a99d453e0... in tx 0x6ce07c27... was NOT attacker-initiated — it was one of 19 sub-transfers in a sweep by 0x014523f2a..., a professional multicall dispatcher.",
+    "Etherscan's 'txlist' and 'tokentx' APIs also return INBOUND dust/airdrop transfers that the address did not initiate. In this case, the attacker EOA received 2,000,000 ETHG (Ethereum Games) from 0x3fc29836... and 17,500 AICC from 0x11bf2e0d... in the days after the exploit, both as part of mass-distribution airdrops to hundreds of addresses. The 'outer from' of the ETHG airdrop tx is actually 0xad106449e4d0743e1d75393c000d64c24f89f20b (a different address), not the token contract 0x3fc29836... — the token contract is the ERC-20 source, but the outer submitter is a third-party airdrop distributor. Investigators should separate 'inbound dust' (not attacker actions) from 'outbound attacker actions' in the tx list, especially for high-profile exploit addresses that are likely to receive opportunistic airdrops.",
+    "Bridges should refuse payouts that do not match a previously-registered source-chain burn/lock event keyed by amount, asset, and recipient. A per-(recipient, amount) replay-resistant nonce is the minimum bar; replaying a Merkle proof for an export that has no corresponding on-chain collateral event is the structural gap exploited here.",
+    "Drainer and consolidation EOA activity on Ethereum should be screened against OFAC and major CEX compliance lists within 24 hours of a bridge incident. The two intermediate EOAs (0xf9ab28cb7b72b518... and 0xa8d3662af2fc73ed...) holding 5,402.4 ETH as of the time of investigation should be added to the compliance watchlist — even if a white-hat agreement is in effect, post-window rotation out of these EOAs remains the most likely laundering follow-up. The pre-exploit observation that the multisig 0x195a4b5583b2... receives 10-100 USDC donations from many different addresses (5,791 historical tokentx events) demonstrates that a 'multisig fee' claim should be verified against the actual contract source code, not just the on-chain pattern of inbound payments.",
+    "When the deployed contract source is unavailable (here: the proxy implementation 0xa045cf963b... is unverified), the root-cause analysis must be reconstructed from the attack calldata and the public open-source reference (here: monkins1010/Verus-Ethereum-contracts on GitHub). The reconstruction should explicitly note this limitation, because the deployed bytecode may differ from the reference in ways that the public source cannot capture. The 21,883-byte deployed implementation is approximately the size of a small Solidity contract with a few state variables, which is consistent with the reference implementation — but the post-mortem should not claim full source-equivalence without bytecode disassembly."
+  ],
+  "references": [
+    "https://www.merklescience.com/blog/hack-track-the-11-58m-verus-bridge-hack",
+    "https://x.com/MerkleScience/status/2061801945568862257",
+    "https://x.com/PeckShieldAlert/status/2056194168385642881",
+    "https://x.com/Phalcon_xyz/status/2056203534811660416",
+    "https://x.com/Phalcon_xyz/status/2056295257361572238",
+    "https://x.com/exvulsec/status/2056195356765868037",
+    "https://x.com/QuillAudits_AI/status/2056370264251003347",
+    "https://x.com/GoPlusZH/status/2056186563210662298",
+    "https://x.com/GoPlusSecurity/status/2056209824409673810",
+    "https://x.com/Defi_Nerd_sec/status/2056207532541325560",
+    "https://x.com/DefimonAlerts/status/2056447564648468753",
+    "https://github.com/monkins1010/Verus-Ethereum-contracts/blob/main/contracts/VerusBridge/SubmitImports.sol",
+    "https://github.com/monkins1010/Verus-Ethereum-contracts/blob/main/contracts/VerusBridge/TokenManager.sol"
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "Verus-Ethereum Bridge submitImports 經濟驗證繞過事件",
+      "protocol": "Verus-Ethereum Bridge",
+      "description": "2026 年 5 月 17 日，Verus-Ethereum Bridge 於單一 submitImports() 呼叫中被盜，鏈上合計損失約 1,177 萬美元。Verus 橋為跨鏈設計：使用者於 Verus 源鏈鎖倉或銷毀資產，Verus 公證人對該筆 export 進行背書，目的鏈合約依 attest 內容在 Ethereum 上撥款。Ethereum 端的橋合約為 EIP-1967 proxy（0x71518580f36feceffe0721f06ba4703218cd7f63），其實作合約（0xa045cf963b79833faf445f555ee1a6812d6fc87f）為閉源（21,883 bytes bytecode，Etherscan 未驗證）。受影響函式為 submitImports((uint64,bytes32,bytes,bytes)[])，selector 0x8c49b257。依 BlockSec Phalcon 的根因分析，橋合約正確驗證了 (1) export／公證的 Merkle proof，以及 (2) keccak256(serializedTransfers) 與 export 的 hashReserveTransfers 承諾一致，但未驗證「源鏈 export 實際鎖倉／銷毀的價值」是否足以支應 Ethereum 端的撥款。部署源碼未開源，分析係基於攻擊 calldata 與 monkins1010/Verus-Ethereum-contracts 公開 GitHub 儲存庫重建，可能與實際部署版本不完全一致。攻擊流程：(a) 攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 於 2026-05-17 11:50:59 UTC 從 Tornado Cash（1 ETH 池）取得 0.993968 ETH 資金；外部交易 0x84dc53d6...ec86 由無關 relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d 提交，賺取 0.006032 ETH relayer fee；內部 Tornado.withdraw 將 0.993968 ETH 送至 attacker EOA。(b) 同日 23:24:35 UTC，攻擊者經 UniversalRouter 將 0.1 WETH 換為 216.7483 USDC（attacker nonce 0），並於 23:25:23 UTC 向 Verus 橋 multisig 0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845 支付 10 USDC（attacker nonce 1）。multisig 為 Verus 社群營運錢包（GnosisSafe v1.3.0，singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 經 Etherscan 驗證），並非 processTransactions() 程式碼路徑的一部分；SubmitImports.sol 與 TokenManager.sol 公開源碼顯示所有費用皆以 VETH／VERUS／DAI／MKR 計，並非真實 USDC。multisig（231 筆 normal txs）例行接收來自許多不同地址的 10-100 USDC／USDT 捐贈，本案 10 USDC 應視為可疑前置動作，與攻擊成功無實證因果關係。(c) 於 Verus 源鏈端，攻擊者建構一筆實際鎖倉／銷毀價值幾近為零、但 serializedTransfers 雜湊可通過驗證的 export（依 Phalcon 資料，源鏈 tx 為 f899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733）；(d) 23:55:23 UTC，攻擊者對 Ethereum 端橋 proxy 呼叫 submitImports()，proveImports() 通過後 processTransactions() 直接撥款，橋將 1,625.36688649 ETH（內部 CALL）、103.56766017 tBTC v2（ERC-20 Transfer）、147,658.836798 USDC（ERC-20 Transfer）三種資產由自身託管送至攻擊者控制的 drainer 0x65cb8b128bf6e690761044cceca422bb239c25f9；(e) drainer 立即於 23:58:23 UTC 與 23:59:35 UTC 對 Permit2（0x000000000022d473030f116ddee9f6b43ac78ba3，Uniswap 官方簽章式授權合約）核准無限 tBTC 與無限 USDC。**swap 動作由外部 solver／relayer EOA 執行（drainer 並未直接呼叫 swap）**：tBTC 換匯由 CoW 風格 solver 0xd9af4455b56f8c703b63392f25a66e083b26c379（951 筆 prior txs）於 tx 0x21f61d6...deb18 透過 Permit2.transferFrom 自 drainer 拉走 tBTC，經 CoW settlement 0x8392876883cf0e9e7ee24d9b1f606ed88644f23b 與 WETH／tBTC v2 池 0x7f54f05635d1... 換成 3,707.485136 ETH 退回 drainer；USDC 換匯由 1inch 風格 resolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001（10,000+ 筆 prior txs）於 tx 0x073117...b3e81 透過 Permit2.transferFrom 拉走 USDC，經 1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000 換成 69.549771 ETH 退回 drainer。f) 2026-05-21 drainer 將合計 5,402.4 ETH 拆分為 4,052 ETH（送至 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6）與 1,350 ETH（送至 0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b）；(g) Verus 社群以鏈上訊息聯繫攻擊者：第一次為 2026-05-18 18:51:11 UTC（tx 0x8a69f4f...，0xd498061f... 對攻擊者 EOA 的 0-value 訊息）表示理解並提出協商空間，第二次為 2026-05-21 14:14:59 UTC（tx 0x94f66fdd...）提出具體條件：攻擊者保留 1,350 ETH 作為 bounty，於 24 小時內將 4,052.4 ETH 返還至 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74，社群則停止調查、不提告，並公開承認該 1,350 ETH 為合法 bounty；(h) 鏈上資金流向精準對應協商結果（1,350 ETH 至 0xa8d3662af2fc73ed...、4,052 ETH 至 0xf9ab28cb7b72b518...，4,052.4 與 4,052 + 0.4 ping 之差異亦吻合），強烈表示攻擊者接受 bounty 條款。截至觀察窗口結束，攻擊者 EOA 整體鏈上歷史僅 5 筆 normal tx（2 outbound：UniversalRouter swap、10 USDC 給 multisig、submitImports；2 inbound：兩則白帽訊息）與 1 筆 Tornado Cash 內部 tx；未偵測到其他鏈（Polygon／Arbitrum／Optimism／Base／BSC）跨鏈活動。攻擊後 attacker EOA 額外收到兩筆無關大量空投（2,000,000 ETHG 與 17,500 AICC），皆為數百個地址的群發空投，攻擊者未發起、簽署或請求。附註：另有一筆 tx 0x6ce07c27...（2026-05-17 23:34:59 UTC）內含一筆從 attacker EOA 至 0x195a99d453e05e3057c6aa2d426c04397b6d9845 的 10 個原始單位「fake USDC」（Cyrillic 同形字 symbol ꓴꓢꓓС 假冒 USDC）Transfer，但該 tx 並非由 attacker 發起——outer `from` 為 0x014523f2a626f0e3dbc241b8e9a4c14c507a6360，113,000+ 筆 prior txs 的專業 multicall dispatcher，該 tx 內含 19 筆子 Transfer。attacker EOA 僅是 dispatcher 群發 sweep 的副作用。",
+      "rootCause": "Verus-Ethereum Bridge 端 submitImports() 未驗證源鏈 Verus export 實際鎖倉／銷毀的價值，是否足以支應 import 申請的撥款。依 BlockSec Phalcon 的根因分析，橋正確驗證了 (1) export／公證的 Merkle proof 與 (2) keccak256(serializedTransfers) 與 export 的 hashReserveTransfers 承諾一致，但缺少「源鏈 export 經濟擔保」檢查。受影響路徑為 proveImports(...) → processTransactions(...)，漏洞介於兩者之間。實作合約（0xa045cf963b...）於 Etherscan 為未驗證狀態（21,883 bytes bytecode），分析係基於攻擊 calldata 與 monkins1010/Verus-Ethereum-contracts 公開儲存庫重建，可能未涵蓋完整部署實作或完整攻擊面。攻擊者提交一筆實際經濟擔保幾近為零、但 serializedTransfers 雜湊可通過驗證的 Verus export（依 Phalcon 引用，源鏈 tx 為 f899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733），橋即釋出約 1,177 萬美元的 ETH／tBTC／USDC。漏洞事件為單筆交易（Ethereum 區塊 25118335／2026-05-17 23:55:23 UTC）。攻擊者另於 23:25:23 UTC 向橋 multisig（0x195a4b5583b2...）支付 10 USDC 作為前置動作——此 10 USDC 並非 processTransactions 必要費用（SubmitImports.sol 與 TokenManager.sol 公開源碼證實橋僅以 VETH／VERUS／DAI／MKR 計費），僅是可疑前置動作，與攻擊成功無實證因果關係。攻擊者 EOA 攻擊後另收到 2 筆無關大量空投（2M ETHG 與 17,500 AICC），並非 attacker 行為。",
+      "attackVector": "1. 預先注資。攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 於 2026-05-17 11:50:59 UTC（內部交易）自 Tornado Cash 1 ETH 池（router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）取得 0.993968 ETH；外部交易 0x84dc53d6...ec86 由無關 relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d 提交，賺 0.006032 ETH relayer fee，內部 Tornado.withdraw 將 0.993968 ETH 送至 attacker。2. Ethereum 端準備。23:24:35 UTC 攻擊者以 0.1 WETH 呼叫 Uniswap UniversalRouter.execute（nonce 0），換得 216.7483 USDC；23:25:23 UTC 向 Verus 橋 multisig 0x195a4b5583b2... 支付 10 USDC（nonce 1）。10 USDC 與攻擊成功無實證因果關係。3. 製作 Verus export。攻擊者於 Verus 端建立一筆實際鎖倉／銷毀擔保幾近為零但 serializedTransfers 雜湊有效的 export，於 Ethereum 端對橋 proxy 0x71518580f36feceffe0721f06ba4703218cd7f63 呼叫 submitImports((uint64,bytes32,bytes,bytes)[])。4. 攻擊交易。tx 0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321（區塊 25118335／2026-05-17 23:55:23 UTC，nonce 2）通過 proveImports()（驗證 Merkle proof 與 serializedTransfers 雜湊）與 processTransactions()（執行撥款），由橋向 drainer 0x65cb8b128bf6e690761044cceca422bb239c25f9 釋出 1,625.36688649 ETH（內部 CALL）、103.56766017 tBTC v2（ERC-20 Transfer）、147,658.836798 USDC（ERC-20 Transfer）。5. Drainer 對 Permit2 授權。drainer 0x65cb8b12... 於 23:58:23 UTC 與 23:59:35 UTC 分別對 Permit2（0x000000000022d473...）核准無限 tBTC 與無限 USDC。6. 外部 solver／relayer EOA 執行 swap。CoW 風格 solver 0xd9af4455b56f8c703b63392f25a66e083b26c379（951 筆 prior txs）於 tx 0x21f61d6...deb18（區塊 25118352）以 Permit2.transferFrom 拉走 103.56766017 tBTC，經 CoW settlement 0x8392876883cf0e9e7ee24d9b1f606ed88644f23b 與 WETH／tBTC v2 池 0x7f54f05635d1... 換成 3,707.485136 WETH 退回 drainer；1inch 風格 resolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001（10,000+ 筆 prior txs）於 tx 0x073117...b3e81（區塊 25118440）以 Permit2.transferFrom 拉走 147,658.836798 USDC，經 1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000 與 pool 0x4dffeb6b78e5... 換成 69.549771 WETH 退回 drainer。7. 白帽協商。2026-05-18 18:51:11 UTC，位址 0xd498061f357447940f494e142b24695b51f59883（全新 EOA）向攻擊者發送 0-value 鏈上訊息（tx 0x8a69f4f...）肯定攻擊手法並邀請協商，提及「substantial percentage」之 bounty；2026-05-21 14:14:59 UTC，同一發送者再發 0-value 後續訊息（tx 0x94f66fdd...）提出具體條件：1,350 ETH 為 bounty，攻擊者須於 24 小時內將 4,052.4 ETH 返還至 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74，社群則停止調查、不提告、不追訴並公開承認該 1,350 ETH 為合法 bounty。8. 接受 bounty。2026-05-21，drainer 將 5,402.4 ETH 嚴格按公告條件拆分：0.4 ETH ping 至 0xf9ab28cb7b72b518...（tx 0xf0088c2f... 19:44:11 UTC）、4,052 ETH 至 0xf9ab28cb7b72b518...（tx 0xb428dae6...cefe 19:47:11 UTC，與 4,052.4 ETH 返還目標僅差 0.4 ETH 之獨立 ping）、1,350 ETH 至 0xa8d3662af2fc73ed...（tx 0x84aada67...d5e67 19:49:59 UTC，即公告之 bounty 金額）。社群於觀察窗口結束前未發布公開承認訊息，但鏈上資金流向在結構上與接受白帽條件一致。9. 攻擊後空投。attacker EOA 攻擊後收到兩筆無關大量空投：2,000,000 ETHG（Ethereum Games）自 0x3fc29836e84e471a053d2d9e80494a867d670ead（區塊 25125182，2026-05-18 22:48:47 UTC）與 17,500 AICC 自 0x11bf2e0d39d8589c96171a4102ea39c834067e26（區塊 25125328，2026-05-18 23:17:59 UTC）。兩者均為數百地址的群發空投，攻擊者未發起、簽署或請求。",
+      "lessons": [
+        "跨鏈橋必須於 import 流程的每個步驟強制執行「源鏈鎖倉／銷毀價值」與「目的鏈釋出價值」之經濟等價。光有密碼學正確性（Merkle proof、簽章、serializedTransfers 雜湊）並不足夠；橋必須另外驗證源鏈 export 確實承擔其所聲稱授權的價值。此為 Wormhole（2022）、Nomad（2022）以及 DeFi-Hack-Chronicle 上 ALEX Protocol、AftermathFi、SquidRouterModule、Alephium 等事件的同一類漏洞：源-目的經濟價值落差。",
+        "同時於多種資產（本案：ETH、tBTC、USDC）進行撥款的橋，會使單一漏洞點的衝擊被放大：攻擊者只需呼叫一次 processTransactions()，即可一次掏空三個資產池。",
+        "閉源橋實作（本案：proxy 實作 0xa045cf963b... 為 Etherscan 未驗證狀態，21,883 bytes bytecode）尤其危險：若修補過於倉促，同一類根因可被下一位攻擊者重新發現；至少應在修補後公開實作或公開 diff，以達可信補救之最低標準。",
+        "經由 Tornado Cash 注資（本案：0.993968 ETH）是反覆出現的攻擊模式；即使是少量資金的來源也應受到監控。仰賴 multisig 處理費的橋（本案：向 0x195a4b5583b2... 支付 10 USDC）尤其易受小額支付女巫模式攻擊，因為 10 USDC 的費用完全在隱私池資助的攻擊者預算內。然而本案的 10 USDC 並非橋的強制費用（橋源碼顯示所有費用以 VETH／VERUS／DAI／MKR 計），此 10 USDC 應視為可疑前置動作，與攻擊成功無實證因果關係。調查者不應預設任何「攻擊前對 protocol 相關地址的支付」皆為 protocol 必要。",
+        "鏈上白帽訊息（本案：兩筆來自 0xd498061f3574... 的 0-value 交易）是當協議離線 post-mortem 發布緩慢時的有效分流工具，但應同時搭配離線公告（discord、部落格）與已知核心成員可驗證之 PGP 簽章，以防被冒名。Verus 社群於 z-address 留下聯絡點是未來事件值得參考的反冒名機制。",
+        "Bounty 條件若能精準對應鏈上流向（本案：1,350 ETH 與 4,052.4 ETH 完全對應拆分金額）並不常見，顯示攻擊者確實與社群進行協商。協議可考慮建置原生鏈上糾紛解決機制（bounty escrow 合約），在無需任一方手動拆分資金的前提下強制執行條款。鏈上拆分為 4,052 ETH（並非 4,052.4 ETH）加上獨立 0.4 ETH ping、合計 4,052.4 ETH——0.4 ETH 的獨立 ping 是攻擊者手動操作（而非合約精確執行公告）的明顯跡象。",
+        "透過 Permit2 進行委託 swap 已是當前專業資金清洗的常態。Drainer 對 Permit2（Uniswap 官方簽章式授權合約）核准無限 tBTC 與 USDC，兩個無關的專業 solver／relayer EOA（CoW 風格 0xd9af4455b56f... 951 筆 prior txs、1inch 風格 0xbeedd60f... 10,000+ 筆 prior txs）使用 Permit2.transferFrom 拉走 token 並執行 swap。橋應考慮為大額撥款加入 hold-and-confirm 流程，以 1-2 個區塊的延遲讓社群控管的暫停函式能在款項離開橋之前攔下——基於 Permit2 的委託 swap 可在單一區塊內完成，1-2 區塊暫停窗口是打斷洗錢鏈的最低門檻。",
+        "Etherscan 的 tokentx API 在地址作為 multicall 子接收者時會回傳 false positive。本案中 attacker EOA 顯示為兩筆 multicall 交易（0x6ce07c27... 與 0x3cc1d58e...）的 sender，但這兩筆的真實 outer `from` 為 0x014523f2a...（113,000+ 筆 prior txs）與 0x62815f4d...（1,924 筆 prior txs）兩位專業 multicall dispatcher。調查者**必須**透過 eth_getTransactionByHash 驗證 outer-tx `from` 欄位才能正確歸屬 Transfer 事件。本案修正後的歸屬：attacker EOA → 0x195a99d453e0... 的 10M 原始單位 fake-USDC transfer 並非 attacker 發起，而是 0x014523f2a... 群發 sweep 19 筆子 transfer 之一。",
+        "Etherscan 的 txlist 與 tokentx API 也會回傳 address 未發起的 INBOUND dust／airdrop transfer。本案中 attacker EOA 於攻擊後數日內收到 2,000,000 ETHG（Ethereum Games，自 0x3fc29836...）與 17,500 AICC（自 0x11bf2e0d39d8589c96171a4102ea39c834067e26），皆為數百地址的群發空投。ETHG 空投的 outer submitter 實際為 0xad106449e4d0743e1d75393c000d64c24f89f20b 而非 token 合約 0x3fc29836...——token 合約是 ERC-20 source，但 outer submitter 是第三方空投分發者。調查者應將 tx list 中的「inbound dust」（非 attacker 動作）與「outbound attacker 動作」分開，特別是可能收到機會性空投的高知名度 exploit 地址。",
+        "橋應拒絕未對應先前登記之源鏈 burn／lock 事件的撥款，並以金額、資產、接收者為鍵。對每個 (recipient, amount) 採用防重放的一次性 nonce 是最低門檻；針對「無對應源鏈擔保事件之 Merkle proof」進行重放即為本案結構性漏洞。",
+        "Drainer 與彙整 EOA 應於橋事件發生後 24 小時內接受 OFAC 與主流 CEX 合規名單篩查。截至調查時點，2 個中間 EOA（0xf9ab28cb7b72b518...、0xa8d3662af2fc73ed...）合計持有 5,402.4 ETH，應被加入合規觀察名單——即使白帽協議生效，協議窗口後自此二 EOA 之資金輪動仍是後續最可能的洗錢路徑。前置觀察顯示 multisig 0x195a4b5583b2... 接收來自許多不同地址的 10-100 USDC 捐贈（5,791 筆歷史 tokentx 事件），顯示「multisig 費用」之宣稱應以合約源碼驗證，而非僅憑鏈上入帳模式。",
+        "當部署合約源碼無法取得（本案：proxy 實作 0xa045cf963b... 未驗證），根因分析必須以攻擊 calldata 與公開開源參考（本案：monkins1010/Verus-Ethereum-contracts GitHub）重建。重建過程應明確標註此限制，因為部署 bytecode 可能與參考版本存在公開源碼無法呈現的差異。21,883 bytes 的部署實作大小與小至中等 Solidity 合約相當，與參考實作一致——但 post-mortem 不應在未做 bytecode 反組譯前宣稱完全源碼等價。"
+      ],
+      "estimatedLoss": {
+        "note": "鏈上驗證總額：1,625.36688649 ETH + 103.56766017 tBTC v2 + 147,658.836798 USDC。2026-05-17 CoinGecko 歷史價格：ETH=$2,179.88、tBTC=$78,004.53、USDC 1:1，折算後合計 $3,543,099 + $8,078,746 + $147,659 = $11,769,504.63（約 $11,769,505）。Phalcon 報導約 $11.7M，Merkle Science 報導 $11.58M；$11.58M 應為稍低 ETH 價格快照（約 $2,134/ETH）與四捨五入後之 tBTC 數量所致。攻擊者於 24 小時內將 5,402.4 ETH（2026-05-17 價格約 $11.78M）彙整至單一 drainer 錢包。Verus 社群後續以 1,350 ETH 作為 bounty 條件，換取攻擊者將 4,052.4 ETH 返還至 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74；鏈上資金流向精準符合該條件（1,350 ETH 至 0xa8d3662af2fc73ed...、4,052 ETH 至 0xf9ab28cb7b72b518...，0.4 ETH 之差由 0xf0088c2f... 獨立 ping 解釋）。"
+      },
+      "attackTime": {
+        "note": "預先注資：2026-05-17 11:50:59 UTC，攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 自 Tornado Cash（1 ETH 池）取得 0.993968 ETH（內部交易）；外部交易 0x84dc53d6...ec86 由無關 relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d 提交，賺取 0.006032 ETH relayer fee。攻擊者第一筆 Ethereum 端準備交易為 23:24:35 UTC UniversalRouter.execute（0.1 WETH 換 216.7483 USDC，attacker nonce 0），23:25:23 UTC 向橋 multisig 支付 10 USDC（nonce 1），主攻擊 submitImports 於區塊 25118335／2026-05-17 23:55:23 UTC（nonce 2）。事後 drainer 於 23:58:23 UTC 對 Permit2 核准 tBTC、23:59:35 UTC 對 Permit2 核准 USDC；外部 solver 0xd9af4455b56f8c703b63392f25a66e083b26c379 於 23:58:47 UTC 將 tBTC 換成 3,707.485136 ETH（區塊 25118352），外部 resolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 於 2026-05-18 00:16:23 UTC 將 USDC 換成 69.549771 ETH（區塊 25118440）。drainer 於 2026-05-21 19:44:11 UTC 發出 0.4 ETH 連線測試 ping、19:47:11 UTC 將 4,052 ETH 彙整至 0xf9ab28cb7b72b518...、19:49:59 UTC 將 1,350 ETH 彙整至 0xa8d3662af2fc73ed...。Verus 社群第一則白帽訊息為 2026-05-18 18:51:11 UTC（tx 0x8a69f4f...，區塊 25224000），更具體之第二次 bounty 條件（1,350 ETH bounty／4,052.4 ETH 返還）為 2026-05-21 14:14:59 UTC（tx 0x94f66fdd...，區塊 25244154）。endTime 設為 2026-05-21 19:49:59 UTC 之最後彙整交易；startTime 設為 2026-05-17 11:50:59 UTC 之預先注資時間，因其前於 Ethereum 上未觀察到攻擊者控制之活動。攻擊後 attacker EOA 另於 2026-05-18 22:48:47 UTC 收到 2,000,000 ETHG 群發空投，2026-05-18 23:17:59 UTC 收到 17,500 AICC 群發空投，皆非 attacker 發起。"
+      },
+      "transactions": [
+        {
+          "txHash": "0x84dc53d6705447ec6b4904bb905f9d78460de9bc671bef36ef79517d44e8ec86",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 自 Tornado Cash 1 ETH 池（router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）取得資金。**外部交易由無關 relayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d 提交**，呼叫 Tornado.withdraw（selector 0xb438689f），賺取 0.006032 ETH relayer fee。內部 trace 顯示 Tornado 1 ETH 池 → 攻擊者 EOA 0.993968 ETH（為注資之權威數字）。Etherscan txlist 顯示外部 value=0（Tornado 提款為函式呼叫），但 txlistinternal 索引記錄 0.993968 ETH 由 0x47ce0c6ed5b0... 內部轉至 attacker EOA。區塊 25114721／2026-05-17 11:50:59 UTC。"
+        },
+        {
+          "txHash": "0x6e284906abb5d4444eab72cebdfb525300ed5d81df8895f701f7fe4fd66bafc9",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻擊前準備，attacker EOA 0x5abb91b9c01a... 親自發起（nonce 0）。對 Uniswap UniversalRouter 0x66a9893cc07d4514f6b0c3d8c0c1c5d8e0e0d5c7（標準 Uniswap v3 UniversalRouter）呼叫 execute(bytes commands, bytes[] inputs, uint256 deadline)，value 0.1 ETH。Trace：0.1 WETH 進入 router，216.7483 USDC 返回攻擊者，0.5432 USDC 中間手續費送至 0xcd6b980029e6...（UniversalRouter fee collector）。攻擊者取得 216.7483 USDC 用於下一筆 10 USDC multisig 支付。區塊 25118181／2026-05-17 23:24:35 UTC。"
+        },
+        {
+          "txHash": "0x12b4ca12b57b9e9e1916e74fa4e497af22f5c2127aa89597e9f82ce83abdca6f",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻擊者 EOA 0x5abb91b9c01a...（nonce 1）呼叫 USDC.transfer(0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845, 10_000_000)——向 Verus 橋 multisig（GnosisSafeProxy，singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 為 GnosisSafe v1.3.0 經 Etherscan 驗證）支付 10 USDC。**重要**：SubmitImports.sol 與 TokenManager.sol 公開源碼（monkins1010/Verus-Ethereum-contracts）顯示 processTransactions() 路徑並無 USDC 支付要求——橋僅以 VETH／VERUS／DAI／MKR（Verus 原生幣）計費，無真實 USDC。Multisig（231 筆 normal txs）例行接收來自許多不同地址的 10-100 USDC／USDT 捐贈；attacker 之 10 USDC 應視為可疑前置動作，**與攻擊成功無實證因果關係**，並非橋必要處理費。區塊 25118185／2026-05-17 23:25:23 UTC。"
+        },
+        {
+          "txHash": "0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "主要攻擊交易。攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777（nonce 2）對 Verus-Ethereum Bridge proxy 0x71518580f36feceffe0721f06ba4703218cd7f63 呼叫 submitImports((uint64,bytes32,bytes,bytes)[])，selector 0x8c49b257。區塊 25118335／2026-05-17 23:55:23 UTC。proveImports() 通過（Merkle proof 與 serializedTransfers 雜湊驗證），processTransactions() 經 TokenManager.processTransactions 釋出三項資產：(1) 1,625.36688649 ETH 由橋以內部 CALL 形式送至 drainer 0x65cb8b12...c25f9（trace_transaction 驗證）；(2) ERC-20 Transfer 自橋將 tBTC v2（0x18084fba...，18 decimals）103,567,660,170,000,000,000 原始單位（103.56766017）送至 drainer；(3) ERC-20 Transfer 自橋將 USDC（0xa0b86991...，6 decimals）147,658,836,798 原始單位（147,658.836798）送至 drainer。Gas 用量 685,456／751,143，狀態 0x1（成功）。攻擊者無需對橋做 approve，因為 processTransactions() 透過橋預存的 allowance 自橋 custody 拉款；漏洞在於源-目的經濟等價性檢查之缺漏，非 approve 繞過。"
+        },
+        {
+          "txHash": "0x48ee81415e14629cbbb422e749e0686461326dadadbd5881a4a7a4d9214a1f33",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 0）對 tBTC v2 token 合約 0x18084fba... 呼叫 tBTC.approve(spender, value)，授予 Permit2 合約 0x000000000022d473030f116ddee9f6b43ac78ba3（Etherscan 驗證 ContractName='Permit2'，Uniswap 官方簽章式授權合約，9,153 bytes bytecode）無限額度授權（2^256 - 1）。區塊 25118350／2026-05-17 23:58:23 UTC。**Drainer 並未呼叫 swap router**——Permit2 為 Uniswap 標準 delegation 層，允許第三方 solver 對使用者 token 呼叫 transferFrom。實際 swap 由外部 relayer EOA 0xd9af4455b56f... 於稍後使用 Permit2 執行。"
+        },
+        {
+          "txHash": "0x890ec1c1ecb6fd0a7af7f7bfb20f26daee4a728448b867a563de4a72267b7ba4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 1）對 USDC token 合約 0xa0b86991... 呼叫 USDC.approve(spender, value)，授予 Permit2 0x000000000022d473...（與 tBTC approve 同一地址）無限額度授權（2^256 - 1）。區塊 25118356／2026-05-17 23:59:35 UTC。理由同 tBTC approve：使外部 USDC swap relayer 0xbeedd60f4ae5... 可使用 Permit2.transferFrom 自 drainer 拉走 USDC 並執行 swap。"
+        },
+        {
+          "txHash": "0x21f61d67341c2fc0f81be5f090e6c8a60390c18c778998b046740370345deb18",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "tBTC v2 → WETH → ETH 聚合交換。**外部交易由外部 solver／relayer EOA 0xd9af4455b56f8c703b63392f25a66e083b26c379 提交（drainer 並未直接呼叫）**；drainer 0x65cb8b12... 為 tBTC 來源（透過 Permit2.transferFrom）與最終 ETH 接收方。Relayer EOA 共有 951 筆歷史 normal txs（自 2025-09 起），皆目標為 CoW Protocol 風格 settlement 合約 0x740cd74f5896...，強烈顯示其為 CoW Protocol solver。Trace：Permit2 自 drainer 轉 103.56766017 tBTC 至 relayer；relayer 透過 aggregation 入口 0x8392876883cf0e9e7ee24d9b1f606ed88644f23b（function selector 0xeef0acd6，CoW settlement 入口）執行三腿 swap 經 WETH／tBTC v2 池 0x7f54f05635d1... 合計 86.2872 + 172.7253 + 87.0934 = 346.1059 WETH，加另一腿 0x52aa89945499... 之 87.0934 WETH，總計 3,707.4851 WETH；WETH 轉至 0x00000011f84b...（FeeCollector 風格 unwrapper）解包為 3,707.485136 ETH 並送回 drainer。ERC-20 Transfer 事件驗證：103.56766017 tBTC 自 drainer → 0x8392876883cf0... → 0x7f54f05635d1... → 三個子接收者 0x73a38006d235／0xdbac78be0050／0xb7ecb2aa52aa（pool 的 settlement 路徑）。區塊 25118352／2026-05-17 23:58:47 UTC。"
+        },
+        {
+          "txHash": "0x07311745b39065a7dc74d35df95e6c5afaa36c7781e841e3a788feac8bcb3e81",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "USDC → WETH → ETH 聚合交換。**外部交易由外部 solver／relayer EOA 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 提交（drainer 並未直接呼叫）**；drainer 0x65cb8b12... 為 USDC 來源（透過 Permit2.transferFrom）與最終 ETH 接收方。Relayer EOA 共有 10,000+ 筆歷史 normal txs（自 2025-04 起），皆目標為 swap router 0xbee3211ab312...，強烈顯示其為 1inch v5 風格 resolver。Trace：Permit2 自 drainer 轉 147,658.836798 USDC 至 relayer；relayer 透過 router 0xbee3211ab312a8d065c4fef0247448e17a8da000（function selector 0x4cf3fe9c，1inch swap 入口）經 delegatecall 執行 pool 0x4dffeb6b78e5...（Curve 或 UniV3 風格 USDC 池）之 swap；結果 WETH 轉至 0x00000011f84b... 解包為 69.549771 ETH 並送回 drainer。ERC-20 Transfer 事件：147,658.836798 USDC 自 drainer → 0xbee3211ab312。區塊 25118440／2026-05-18 00:16:23 UTC。"
+        },
+        {
+          "txHash": "0xf0088c2f164a6dddd1086c911d333a6a2d6d6e11d15298cd58fed20681be7335",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 2）將 0.4 ETH（value，非合約呼叫）送至中間 EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6。input 為 0x（1 byte 標準簡單 ETH 轉帳填充）。區塊 25211495／2026-05-21 19:44:11 UTC。應為較大筆彙整前之連線測試；0.4 ETH 金額與 5,402.4 ETH 攻擊帳目（0.4 + 4,052 + 1,350）一致。"
+        },
+        {
+          "txHash": "0xb428dae60a234c149c8bc4468979356c434726bf8f588b6c97bd7144aa5bcefe",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 3）將 4,052 ETH（value，非合約呼叫）送至中間 EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6。input 為 0x。區塊 25211500／2026-05-21 19:47:11 UTC。此 4,052 ETH 與社群公告之 4,052.4 ETH 返還金額一致（差額 0.4 ETH 為 3 分鐘前同地址之 0xf0088c2f... 獨立 ping 交易）。"
+        },
+        {
+          "txHash": "0x84aada67c438869ea19cf6e82fb33b3d2515b636c166dfc356eb8167a15d5e67",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 4）將 1,350 ETH（value，非合約呼叫）送至中間 EOA 0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b。input 為 0x。區塊 25211525／2026-05-21 19:49:59 UTC。此 1,350 ETH 完全對應社群第二次白帽公告之 1,350 ETH bounty 金額（見 0x94f66fdd...）。鏈上 4,052 ETH 至 0xf9ab28cb7b72b518...、1,350 ETH 至 0xa8d3662af2fc73ed... 之拆分結構上與接受白帽條件一致。"
+        },
+        {
+          "txHash": "0x8a69f4f90cf339e07777286115cb9dc9d1b0b614ea38aa8037bfb6e69c0d3429",
+          "blockchain": "ethereum",
+          "role": "white_hat_message",
+          "description": "Verus 社群向攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 發送之第一則白帽鏈上訊息（自 0xd498061f357447940f494e142b24695b51f59883 發出，無其他 txs 之全新 EOA，eth_getCode=0x 確認 EOA）。0-value 交易；calldata（1,298 bytes）解碼為以「To the Verus<->Ethereum bridge attacker」開頭之平文「Onchain Message」，肯定攻擊者技巧，承諾修補漏洞並公開詳述步驟，邀請攻擊者接受協商以換取「substantial percentage」之 bounty 與停止追查。聯繫方式：verus.bridge@proton.me、Verus 鏈上 z-address。區塊 25224000／2026-05-18 18:51:11 UTC。"
+        },
+        {
+          "txHash": "0x94f66fdd346c0ae6cf62113abf7e4e5b920703cca84a739e0de4a617635a302b",
+          "blockchain": "ethereum",
+          "role": "white_hat_message",
+          "description": "Verus 社群向攻擊者 EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 發送之第二則最終白帽鏈上訊息（自 0xd498061f357447940f494e142b24695b51f59883 發出）。0-value 交易；calldata（2,064 bytes）解碼為具體條款：(1) 1,350 ETH 為社群同意之 bounty；(2) 攻擊者須於 24 小時內將 4,052.4 ETH 返還至 0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74；(3) 社群將停止調查、不提告、不追訴並公開承認 1,350 ETH 為合法 bounty。聯繫方式同第一則。區塊 25244154／2026-05-21 14:14:59 UTC。鏈上彙整流向（4,052 ETH 至 0xf9ab28cb7b72b518...於 19:47:11 UTC、1,350 ETH 至 0xa8d3662af2fc73ed...於 19:49:59 UTC）於第二則公告後 6 小時內完成，時間上與接受條款一致（仍在 24 小時窗口內）；1,350-ETH 與 4,052-ETH 對公告之 1,350 與 4,052.4 金額高度一致（差額由 0.4 ETH 獨立 ping 補足）為攻擊者主動協商之強力信號。"
+        },
+        {
+          "txHash": "0xb81f3ce50d6cc9cc0be8c2bd2b5e0284e15e18a209cf199e33defb63c6e124d0",
+          "blockchain": "ethereum",
+          "role": "inbound_dust",
+          "description": "**INBOUND 群發空投**，攻擊者 EOA 0x5abb91b9c01a... 自 token 合約 0x3fc29836e84e471a053d2d9e80494a867d670ead（token 名稱 'Ethereum Games'，symbol 'ETHG'，18 decimals）收到 2,000,000 ETHG（raw=2,000,000 * 10^18）。此為數百個地址的群發 ERC-20 空投；tx 內含數百筆類似 Transfer 事件至無關接收者。攻擊者未發起、簽署或請求此 transfer。最可能解釋：利用 exploit post-mortem 公開後的機會性空投（公開攻擊後的常見模式）。區塊 25125182／2026-05-18 22:48:47 UTC。"
+        },
+        {
+          "txHash": "0xa45c705c6cdd9b548d493ac2f4deec46f9d1af23f071c57841e34c530481d0b2",
+          "blockchain": "ethereum",
+          "role": "inbound_dust",
+          "description": "**INBOUND 群發空投**，攻擊者 EOA 0x5abb91b9c01a... 自 token 合約 0x66a3c2fa3e467aa586e90912f977e648589cabaf（symbol 'AICC'，名稱 'AI Chain Coin'）收到 17,500 AICC。與上述 ETHG 空投同性質，數百地址的群發空投，攻擊者未發起、簽署或請求。發生區塊 25125328／2026-05-18 23:17:59 UTC（與 ETHG 空投相距 29 分鐘，可能為同一專案之連續空投）。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x5abb91b9c01a5ed3ae762d32b236595b459d5777",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "Ethereum 端主要攻擊者 EOA。於 tx 0x6990f0...d2c0 對 Verus-Ethereum Bridge proxy 呼叫 submitImports()。完整鏈上歷史：5 筆 normal tx（2 outbound：UniversalRouter WETH→USDC swap（nonce 0）、USDC.transfer(10 USDC) 給橋 multisig（nonce 1）、主攻擊（nonce 2）；2 inbound：白帽訊息 1（區塊 25224000）、白帽訊息 2（區塊 25244154））以及 1 筆自 Tornado Cash 1 ETH 池（0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）之 0.993968 ETH 內部交易注資（2026-05-17 11:50:59 UTC）。已驗證為 EOA（eth_getCode 為 0x）。於 Polygon、Arbitrum、Optimism、Base、BSC 皆未偵測到跨鏈活動。註：EOA 攻擊後另收到 2,000,000 ETHG 與 17,500 AICC 群發空投（見 txs 0xb81f3ce5... 與 0xa45c705c6...）——此非 attacker 發起。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x65cb8b128bf6e690761044cceca422bb239c25f9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 端 drainer EOA。於主攻擊交易中接收 1,625.36688649 ETH（內部 CALL）+ 103.56766017 tBTC v2（ERC-20 Transfer）+ 147,658.836798 USDC（ERC-20 Transfer）。隨後對 Permit2（0x000000000022d473...）核准無限 tBTC 與無限 USDC，**接著由兩個外部 solver／relayer EOA 使用 Permit2.transferFrom 執行 swap（drainer 並未直接呼叫 swap）**，退回 3,707.485136 ETH（tBTC→WETH→ETH）與 69.549771 ETH（USDC→WETH→ETH）至 drainer。Drainer 於 2026-05-21 將合計 5,402.4 ETH 拆分為 4,052 ETH（送至 0xf9ab28cb7b72b518...）與 1,350 ETH（送至 0xa8d3662af2fc73ed...），完全對應白帽公告。已驗證為 EOA。未偵測到跨鏈活動。Drainer EOA 之 14 筆 normal tx 為：2 筆 Permit2 approve、0.4 ETH 連線測試 ping、4,052 ETH 彙整、1,350 ETH 彙整，以及 8 筆 post-exploit 雜訊（self-transfer 0-value 與 0.0001 ETH pings）。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 端中間彙整 EOA。2026-05-21 19:47:11 UTC 自 drainer 接收 4,052 ETH（先前 19:44:11 UTC 另收 0.4 ETH 連線測試 ping）。4,052 ETH 金額對應 Verus 社群白帽公告之 4,052.4 ETH 返還條件（差額 0.4 ETH 為 0xf0088c2f... 獨立 ping）。已驗證為 EOA。觀察窗口內未見任何出帳交易，資金維持原狀。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 端中間彙整 EOA。2026-05-21 19:49:59 UTC 自 drainer 接收 1,350 ETH。1,350 ETH 金額完全對應 Verus 社群白帽公告之 1,350 ETH bounty 金額。已驗證為 EOA。觀察窗口內未見任何出帳交易，資金維持原狀。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd9af4455b56f8c703b63392f25a66e083b26c379",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "外部 solver／relayer EOA（**並非合約**——eth_getCode 為 0x；951 筆 prior normal txs 自 2025-09 起，皆目標為 CoW Protocol 風格 settlement 合約 0x740cd74f5896...，強烈顯示其為 CoW Protocol solver，批次處理用戶 swap）。此 EOA 代理 drainer 0x65cb8b12... 使用 Permit2.transferFrom 發起外部交易 0x21f61d6...deb18（tBTC→WETH swap）。EOA 本身看來並非 attacker 控制；它是公開、專業之 solver，回應 drainer 之 Permit2 授權。accountType=EOA（位址本身為 EOA，非合約；exploit_contract 標籤於此 schema 中用於標示 attacker 透過 Permit2 授權賦予 swap 權之外部參與方之結構性角色，並非宣稱 relayer 為惡意合約）。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "外部 solver／relayer EOA（**並非合約**——eth_getCode 為 0x；10,000+ 筆 prior normal txs 自 2025-04 起，皆目標為 swap router 0xbee3211ab312...，強烈顯示其為 1inch v5 風格 resolver 或 1inch delegator）。此 EOA 代理 drainer 0x65cb8b12... 使用 Permit2.transferFrom 發起外部交易 0x073117...b3e81（USDC→WETH swap）。理由同 0xd9af4455b56f...：此為公開專業 solver，非 attacker 控制。1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000 為 Ethereum 主網之標準 1inch Aggregation Router V5 合約。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd498061f357447940f494e142b24695b51f59883",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "兩則鏈上白帽訊息之發送者（2026-05-18 18:51:11 UTC 之 0x8a69f4f... 與 2026-05-21 14:14:59 UTC 之 0x94f66fdd...）。已驗證為 EOA（eth_getCode 為 0x）；無 normal txlist 紀錄（僅 0-value 白帽訊息）。「exploit_contract」為 schema 之 fallback 標籤——更精確之角色為 'white_hat_sender' 或 'protocol_counterparty'，但 schema 之 attackerRoles vocabulary 並未含此；精確化需新增 extensibleField。此位址結構上屬於事後協商流程之一環，未執行任何攻擊相關動作。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x71518580f36feceffe0721f06ba4703218cd7f63",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Ethereum 端 Verus-Ethereum Bridge proxy。EIP-1967 proxy，實作為 0xa045cf963b79833faf445f555ee1a6812d6fc87f。實作為閉源（Etherscan SourceCode=''，21,883 bytes bytecode）。攻擊交易 0x6990f0...d2c0 對此 proxy 呼叫 submitImports()，自其託管中成功取出 1,625.36688649 ETH、103.56766017 tBTC v2 與 147,658.836798 USDC。合約創建者 0x8e171d1e671b5c492f15a2afac0cb32ac4212c9d；部署區塊 18272987／2023-10-03 22:29:59 UTC。橋為 Verus 社群營運之正規 Verus-Ethereum Bridge；依 BlockSec Phalcon 根因分析，漏洞在於 submitImports／processTransactions 路徑缺少「源鏈 export 實際經濟擔保是否足夠支應 import 撥款」之檢查，與金鑰外洩或公證 Merkle proof 繞過無關。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 端 tBTC v2 ERC-20 合約（symbol 'tBTC'，name 'tBTC v2'，decimals 18）。攻擊交易中 103.56766017 tBTC v2 自橋轉至 drainer。標記為 protocol_contract（非 vulnerable_contract），因 ERC-20 合約本身未被攻破，僅執行了橋要求之 Transfer。漏洞元件為橋合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 端 USDC ERC-20 合約（symbol 'USDC'，name 'USD Coin'，decimals 6）。攻擊交易中 147,658.836798 USDC 自橋轉至 drainer。角色邏輯同上。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Verus-Ethereum Bridge multisig（GnosisSafeProxy，singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 為 GnosisSafe v1.3.0 經 Etherscan 驗證）。攻擊者於 2026-05-17 23:25:23 UTC 向此 multisig 支付 10 USDC。multisig 為 Verus 社群營運錢包，**並非 processTransactions() 程式碼路徑的一部分**（讀取 SubmitImports.sol 與 TokenManager.sol 公開源碼確認：所有費用皆以 VETH／VERUS／DAI／MKR 計，無真實 USDC）。multisig（231 筆 normal txs）例行接收來自許多不同地址的 10-100 USDC／USDT 捐贈；attacker 之 10 USDC 應視為可疑前置動作，與攻擊成功無實證因果關係，並非橋必要處理費。accountType=Multisig、role=protocol_contract 反映其結構性角色。",
+          "accountType": "Multisig"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Verus-Ethereum Bridge submitImports 経済検証バイパス事件",
+      "protocol": "Verus-Ethereum Bridge",
+      "description": "2026年5月17日、Verus-Ethereum Bridgeが単一のsubmitImports()呼び出しで攻撃を受け、オンチェーンの合計損失は約1,177万ドルに達した。Verusブリッジは、ユーザーがVerusソースチェーン上で資産をロックまたはバーンし、Verus公証人がそのexportを証明し、宛先チェーンコントラクトが証明内容に基づきEthereumで払い出しを行うクロスチェーンデザインである。Ethereum側のブリッジコントラクトはEIP-1967プロキシ（0x71518580f36feceffe0721f06ba4703218cd7f63）で、その実装コントラクト（0xa045cf963b79833faf445f555ee1a6812d6fc87f）はクローズドソース（21,883バイトbytecode、Etherscan未検証）。脆弱な関数はsubmitImports((uint64,bytes32,bytes,bytes)[])、セレクタ0x8c49b257。BlockSec Phalconの根本原因分析によれば、ブリッジは (1) export／公証のMerkle proof、および (2) keccak256(serializedTransfers) がexportのhashReserveTransfersコミットメントと一致することを正しく検証していたが、ソースチェーン上のexportが実際にロック／バーンした価値がEthereum側の払い出しに対して十分であるかどうかは検証していなかった。デプロイされたソースはオープンソース化されておらず、本分析は攻撃calldataとmonkins1010/Verus-Ethereum-contracts公開GitHubリポジトリから再構成されたものであり、実際のデプロイ実装と完全には一致しない可能性がある。攻撃フロー：(a) 攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 は2026-05-17 11:50:59 UTCにTornado Cash（1 ETHプール）から0.993968 ETHの資金提供を受ける；外部取引 0x84dc53d6...ec86 は無関係なrelayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d により提出され、0.006032 ETHのrelayer手数料を得る；内部のTornado.withdraw呼び出しが0.993968 ETHを攻撃者EOAに移転。(b) 同日23:24:35 UTC、攻撃者はEthereum上でUniversalRouter経由で0.1 WETHを216.7483 USDCにスワップし（attacker nonce 0）、23:25:23 UTCにVerusブリッジのmultisig 0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845 に10 USDCを支払った（attacker nonce 1）。multisigはVerusコミュニティの運営ウォレット（GnosisSafe v1.3.0、singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 はEtherscanで検証済み）であり、processTransactions()コードパスの一部ではない。SubmitImports.solとTokenManager.solの公開ソースは、すべての手数料がVETH／VERUS／DAI／MKRで計算され、実USDCではないことを示している。multisig（231件のnormal tx）は日常的に多くの異なるアドレスから10-100 USDC／USDTの寄付を受けており、本件の10 USDCは攻撃の成功と実証的な因果関係を持たない疑わしい事前動作として扱うべきである。(c) Verusソースチェーン側では、攻撃者は実質的なロック／バーン担保を持たないがserializedTransfersハッシュが検証を通るexportを構築（Phalconによるとソースチェーンtxはf899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733）。(d) 23:55:23 UTC、攻撃者はEthereum側ブリッジプロキシに対してsubmitImports()を呼び出し、proveImports()通過後にprocessTransactions()が直接払い出し、ブリッジは自身のカストディから1,625.36688649 ETH（内部CALL）、103.56766017 tBTC v2（ERC-20 Transfer）、147,658.836798 USDC（ERC-20 Transfer）の3資産を攻撃者管理下のdrainer 0x65cb8b128bf6e690761044cceca422bb239c25f9へ送信。(e) drainer は直ちに23:58:23 UTCと23:59:35 UTCにPermit2（0x000000000022d473030f116ddee9f6b43ac78ba3、Uniswap公式の署名ベース承認コントラクト）に対して無制限のtBTCと無制限のUSDCを承認。**スワップは外部のsolver／relayer EOAにより実行される（drainerは直接スワップを呼び出さない）**：tBTCスワップはCoWスタイルのsolver 0xd9af4455b56f8c703b63392f25a66e083b26c379（951件のprior tx）がtx 0x21f61d6...deb18でPermit2.transferFromによりdrainerからtBTCをプルし、CoW settlement 0x8392876883cf0e9e7ee24d9b1f606ed88644f23bとWETH／tBTC v2プール 0x7f54f05635d1...経由で3,707.485136 ETHをdrainerに返却；USDCスワップは1inchスタイルのresolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001（10,000+件のprior tx）がtx 0x073117...b3e81でPermit2.transferFromによりdrainerからUSDCをプルし、1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000経由で69.549771 ETHをdrainerに返却。(f) 2026-05-21にdrainerは合計5,402.4 ETHを4,052 ETH（0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6へ）と1,350 ETH（0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73bへ）に分割。(g) Verusコミュニティは2回のオンチェーンホワイトハットメッセージを送信：1回目は2026-05-18 18:51:11 UTC（tx 0x8a69f4f...、0xd498061f... から攻撃者EOAへの0-valueメッセージ）で攻撃を認識し交渉を提案、2回目は2026-05-21 14:14:59 UTC（tx 0x94f66fdd...、同じ0-valueチャネル）で具体条件を提示：攻撃者が1,350 ETHをbountyとして保持し、24時間以内に4,052.4 ETHを0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74に返還すれば、コミュニティは調査を停止し、告訴せず、1,350 ETHを合法的なbountyとして公に認める。(h) オンチェーン資金フローは提示条件と正確に一致しており（1,350 ETHが0xa8d3662、4,052 ETHが0xf9ab28cb7b72b518...、4,052.4と4,052 + 0.4 pingの差異も整合）、攻撃者がbounty条件を受け入れたことを強く示唆する。観察ウィンドウ終了時点で、攻撃者EOAの完全なオンチェーン履歴は5件のnormal tx（2 outbound：UniversalRouterスワップ、10 USDCをmultisigへ、submitImports；2 inbound：2つのホワイトハットメッセージ）と1件のTornado Cash内部txのみ；Polygon／Arbitrum／Optimism／Base／BSC上でクロスチェーン活動は検出されず。攻撃後、攻撃者EOAはさらに2件の無関係な大量エアドロップ（2,000,000 ETHGと17,500 AICC）を受領しており、どちらも数百のアドレスへの一斉配布であり、攻撃者が開始・署名・要求したものではない。注：別のtx 0x6ce07c27...（2026-05-17 23:34:59 UTC）にはattacker EOAから0x195a99d453e05e3057c6aa2d426c04397b6d9845への10生単位の「fake USDC」（キリル文字同形文字のsymbol ꓴꓢꓓСでUSDCになりすまし）Transferが含まれているが、このtxは攻撃者が開始したものではない——outer `from`は0x014523f2a626f0e3dbc241b8e9a4c14c507a6360で、113,000件以上のprior txを持つプロのマルチコールディスパッチャであり、txは19の子Transferを含む。攻撃者EOAはディスパッチャの一斉スイープの副作用に過ぎない。",
+      "rootCause": "Verus-Ethereum BridgeのsubmitImports()関数はEthereum側プロキシ（0x71518580...）で、ソースチェーン上のVerus exportが実際にロック／バーンした価値が、import申請が要求する払い出しに対して十分であるかを検証しなかった。BlockSec Phalconの根本原因分析によれば、ブリッジは (1) export／公証のMerkle proof、および (2) keccak256(serializedTransfers) がexportのhashReserveTransfersコミットメントと一致することを正しく検証していたが、ソースチェーンの経済的担保の検証を欠いていた。影響を受けるフローは proveImports(...) → processTransactions(...) であり、欠落したチェックはその中間に位置する。実装コントラクト（0xa045cf963b...）はEtherscan上で未検証（21,883バイトbytecode）、本分析は攻撃calldataとmonkins1010/Verus-Ethereum-contracts公開リポジトリから再構成されたもので、実際のデプロイ実装を完全に反映しているとは限らない。攻撃者は実質的な経済担保を持たないがserializedTransfersハッシュが検証を通るVerus export（Phalconが参照するソースチェーンtx f899e6984dc7c3d7737bbca5d87db3682de355743349d40396a5fc34b9f5a733）を提出し、ブリッジは約1,177万ドルのETH／tBTC／USDCを解放した。本エクスプロイトはEthereumブロック25118335／2026-05-17 23:55:23 UTCの単一txイベントである。攻撃者はまた23:25:23 UTCにブリッジmultisig（0x195a4b5583b2...）に10 USDCを事前動作として支払った——この10 USDCはprocessTransactionsの必要手数料ではない（SubmitImports.solとTokenManager.solの公開ソースは手数料がVETH／VERUS／DAI／MKRでのみ計算されることを証明している）、単なる疑わしい事前動作であり、攻撃の成功と実証的な因果関係を持たない。攻撃者EOAは攻撃後にさらに2件の無関係な大量エアドロップ（2M ETHGと17,500 AICC）を受領しており、これらは攻撃者の動作ではない。",
+      "attackVector": "1. 事前資金調達。攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 は2026-05-17 11:50:59 UTCにTornado Cash 1 ETHプール（router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）から0.993968 ETHを取得。外部取引 0x84dc53d6...ec86は無関係なrelayer 0x09efa4777a855eb946df013c8f3e51fc553aa81dが提出し、0.006032 ETHのrelayer手数料を得て、内部のTornado.withdrawが0.993968 ETHを攻撃者EOAに移送した。2. Ethereum上での準備。23:24:35 UTC、攻撃者は0.1 WETHでUniswap UniversalRouter.executeを呼び出し（nonce 0）、216.7483 USDCを取得。23:25:23 UTC、攻撃者はVerusブリッジmultisig 0x195a4b5583b2...に10 USDCを支払った（nonce 1）。この10 USDCとエクスプロイトの成功には実証的な因果関係はなく、成功の必要条件ではない疑わしい事前動作である。3. Verus exportの作成。攻撃者はVerus側で実質的にゼロのロック／バーン担保を持つが有効なserializedTransfersハッシュを持つexportを作成し、Ethereum側ブリッジプロキシ0x71518580f36feceffe0721f06ba4703218cd7f63に対してsubmitImports((uint64,bytes32,bytes,bytes)[])を呼び出した。4. エクスプロイトtx 0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321（ブロック25118335／2026-05-17 23:55:23 UTC、nonce 2）はproveImports()（Merkle proofとserializedTransfersハッシュを検証）とprocessTransactions()（払い出し実行）を通過し、ブリッジからdrainer 0x65cb8b128bf6e690761044cceca422bb239c25f9へ1,625.36688649 ETH（内部CALL）、103.56766017 tBTC v2（ERC-20 Transfer）、147,658.836798 USDC（ERC-20 Transfer）の3資産を放出。5. DrainerによるPermit2への委任。drainer 0x65cb8b12... は23:58:23 UTCと23:59:35 UTCにそれぞれPermit2（0x000000000022d473...）に対して無制限のtBTCと無制限のUSDCを承認。6. 外部solver／relayer EOAによるスワップ実行。CoWスタイルのsolver 0xd9af4455b56f8c703b63392f25a66e083b26c379（951件のprior tx）がtx 0x21f61d6...deb18（ブロック25118352）でPermit2.transferFromにより103.56766017 tBTCをプルし、CoW settlement 0x8392876883cf0e9e7ee24d9b1f606ed88644f23bとWETH／tBTC v2プール 0x7f54f05635d1...経由で3,707.485136 ETHをdrainerに返却。1inchスタイルのresolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001（10,000+件のprior tx）がtx 0x073117...b3e81（ブロック25118440）でPermit2.transferFromにより147,658.836798 USDCをプルし、1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000とpool 0x4dffeb6b78e5...経由で69.549771 ETHをdrainerに返却。7. ホワイトハット交渉。2026-05-18 18:51:11 UTC、アドレス0xd498061f357447940f494e142b24695b51f59883（新規EOA）が攻撃者へ0-valueオンチェーンメッセージ（tx 0x8a69f4f...）を送信し、攻撃を認識して「substantial percentage」のbountyと引き換えに譲歩を求めた。2026-05-21 14:14:59 UTC、同じ送信者が0-valueフォローアップ（tx 0x94f66fdd...）を送信し具体条件を提示：1,350 ETHがbounty、攻撃者は24時間以内に4,052.4 ETHを0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74へ返還、調査停止・告訴しない・追加の法的措置を求めないこと、1,350 ETHを合法的なbountyとして公に認めることを約束。8. bounty受諾。2026-05-21、drainerは提示条件通りに5,402.4 ETHを厳密に分割：0.4 ETH pingを0xf9ab28cb7b72b518...へ（tx 0xf0088c2f... 19:44:11 UTC）、4,052 ETHを0xf9ab28cb7b72b518...へ（tx 0xb428dae6...cefe 19:47:11 UTC、4,052.4 ETH返還目標から0.4 ETHの独立ping分の差異を考慮）、1,350 ETHを0xa8d3662af2fc73ed...へ（tx 0x84aada67...d5e67 19:49:59 UTC、bounty金額）。コミュニティは観察ウィンドウ時点で公的な承認メッセージを発信していないが、オンチェーン資金分割はホワイトハット条件の受諾と構造的に一致している。9. 攻撃後のエアドロップ。攻撃者EOAは攻撃後にさらに2件の無関係な大量エアドロップを受領：2,000,000 ETHG（Ethereum Games）を0x3fc29836e84e471a053d2d9e80494a867d670ead（ブロック25125182、2026-05-18 22:48:47 UTC）から、17,500 AICCを0x11bf2e0d39d8589c96171a4102ea39c834067e26（ブロック25125328、2026-05-18 23:17:59 UTC）から。どちらも数百のアドレスへの一斉配布であり、攻撃者が開始・署名・要求したものではない。",
+      "lessons": [
+        "クロスチェーンブリッジは、importフローの各ステップで、ソースチェーンのロック／バーン価値と宛先チェーンの解放価値の経済的等価性を強制しなければならない。暗号学的な正しさ（Merkle proof、署名、serializedTransfersハッシュの一致）は必要条件だが十分条件ではない。ブリッジはさらに、ソースexportが主張する価値を実際に担っているかを検証する必要がある。これはWormhole（2022）、Nomad（2022）、およびDeFi-Hack-Chronicle上のALEX Protocol、AftermathFi、SquidRouterModule、Alephiumの各インシデントと同じエクスプロイトクラス——ソース・宛先経済価値ギャップ——である。",
+        "複数資産（本案：ETH、tBTC、USDC）への払い出しを行うブリッジは、単一の欠落チェックの影響を増幅させる：攻撃者は1回のprocessTransactions()呼び出しで3つの資産プールを同時に空にでき、損失が拡大する。攻撃者の1,625.36688649 ETH + 103.56766017 tBTC + 147,658.836798 USDCはすべて単一のsubmitImports()呼び出しで排出された。",
+        "クローズドソースのブリッジ実装（本案：プロキシの実装0xa045cf963b...はEtherscan未検証、21,883バイトbytecode）は特に危険である。パッチ適用が拙速であれば、同じ根本原因を次の攻撃者が再発見し得る。実装のオープンソース化、もしくは最低でも修正後の公開diffが、信頼できる修復の最低基準である。",
+        "Tornado Cashによる事前資金調達（本案：0.993968 ETH）は繰り返し現れる攻撃パターンである。少額の資金出所であっても監視されるべきである。multisig処理手数料に依存するブリッジ（本案：0x195a4b5583b2...への10 USDC支払い）は、少額決済シビルパターンに特に脆弱である。10 USDCの手数料はプライバシープール資金提供を受けた攻撃者の予算内に十分収まる。しかし本件の10 USDCはブリッジの強制手数料ではなく（ブリッジソースは手数料がVETH／VERUS／DAI／MKRでのみ計算されることを示す）、この10 USDCは攻撃の成功と実証的な因果関係を持たない疑わしい事前動作として扱うべきである。調査者は「攻撃前のプロトコル関連アドレスへの支払い」がすべてプロトコル必須であると前提すべきではない。",
+        "オンチェーンホワイトハットメッセージ（本案：0xd498061f3574...からの2件の0-value tx）は、協議体がオフチェーンのpost-mortem公開が遅い場合の有効なトリアージツールだが、オフチェーン告知（discord、ブログ）と既知のコアメンバーの検証可能なPGP署名を組み合わせてなりすましを防ぐべきである。Verusコミュニティがz-addressを連絡先に残したのは、将来のインシデントで参考となるアンチ・なりすまし手法である。",
+        "bounty条件がオンチェーンフローと1セント単位まで一致する（本案：1,350 ETHと4,052.4 ETHが分割金額と完全一致）ケースは稀であり、攻撃者が実際に交渉に応じたことを示している。プロトコルは、いずれの当事者も手動で資金を分割する信頼なしに条件を強制できる、ネイティブのオンチェーン紛争解決プリミティブ（『bounty escrow』スマートコントラクト）の構築を検討すべきである。オンチェーンでの分割は4,052 ETH（4,052.4 ETHではなく）+ 0.4 ETHの独立pingで合計4,052.4 ETHとなり、0.4 ETHの独立pingは攻撃者がオファーを正確に実行するコントラクトではなく手動で取引している明確な兆候である。",
+        "Permit2を介した委任スワップは、現在のプロの資金洗浄の標準となっている。drainerはPermit2（Uniswap公式の署名ベース承認コントラクト）に対して無制限のtBTCとUSDCを承認し、2つの無関係なプロsolver／relayer EOA（CoWスタイルの0xd9af4455b56f...で951件のprior tx、1inchスタイルの0xbeedd60f...で10,000+件のprior tx）がPermit2.transferFromを使用してトークンをプルし、スワップを実行した。ブリッジは大口払い出しに対してhold-and-confirmフローの追加を検討すべきである。1-2ブロックの遅延により、コミュニティが管理するポーズ機能が、資金がブリッジを離れる前にそれを停止できる。Permit2ベースの委任スワップは単一ブロックで実行できるため、1-2ブロックのポーズウィンドウが資金洗浄チェーンを中断する最低基準である。",
+        "Etherscanのtokentx APIは、アドレスがマルチコールのサブ受信者である場合にfalse positiveを返す可能性がある。本件では、攻撃者EOAが2つの無関係なマルチコール取引（0x6ce07c27...と0x3cc1d58e...）のsenderとして表示されているが、これらの実際のouter `from`は0x014523f2a...（113,000+件のprior tx）と0x62815f4d...（1,924件のprior tx）の2人のプロマルチコールディスパッチャである。調査者は**必ず**eth_getTransactionByHashでouter-tx `from`フィールドを検証してTransferイベントを正しく帰属させるべきである。本件の修正された帰属：attacker EOAから0x195a99d453e0...への10M生単位のfake-USDC transferは攻撃者が開始したものではなく、0x014523f2a...が19の子transferを含む一斉スイープの一部である。",
+        "Etherscanのtxlistとtokentx APIは、アドレスが開始していないINBOUND dust／airdrop transferも返す。本件では、攻撃者EOAは攻撃後の数日間に2,000,000 ETHG（Ethereum Games、0x3fc29836...から）と17,500 AICC（0x11bf2e0d39d8589c96171a4102ea39c834067e26から）を受領しており、どちらも数百のアドレスへの一斉配布である。ETHGエアドロップのouter submitterは実際には0xad106449e4d0743e1d75393c000d64c24f89f20bであり、トークンコントラクト0x3fc29836...ではない——トークンコントラクトはERC-20ソースだが、outer submitterはサードパーティのエアドロップ配布者である。調査者は、特に公的なエクスプロイト後にアドレッサブルなエアドロップを受け取る可能性のある高知名度エクスプロイトアドレスについて、tx listの「inbound dust」（攻撃者の動作ではない）と「outbound攻撃者の動作」を分離すべきである。",
+        "ブリッジは事前に登録されたソースチェーンburn/lockイベントと一致しない払い出しを拒否すべきである。金額・資産・受領者をキーとするイベント単位の耐リプレイnonceが最低基準である。対応するオンチェーン担保イベントを持たないMerkle proofをリプレイすることが、本案の構造的脆弱性である。",
+        "drainerと集約EOAのオンチェーン活動は、ブリッジインシデントから24時間以内にOFACおよび主要CEXコンプライアンスリストと照合されるべきである。調査時点で2つの中間EOA（0xf9ab28cb7b72b518...、0xa8d3662af2fc73ed...）に合計5,402.4 ETHが保持されており、コンプライアンス監視リストに追加すべきである——ホワイトハット合意が有効であっても、合意期間後にこれらEOAから外への資金移動は、最も可能性の高い資金洗浄の続行経路である。事前観察によりmultisig 0x195a4b5583b2...が多くの異なるアドレスから10-100 USDCの寄付を受けていること（5,791件の履歴tokentxイベント）が示されており、「multisig手数料」の主張はオンチェーンの入金パターンのみならず実際のコントラクトソースコードで検証すべきである。",
+        "デプロイされたコントラクトソースが利用できない場合（本案：プロキシ実装0xa045cf963b...は未検証）、根本原因分析は攻撃calldataと公開オープンソースリファレンス（本案：monkins1010/Verus-Ethereum-contracts）から再構成する必要がある。再構成プロセスでは、デプロイされたbytecodeがオープンソースリファレンスとは異なる可能性を明示的に注記すべきである。21,883バイトのデプロイ実装サイズは、小規模から中規模のSolidityコントラクトと一致し、リファレンス実装と一致するが、post-mortemはbytecodeの逆アセンブリなしに完全なソース等価性を主張すべきではない。"
+      ],
+      "estimatedLoss": {
+        "note": "オンチェーン検証済み合計：1,625.36688649 ETH + 103.56766017 tBTC v2 + 147,658.836798 USDC。2026-05-17のCoinGecko履歴価格はETH=$2,179.88、tBTC=$78,004.53、USDC 1:1で、換算後の合計は$3,543,099 + $8,078,746 + $147,659 = $11,769,504.63（約$11,769,505）。Phalconは約$11.7M、Merkle Scienceは$11.58Mと報告。$11.58Mはやや低いETH価格スナップショット（約$2,134/ETH）と四捨五入されたtBTC数量を反映していると考えられる。スワップ後、攻撃者は5,402.4 ETH（2026-05-17価格で約$11.78M）を24時間以内に単一のdrainerウォレットに集約した。Verusコミュニティは後に1,350 ETHをbountyとして、4,052.4 ETHを0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74に返還する条件で提示し、オンチェーン資金フローは正確にその条件に従っている（1,350 ETHが0xa8d3662af2fc73ed...、4,052 ETHが0xf9ab28cb7b72b518...、0.4 ETHの差は0xf0088c2f...の独立pingで説明される）。"
+      },
+      "attackTime": {
+        "note": "事前資金調達：2026-05-17 11:50:59 UTC、攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 がTornado Cash（1 ETHプール）から0.993968 ETHを取得（内部tx）；外部tx 0x84dc53d6...ec86は無関係なrelayer 0x09efa4777a855eb946df013c8f3e51fc553aa81dが提出し、0.006032 ETHのrelayer手数料を得た。攻撃者の最初のEthereum準備txは23:24:35 UTCのUniversalRouter.execute（0.1 WETHを216.7483 USDCにスワップ、attacker nonce 0）、23:25:23 UTCにブリッジmultisigへ10 USDC支払い（nonce 1）、主エクスプロイトsubmitImportsはブロック25118335／2026-05-17 23:55:23 UTC（nonce 2）。エクスプロイト後、drainerは23:58:23 UTCにPermit2へtBTCを承認、23:59:35 UTCにPermit2へUSDCを承認；外部solver 0xd9af4455b56f8c703b63392f25a66e083b26c379が23:58:47 UTCにtBTCを3,707.485136 ETHにスワップ（ブロック25118352）、外部resolver 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001が2026-05-18 00:16:23 UTCにUSDCを69.549771 ETHにスワップ（ブロック25118440）。drainerは2026-05-21 19:44:11 UTCに0.4 ETH接続テストping、19:47:11 UTCに4,052 ETHを0xf9ab28cb7b72b518...に集約、19:49:59 UTCに1,350 ETHを0xa8d3662af2fc73ed...に集約。Verusコミュニティの1回目ホワイトハットメッセージは2026-05-18 18:51:11 UTC（tx 0x8a69f4f...、ブロック25224000）、より具体的な2回目bounty条件（1,350 ETH bounty／4,052.4 ETH返還）は2026-05-21 14:14:59 UTC（tx 0x94f66fdd...、ブロック25244154）。endTimeは2026-05-21 19:49:59 UTCの最後の集約txに設定；startTimeは2026-05-17 11:50:59 UTCの事前資金調達に設定（それ以前のEthereum上で攻撃者管理下の活動は観測されないため）。攻撃後、攻撃者EOAは2026-05-18 22:48:47 UTCに2,000,000 ETHGの一斉エアドロップ、2026-05-18 23:17:59 UTCに17,500 AICCの一斉エアドロップを受領しており、いずれも攻撃者が開始したものではない。"
+      },
+      "transactions": [
+        {
+          "txHash": "0x84dc53d6705447ec6b4904bb905f9d78460de9bc671bef36ef79517d44e8ec86",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777 をTornado Cash 1 ETHプール（router 0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）から資金調達。**外部取引は無関係なrelayer 0x09efa4777a855eb946df013c8f3e51fc553aa81d により提出**され、Tornado.withdraw（selector 0xb438689f）を呼び出し、0.006032 ETHのrelayer手数料を得た。内部トレースはTornado 1 ETHプール → 攻撃者EOA 0.993968 ETH（資金調達の権威的数値）を示す。Etherscan txlistは外部value=0を表示し（Tornado引き出しは関数呼び出し）、txlistinternalインデックスが0x47ce0c6ed5b0...から攻撃者EOAへの0.993968 ETH内部送金を記録。ブロック25114721／2026-05-17 11:50:59 UTC。"
+        },
+        {
+          "txHash": "0x6e284906abb5d4444eab72cebdfb525300ed5d81df8895f701f7fe4fd66bafc9",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃前準備、攻撃者EOA 0x5abb91b9c01a... 自身が開始（nonce 0）。Uniswap UniversalRouter 0x66a9893cc07d4514f6b0c3d8c0c1c5d8e0e0d5c7（標準Uniswap v3 UniversalRouter）に対してexecute(bytes commands, bytes[] inputs, uint256 deadline)を呼び出し、value 0.1 ETH。トレース：0.1 WETHがrouterに入り、216.7483 USDCが攻撃者に戻り、0.5432 USDCの中間手数料が0xcd6b980029e6...（UniversalRouter fee collector）に支払われた。攻撃者は次の10 USDC multisig支払いのために216.7483 USDCを取得。ブロック25118181／2026-05-17 23:24:35 UTC。"
+        },
+        {
+          "txHash": "0x12b4ca12b57b9e9e1916e74fa4e497af22f5c2127aa89597e9f82ce83abdca6f",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃者EOA 0x5abb91b9c01a...（nonce 1）がUSDC.transfer(0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845, 10_000_000)を呼び出し——Verusブリッジmultisig（GnosisSafeProxy、singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 はEtherscanでGnosisSafe v1.3.0として検証済み）に10 USDCを支払った。**重要**：SubmitImports.solとTokenManager.solの公開ソース（monkins1010/Verus-Ethereum-contracts）は、processTransactions()パスにUSDC支払い要件がないことを示している——ブリッジはVETH／VERUS／DAI／MKR（Verusネイティブ通貨）でのみ手数料を計算し、実USDCは使用しない。multisig（231件のnormal tx）は日常的に多くの異なるアドレスから10-100 USDC／USDTの寄付を受けている；攻撃者の10 USDCは疑わしい事前動作として扱うべきであり、**攻撃の成功と実証的な因果関係を持たない**、ブリッジ必須処理手数料ではない。ブロック25118185／2026-05-17 23:25:23 UTC。"
+        },
+        {
+          "txHash": "0x6990f01720f57fc515d0e976a0c4f8157e0a9529194c4c15d190e98d087eb321",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "主エクスプロイトtx。攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777（nonce 2）がVerus-Ethereum Bridgeプロキシ0x71518580f36feceffe0721f06ba4703218cd7f63に対してsubmitImports((uint64,bytes32,bytes,bytes)[])、セレクタ0x8c49b257を呼び出し。ブロック25118335／2026-05-17 23:55:23 UTC。proveImports()通過（Merkle proofとserializedTransfersハッシュ検証）、processTransactions()がTokenManager.processTransactions経由で3資産を解放：(1) 1,625.36688649 ETHが内部CALLとしてブリッジからdrainer 0x65cb8b12...c25f9へ（trace_transactionで検証）；(2) ERC-20 TransferによりtBTC v2（0x18084fba...、18 decimals）103,567,660,170,000,000,000生単位（103.56766017）がdrainerへ；(3) ERC-20 TransferによりUSDC（0xa0b86991...、6 decimals）147,658,836,798生単位（147,658.836798）がdrainerへ。Gas使用量：751,143中685,456。状態：0x1（成功）。攻撃者はブリッジに対する承認を必要としない、processTransactions()はブリッジの事前保存されたallowanceを通じてブリッジのカストディから資金をプルする；脆弱性はソース・宛先経済等価性チェックの欠如であり、承認バイパスではない。"
+        },
+        {
+          "txHash": "0x48ee81415e14629cbbb422e749e0686461326dadadbd5881a4a7a4d9214a1f33",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 0）がtBTC v2 tokenコントラクト0x18084fba...に対してtBTC.approve(spender, value)を呼び出し、Permit2コントラクト0x000000000022d473030f116ddee9f6b43ac78ba3（Etherscan検証済みContractName='Permit2'、Uniswap公式の署名ベース承認コントラクト、9,153バイトbytecode）に無制限の承認（2^256 - 1）を付与。ブロック25118350／2026-05-17 23:58:23 UTC。**drainerはswap routerを呼び出していない**——Permit2はUniswapの標準的な委任レイヤーで、サードパーティsolverがユーザーのトークンに対してtransferFromを呼び出せるようにする。実際のswapは後ほど外部relayer EOA 0xd9af4455b56f...によりPermit2を使用して実行される。"
+        },
+        {
+          "txHash": "0x890ec1c1ecb6fd0a7af7f7bfb20f26daee4a728448b867a563de4a72267b7ba4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 1）がUSDC tokenコントラクト0xa0b86991...に対してUSDC.approve(spender, value)を呼び出し、Permit2 0x000000000022d473...（tBTC承認と同じアドレス）に無制限の承認（2^256 - 1）を付与。ブロック25118356／2026-05-17 23:59:35 UTC。tBTC承認と同じ根拠：これにより外部USDC swap relayer EOA 0xbeedd60f4ae5...がPermit2.transferFromを使用してdrainerのUSDCをプルし、swapを実行できる。"
+        },
+        {
+          "txHash": "0x21f61d67341c2fc0f81be5f090e6c8a60390c18c778998b046740370345deb18",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "tBTC v2 → WETH → ETH 集約スワップ。**外部取引は外部solver／relayer EOA 0xd9af4455b56f8c703b63392f25a66e083b26c379 により提出される（drainerは直接呼び出さない）**；drainer 0x65cb8b12...はtBTCのソース（Permit2.transferFrom経由）と最終ETH受領者。Relayer EOAは951件の履歴normal tx（2025年9月から開始）を持ち、すべてCoW Protocolスタイルのsettlementコントラクト0x740cd74f5896...をターゲットとしており、ユーザーswapをバッチ処理するCoW Protocol solverであることを強く示唆する。トレース：Permit2がdrainerからrelayerへ103.56766017 tBTCを転送；relayerは集約エントリ0x8392876883cf0e9e7ee24d9b1f606ed88644f23b（function selector 0xeef0acd6、CoW settlementエントリ）経由で3レッグswapをWETH／tBTC v2プール0x7f54f05635d1...で実行し、合計86.2872 + 172.7253 + 87.0934 = 346.1059 WETHを加算し、別のレッグ0x52aa89945499...から87.0934 WETHを加え、合計3,707.4851 WETH；WETHは0x00000011f84b...（FeeCollectorスタイルのunwrapper）に転送され、3,707.485136 ETHにアンラップされてdrainer 0x65cb8b12...に送信される。ERC-20 Transferイベントの検証：103.56766017 tBTCがdrainer → 0x8392876883cf0... → 0x7f54f05635d1... → 3つのサブ受領者0x73a38006d235／0xdbac78be0050／0xb7ecb2aa52aa（プールのsettlement経路）。ブロック25118352／2026-05-17 23:58:47 UTC。"
+        },
+        {
+          "txHash": "0x07311745b39065a7dc74d35df95e6c5afaa36c7781e841e3a788feac8bcb3e81",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "USDC → WETH → ETH 集約スワップ。**外部取引は外部solver／relayer EOA 0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001 により提出される（drainerは直接呼び出さない）**；drainer 0x65cb8b12...はUSDCのソース（Permit2.transferFrom経由）と最終ETH受領者。Relayer EOAは10,000件以上の履歴normal tx（2025年4月から開始）を持ち、すべてswap router 0xbee3211ab312...をターゲットとしており、1inch v5スタイルのresolverまたは1inch delegatorであることを強く示唆する。トレース：Permit2がdrainerからrelayerへ147,658.836798 USDCを転送；relayerはrouter 0xbee3211ab312a8d065c4fef0247448e17a8da000（function selector 0x4cf3fe9c、1inch swapエントリ）経由で、pool 0x4dffeb6b78e5...（CurveまたはUniV3スタイルのUSDCプール）へのdelegatecallによりswapを実行；結果のWETHは0x00000011f84b...に転送され、69.549771 ETHにアンラップされてdrainerに送信される。ERC-20 Transferイベント：147,658.836798 USDCがdrainer → 0xbee3211ab312。ブロック25118440／2026-05-18 00:16:23 UTC。"
+        },
+        {
+          "txHash": "0xf0088c2f164a6dddd1086c911d333a6a2d6d6e11d15298cd58fed20681be7335",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 2）が0.4 ETH（value、契約呼び出しではない）を中間EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6に送信。inputは0x（1バイトの標準的なシンプルなETH転送パディング）。ブロック25211495／2026-05-21 19:44:11 UTC。より大きな集約の前の接続テストと推定；0.4 ETHの額は、5,402.4 ETH攻撃会計（0.4 + 4,052 + 1,350）と一致する典型的な「ping」値。"
+        },
+        {
+          "txHash": "0xb428dae60a234c149c8bc4468979356c434726bf8f588b6c97bd7144aa5bcefe",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 3）が4,052 ETH（value、契約呼び出しではない）を中間EOA 0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6に送信。inputは0x。ブロック25211500／2026-05-21 19:47:11 UTC。この4,052 ETHはコミュニティの4,052.4 ETH返還要件と一致する（3分前に同じアドレスに送信された0xf0088c2f...の独立pingの0.4 ETHの分の差異を除く）。"
+        },
+        {
+          "txHash": "0x84aada67c438869ea19cf6e82fb33b3d2515b636c166dfc356eb8167a15d5e67",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Drainer 0x65cb8b128bf6...（nonce 4）が1,350 ETH（value、契約呼び出しではない）を中間EOA 0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73bに送信。inputは0x。ブロック25211525／2026-05-21 19:49:59 UTC。この1,350 ETHはコミュニティの2回目ホワイトハット公告の1,350 ETH bounty金額と正確に一致する（0x94f66fdd...参照）。4,052 ETHを0xf9ab28cb7b72b518...へ、1,350 ETHを0xa8d3662af2fc73ed...へのオンチェーン分割は、ホワイトハット条件受諾と構造的に一致している。"
+        },
+        {
+          "txHash": "0x8a69f4f90cf339e07777286115cb9dc9d1b0b614ea38aa8037bfb6e69c0d3429",
+          "blockchain": "ethereum",
+          "role": "white_hat_message",
+          "description": "Verusコミュニティから攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777への1回目ホワイトハットオンチェーンメッセージ（0xd498061f357447940f494e142b24695b51f59883から発信、他のtxがない新規EOA、eth_getCode=0xでEOA確認）。0-value tx；calldata（1,298バイト）は『To the Verus<->Ethereum bridge attacker』で始まる平文『Onchain Message』にデコードされ、攻撃スキルを認め、脆弱性の修正とステップの詳細公開を約束し、攻撃者に『substantial percentage』のbountyと引き換えの交渉を呼びかける。連絡先：verus.bridge@proton.me、Verusチェーンのz-address。ブロック25224000／2026-05-18 18:51:11 UTC。"
+        },
+        {
+          "txHash": "0x94f66fdd346c0ae6cf62113abf7e4e5b920703cca84a739e0de4a617635a302b",
+          "blockchain": "ethereum",
+          "role": "white_hat_message",
+          "description": "Verusコミュニティから攻撃者EOA 0x5abb91b9c01a5ed3ae762d32b236595b459d5777への2回目・最終ホワイトハットオンチェーンメッセージ（0xd498061f357447940f494e142b24695b51f59883から発信）。0-value tx；calldata（2,064バイト）は具体条件にデコード：(1) 1,350 ETHがコミュニティ合意のbounty；(2) 攻撃者は24時間以内に4,052.4 ETHを0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74へ返還；(3) コミュニティは調査を停止し、告訴せず、追加の結果を求めず、1,350 ETHを合法的なbountyとして公に認める。連絡先は1回目と同じ。ブロック25244154／2026-05-21 14:14:59 UTC。オンチェーン集約フロー（4,052 ETHが0xf9ab28cb7b72b518... 19:47:11 UTC、1,350 ETHが0xa8d3662af2fc73ed... 19:49:59 UTC）は2回目公告から6時間以内に実行され、24時間ウィンドウ内の受諾と時間的に一致する；1,350-ETHと4,052-ETHが公告の1,350と4,052.4の金額に高度に一致する（差額は0.4 ETHの独立pingで補完）ことは、攻撃者が積極的に交渉に応じた強いシグナルである。"
+        },
+        {
+          "txHash": "0xb81f3ce50d6cc9cc0be8c2bd2b5e0284e15e18a209cf199e33defb63c6e124d0",
+          "blockchain": "ethereum",
+          "role": "inbound_dust",
+          "description": "**INBOUND一斉エアドロップ**、攻撃者EOA 0x5abb91b9c01a...がトークンコントラクト0x3fc29836e84e471a053d2d9e80494a867d670ead（トークン名 'Ethereum Games'、symbol 'ETHG'、18 decimals）から2,000,000 ETHG（raw=2,000,000 * 10^18）を受領。これは数百のアドレスへの一斉ERC-20エアドロップ；txは無関係な受領者への数百の類似Transferイベントを含む。攻撃者はこのtransferを開始、署名、要求していない。最も可能性の高い説明：エクスプロイトのpost-mortem公開後のアドレッサブルなエアドロップ（公的なエクスプロイト開示後の一般的なパターン）。ブロック25125182／2026-05-18 22:48:47 UTC。"
+        },
+        {
+          "txHash": "0xa45c705c6cdd9b548d493ac2f4deec46f9d1af23f071c57841e34c530481d0b2",
+          "blockchain": "ethereum",
+          "role": "inbound_dust",
+          "description": "**INBOUND一斉エアドロップ**、攻撃者EOA 0x5abb91b9c01a...がトークンコントラクト0x66a3c2fa3e467aa586e90912f977e648589cabaf（symbol 'AICC'、name 'AI Chain Coin'）から17,500 AICCを受領。上記のETHGエアドロップと同じ性質で、数百のアドレスへの一斉エアドロップ、攻撃者は開始、署名、要求していない。発生ブロック25125328／2026-05-18 23:17:59 UTC（ETHGエアドロップから約29分後で、関連プロジェクトの一連のドロップである可能性）。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x5abb91b9c01a5ed3ae762d32b236595b459d5777",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "Ethereum側の主攻撃者EOA。tx 0x6990f0...d2c0でVerus-Ethereum Bridgeプロキシに対してsubmitImports()を呼び出した。完全なオンチェーン履歴：5件のnormal tx（2 outbound：UniversalRouter WETH→USDCスワップ（nonce 0）、USDC.transfer(10 USDC)をブリッジmultisigへ（nonce 1）、主エクスプロイト（nonce 2）；2 inbound：ホワイトハットメッセージ1（ブロック25224000）、ホワイトハットメッセージ2（ブロック25244154））と、2026-05-17 11:50:59 UTCにTornado Cash 1 ETHプール（0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936）から0.993968 ETHの内部tx。EOA確認済み（eth_getCodeが0x）。Polygon、Arbitrum、Optimism、Base、BSCではクロスチェーン活動は検出されなかった。注意：EOAは攻撃後にさらに2,000,000 ETHGと17,500 AICCの一斉エアドロップを受領した（tx 0xb81f3ce5...と0xa45c705c6...参照）——これらは攻撃者が開始したものではない。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x65cb8b128bf6e690761044cceca422bb239c25f9",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum側のdrainer EOA。主エクスプロイトtxで1,625.36688649 ETH（内部CALL）+ 103.56766017 tBTC v2（ERC-20 Transfer）+ 147,658.836798 USDC（ERC-20 Transfer）を受領。その後、Permit2（0x000000000022d473...）に無制限のtBTCと無制限のUSDCを承認し、**2つの外部solver／relayer EOAがPermit2.transferFromを使用してスワップを実行した（drainerは直接スワップを呼び出さない）**、3,707.485136 ETH（tBTC→WETH→ETH）と69.549771 ETH（USDC→WETH→ETH）をdrainerに返却した。Drainerは2026-05-21に合計5,402.4 ETHを4,052 ETH（0xf9ab28cb7b72b518...へ）と1,350 ETH（0xa8d3662af2fc73ed...へ）に分割し、ホワイトハット公告と完全に対応した。EOA確認済み（eth_getCodeが0x）。クロスチェーン活動は検出されなかった。Drainer EOAの14件のnormal txは：2件のPermit2承認、0.4 ETH接続テストping、4,052 ETH集約、1,350 ETH集約、および8件のpost-exploitノイズ（self-transfer 0-valueと0.0001 ETH pings）である。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xf9ab28cb7b72b5188d6c001d3b6cb0b76af6e6e6",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum側の中間集約EOA。2026-05-21 19:47:11 UTCにdrainerから4,052 ETHを受領（その3分前の19:44:11 UTCに0.4 ETH接続テストpingを受領）。4,052 ETHの額はVerusコミュニティのホワイトハット返還要件（4,052.4 ETHを0xF9AB28cB7b72B518e6a351FbdaBe69362cBC1A74へ、0.4 ETHの差は0xf0088c2f... pingの分）と一致する。EOA確認済み。観察ウィンドウ内で出金txは観測されず、資金は滞留状態。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xa8d3662af2fc73ed1b73bc2df3d33b27edf7b73b",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum側の中間集約EOA。2026-05-21 19:49:59 UTCにdrainerから1,350 ETHを受領。1,350 ETHの額はVerusコミュニティのホワイトハットbounty金額（1,350 ETHを攻撃者が報酬として保持）と完全に一致する。EOA確認済み。観察ウィンドウ内で出金txは観測されず、資金は滞留状態。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd9af4455b56f8c703b63392f25a66e083b26c379",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "外部solver／relayer EOA（**コントラクトではない**——eth_getCodeが0x；2025年9月以降951件の履歴normal txを持ち、すべてCoW Protocolスタイルのsettlementコントラクト0x740cd74f5896...をターゲットとしており、ユーザーswapをバッチ処理するCoW Protocol solverであることを強く示唆する）。このEOAは、drainer 0x65cb8b12...に代わって、Permit2.transferFromを使用して外部取引0x21f61d6...deb18（tBTC→WETHスワップ）を開始した。EOA自体は攻撃者の管理下にあるようには見えない；むしろ、drainerのPermit2承認に応答した公的なプロsolverである。accountType=EOA（アドレス自体はEOA、コントラクトではない；このスキーマでのexploit_contractラベルは、攻撃者（Permit2承認により）がswapを呼び出す権限を与えた外部当事者の構造的役割をフラグするために使用される。relayerが悪意のあるコントラクトであると主張するものではない）。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xbeedd60f4ae51ddf06267da77ecd690ac5d3a001",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "外部solver／relayer EOA（**コントラクトではない**——eth_getCodeが0x；2025年4月以降10,000件以上の履歴normal txを持ち、すべてswap router 0xbee3211ab312...をターゲットとしており、1inch v5スタイルのresolverまたは1inch delegatorであることを強く示唆する）。このEOAは、drainer 0x65cb8b12...に代わって、Permit2.transferFromを使用して外部取引0x073117...b3e81（USDC→WETHスワップ）を開始した。0xd9af4455b56f...と同じ根拠：これは公的なプロsolverであり、攻撃者の管理下にない。1inch v5 router 0xbee3211ab312a8d065c4fef0247448e17a8da000は、Ethereumメインネットの標準的な1inch Aggregation Router V5コントラクトである。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd498061f357447940f494e142b24695b51f59883",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "2つのオンチェーンホワイトハットメッセージの送信者（2026-05-18 18:51:11 UTCの0x8a69f4f...と2026-05-21 14:14:59 UTCの0x94f66fdd...）。EOA確認済み（eth_getCodeが0x）；normal txlistエントリなし（0-valueホワイトハットtxのみ）。「exploit_contract」はスキーマのフォールバックラベル——より正確なロールは'white_hat_sender'または'protocol_counterparty'だが、スキーマのattackerRoles vocabularyにはどちらも含まれていない；正確なロールを追加するには新しいextensibleFieldが必要となる。このアドレスは構造的に事後交渉フローの一部であり、攻撃関連のアクションを実行していない。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x71518580f36feceffe0721f06ba4703218cd7f63",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Ethereum側Verus-Ethereum Bridgeプロキシ。EIP-1967プロキシ、実装は0xa045cf963b79833faf445f555ee1a6812d6fc87f。実装はクローズドソース（Etherscan SourceCode=''、21,883バイトbytecode）。エクスプロイトtx 0x6990f0...d2c0がこのプロキシに対してsubmitImports()を呼び出し、そのカストディから1,625.36688649 ETH、103.56766017 tBTC v2、147,658.836798 USDCの引き出しに成功した。コントラクト作成者0x8e171d1e671b5c492f15a2afac0cb32ac4212c9d；ブロック18272987／2023-10-03 22:29:59 UTCにデプロイ。ブリッジはVerusコミュニティが運営する正規のVerus-Ethereum Bridge；BlockSec Phalconの根本原因分析によれば、脆弱性はsubmitImports／processTransactionsパスが『ソースチェーンのexportの実際の経済的担保が、importの払い出しに対して十分であるか』のチェックを欠いていることにあり、鍵漏洩や公証Merkle proofバイパスとは無関係。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum側tBTC v2 ERC-20コントラクト（symbol 'tBTC'、name 'tBTC v2'、decimals 18）。エクスプロイトtxで103.56766017 tBTC v2がブリッジからdrainerへ転送された。protocol_contractとしてタグ付け（vulnerable_contractではない）。ERC-20コントラクト自体は攻撃されておらず、ブリッジが要求したTransferを実行したのみ。脆弱な要素はブリッジコントラクト。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum側USDC ERC-20コントラクト（symbol 'USDC'、name 'USD Coin'、decimals 6）。エクスプロイトtxで147,658.836798 USDCがブリッジからdrainerへ転送された。ロールロジックは上記tBTC v2と同じ。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x195a4b5583b2ab22c2a72ef4e8f618adb0e29845",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Verus-Ethereum Bridge multisig（GnosisSafeProxy、singleton 0xd9db270c1b5e3bd161e8c8503c55ceabee709552 はEtherscanでGnosisSafe v1.3.0として検証済み）。攻撃者は2026-05-17 23:25:23 UTCにこのmultisigへ10 USDCを支払った。multisigはVerusコミュニティの運営ウォレットであり、**processTransactions()コードパスの一部ではない**（SubmitImports.solとTokenManager.solの公開ソースを確認：すべての手数料はVETH／VERUS／DAI／MKRで計算され、実USDCは使用されない）。multisig（231件のnormal tx）は日常的に多くの異なるアドレスから10-100 USDC／USDTの寄付を受けている；攻撃者の10 USDCは疑わしい事前動作として扱うべきであり、攻撃の成功と実証的な因果関係を持たず、ブリッジ必須処理手数料ではない。accountType=Multisig、role=protocol_contractはその構造的役割を反映する。",
+          "accountType": "Multisig"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-06-03",
+    "lastUpdated": "2026-06-03",
+    "human_verified": false,
+    "models": [
+      "minimax-m3"
+    ]
+  }
+}
