@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-06-01"
+    "lastUpdated": "2026-06-05"
   },
   "files": [
     {
@@ -88,6 +88,12 @@
       "date": "2026-05-11",
       "protocol": "Transit Finance",
       "file": "20260511-TransitFinance.json"
+    },
+    {
+      "id": "VerusBridge-20260517",
+      "date": "2026-05-17",
+      "protocol": "Verus-Ethereum Bridge",
+      "file": "20260517-VerusBridge.json"
     },
     {
       "id": "EchoProtocol-20260518",
