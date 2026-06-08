@@ -1,0 +1,590 @@
+{
+  "id": "SharwaFinance-20260501",
+  "date": "2026-05-01",
+  "title": "Sharwa Finance MarginTrading onERC721Received Uniswap V3 Spot Oracle Manipulation",
+  "protocol": "Sharwa Finance",
+  "blockchain": [
+    "arbitrum"
+  ],
+  "category": [
+    "price_manipulation",
+    "business_logic"
+  ],
+  "ecosystem": "evm",
+  "language": [
+    "solidity"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "32850",
+    "breakdown": [
+      {
+        "asset": "USDC (Arbitrum native, 0xaf88d065e77c8cc2239327c5edb3a432268e5831)",
+        "amount": "32850.892483",
+        "convertedUSD": "32850",
+        "note": "Net profit transferred from attacker exploit contract 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 to attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 in log#57 of the main exploit transaction (Transfer event, contract 0xaf88d065e77c8cc2239327c5edb3a432268e5831, value 32850892483 = 32,850.892483 USDC with 6 decimals). The figure matches the $32,850 headline quoted by DeFiLlama (date 1777593600 = 2026-05-01, defillamaId 6876), DefimonAlerts (https://x.com/DefimonAlerts/status/2051691029024084164) and the same amount is what bridged out via Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc in the laundering txs."
+      }
+    ],
+    "note": "On-chain reconciliation: attacker exploit contract 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 (Solidity 0.8.20, runtime 14,272 bytes, deployed 2026-05-01 10:17:06Z in tx 0xe4202bea...) received 15,368.657012 USDC from Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf (named 'LiquidityPool', for Hegic option tokenId 0x13 = 19) plus a sequence of USDC.e/USDC/USDC swaps on the manipulated pool 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb (Uniswap V3 fee=500, low liquidity ~3.16B), and additional 4.5157 WETH + 0.0939 WBTC from WETH/USDC and WBTC/USDC pool swaps. After netting, 32,850.892483 USDC was consolidated to attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 (log#57). The Hegic option NFT token 0x3f01 (= 16129) used as collateral remains held by the protocol at MarginAccount 0x069cdff47380bfcfa40d84f70834779daae96726, so the protocol's NFT exposure is recoverable, but the drained USDC (~$32,850) is the realized loss. A second similar attempt at 2026-05-02 01:30:34Z (tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be, using exploit contract 0x96a8b3e8963c577e8136e7c0036afe432940d4da) REVERTED with status 0x0 and 0 logs — the attacker bought the next-next tokenId 0x3f04 = 16132 from the same Sudoswap 'HegicStrategyCall' pool to see if the bug still worked on a fresh option, and it did not (different tokenId, 0x3f04 = 16132, not 0x3f01 = 16129 used in the successful attack). DeFiLlama also lists a previous Sharwa Finance loss on 2025-10-20 for $146,000 ('Price Manipulation Attack') under defillamaId 6876, indicating the same protocol class of vulnerability had been exploited once before and was not fully remediated."
+  },
+  "attackTime": {
+    "startTime": "2026-05-01T10:08:20Z",
+    "endTime": "2026-05-03T09:31:14Z",
+    "isRange": true,
+    "date": "2026-05-01",
+    "note": "Prep + attack window: prep starts 2026-05-01 10:08:20Z (attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 receives Bridgers pre-funding of 0.017779 ETH on 2026-04-30 04:43:13Z at block 457808170 → wraps 0.008 ETH to WETH 0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2 at block 458231063), prep continues 10:11:40Z–10:11:46Z (Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 exactInputSingle WETH→USDC.e + Sudoswap 'buy' on contract 0xec096ea6eb9aa5ea689b0cf00882366e92377371 to buy Hegic option NFT tokenId 0x3f01 from Sudoswap 'HegicStrategyCall' pool 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c), exploit 2026-05-01 10:17:07Z (block 458233156, tx 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad — the main safeTransferFrom on PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5 that triggers the onERC721Received hijack). Consolidation + laundering: 10:17:36Z (USDC approve + Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc depositV3 selector 0x3ce33bff bridge to another chain). Failed follow-up 2026-05-02 01:30:34Z (block 458451136, tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be status 0x0). Final laundering leg 2026-05-03 09:31:14Z (USDC.e approve + Across SpokePool bridge). The core exploit was atomic inside tx 0x05cfcfe9..., but the laundering extended into 2026-05-03."
+  },
+  "description": "On 2026-05-01 at 10:17:07 UTC (Arbitrum block 458233156), Sharwa Finance's MarginTrading module was exploited for $32,850 via an onERC721Received callback hijack combined with a Uniswap V3 single-block spot price manipulation on a low-liquidity USDC.e/USDC pool. The attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 (an EOA, no code at this address) had been pre-funded on 2026-04-30 04:43:13Z (block 457808170) with 0.017779 ETH from a Bridgers cross-chain bridge proxy contract 0xB685760EBD368a891F27ae547391F4E2A289895b (verified on Arbiscan, OpenLabelsInitiative tag 'Bridgers') — this single pre-funding covered BOTH the 1st (2026-05-01) and 2nd (2026-05-02) exploit attempts plus all swap gas. On attack day the attacker wrapped 0.008 ETH to WETH via WETH.deposit() at 10:08:20Z, swapped to USDC.e via Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45, and used the Sudoswap 'buy' aggregator on contract 0xec096ea6eb9aa5ea689b0cf00882366e92377371 to purchase Hegic option NFT tokenId 0x3f01 (= 16129, an in-the-money WETH call option wrapped via Sharwa's PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5) for ~0.1 ETH + 15 USDC.e from the Sudoswap 'HegicStrategyCall' pool 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c. At 10:17:06Z the attacker deployed a 14,272-byte exploit contract at 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 (Solidity 0.8.20). At 10:17:07Z the exploit transaction 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad was broadcast: the attacker EOA called safeTransferFrom (selector 0x42842e0e) on the PositionsManager 0x5fe380d6, sending tokenId 0x3f01 from itself to its own exploit contract 0x7e3c1331. Because 0x7e3c1331 is a contract, the PositionsManager's ERC-721 receiver hook fires `onERC721Received(operator, from, tokenId, bytes)` on 0x7e3c1331 — and the exploit contract used this callback as the single atomic attack surface. Inside the callback the exploit contract: (a) approved PositionsManager-style spend to MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 (Approval events log#9–10), (b) called MarginTradingRouter's openPosition/borrow path on MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 to deposit the NFT (Transfer of 0x3f01 from 0x7e3c1331 → 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 in logs#11–15), (c) swapped USDC.e for USDC on the low-liquidity USDC.e/USDC Uniswap V3 pool 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb (fee=500, liquidity 3,161,863,130 at time of attack), with a single Swap event (log#5–6) moving +21,989,109,760 of token0 (USDC, 0xaf88d065e77c8cc2239327c5edb3a432268e5831) into the pool and draining a large amount of token1 (USDC.e, 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8) out — this shifts the pool's sqrtPriceX96 to make USDC.e much more expensive relative to USDC, (d) called the modular swap router (IMarginTrading.swap) with a Hegic-option-denominated `tokenIn` whose price is resolved via the vulnerable UniswapModuleWithoutChainlink oracle 0x729cf665c09ef112c607290415a566fffa45826f. The oracle's getInputPositionValue(uint256 amountIn) calls `quoter.quoteExactInput(path, amountIn)` directly against the now-manipulated USDC.e/USDC pool, so the Hegic option (whose payoff is denominated in USDC.e) returns a USDC-equivalent value that is far above its true value, (e) borrowed against this inflated collateral via MarginTrading.borrow, receiving 15,368.657012 USDC routed through Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf → MarginAccount 0x069cdff4 → ... → exploit contract 0x7e3c1331, (f) unwound the position and collected WETH, WBTC, USDC.e, and USDC via a series of follow-up swaps (logs#25–55), and (g) forwarded the net 32,850.892483 USDC to the attacker EOA (log#57, USDC.transfer(0x4551835e..., 32850892483)). The defender (Sharwa Finance) did not have Chainlink fallback, TWAP, or any oracle-deviation guard in UniswapModuleWithoutChainlink — the contract (verified on Arbiscan) is the unmodified Sharwa 'modularSwapRouter/uniswap/UniswapModuleBase.sol' whose getInputPositionValue/getOutputPositionValue bodies literally call `quoter.quoteExactInput(path, amountIn)` and `quoter.quoteExactOutput(path, amountOut)` on the live single-block pool state (DefimonAlerts reproduced the offending source line in their post image: 'UniswapV3: Quoter' callout from `quoter.quoteExactInput(path, amountIn)`). At 10:17:36Z (29 seconds after the attack) the attacker approved USDC to Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc (selector 0x3ce33bff = depositV3(string,address,uint256,bytes)) and bridged the looted USDC to another chain. A second similar attempt at 2026-05-02 01:30:34Z (tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be using a separately-deployed exploit contract 0x96a8b3e8963c577e8136e7c0036afe432940d4da — same 14,272-byte runtime — calling safeTransferFrom with tokenId 0x3f04 = 16132, a different tokenId bought from the same 'HegicStrategyCall' Sudoswap pool) REVERTED with status 0x0 and produced 0 logs, suggesting the protocol had either patched the attack surface or that the freshly-acquired tokenId 16132 was not in a manipulable oracle state at that time. A final laundering leg occurred at 2026-05-03 09:31:14Z (USDC.e approve + Across SpokePool bridge). As of investigation, no public post-mortem has been published by Sharwa Finance; DefimonAlerts published the public alert on 2026-05-05 23:50 UTC (https://x.com/DefimonAlerts/status/2051691029024084164) and DeFiLlama recorded the incident under defillamaId 6876 (previous Sharwa entry: $146,000 on 2025-10-20, also classified as Price Manipulation, suggesting the UniswapModuleWithoutChainlink / low-liquidity-pool class of bug had been exploited once before and was not fully remediated).",
+  "rootCause": "1. SINGLE-BLOCK SPOT QUOTER USED AS COLLATERAL ORACLE: UniswapModuleWithoutChainlink (Sharwa contract 0x729cf665c09ef112c607290415a566fffa45826f, source path contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol) uses `getInputPositionValue(uint256 amountIn) → quoter.quoteExactInput(path, amountIn)` and `getOutputPositionValue(uint256 amountOut) → quoter.quoteExactOutput(path, amountOut)` to price Hegic option NFT collateral. The Uniswap V3 Quoter reads the pool's current sqrtPriceX96 at the moment of the call and returns an instantaneous single-block spot quote — it has no TWAP, no Chainlink fallback, and no oracle-deviation circuit breaker. The contract name itself (UniswapModuleWithoutChainlink) acknowledges the missing oracle redundancy.\n2. LOW-LIQUIDITY USDC.e/USDC POOL: The path passed to the Quoter targets the Uniswap V3 USDC.e/USDC pool at 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb (token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831, token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8, fee=500, liquidity ~3.16B at time of attack). With ~22k USDC.e of swap input the pool's price moves enough to inflate the Hegic option's USDC-equivalent value (which is denominated in USDC.e payouts) by an order of magnitude, so a single attacker can borrow against over-valued collateral.\n3. ON-ERC721RECEIVED CALLBACK HIJACK SURFACE: Sharwa's flow lets an attacker hand a Hegic option NFT to a contract of their choosing via safeTransferFrom. Because the recipient is a contract, PositionsManager 0x5fe380d6... fires `onERC721Received` on it, and the recipient's `onERC721Received` runs arbitrary code in the same atomic transaction — including a flash loan, the price-manipulating swap, the MarginTrading.borrow call, the unwinding swaps, and the consolidation transfer. Wrapping the attack inside `onERC721Received` removes any opportunity for a defender to front-run a separate 'attacker calls MarginTrading.swap()' transaction because the whole sequence reverts atomically if any step fails.\n4. NO POSITION-VALUE SANITY BOUND: MarginTrading (0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7) does not bound the LTV/borrow-amount against an independent secondary oracle and does not enforce that `getPositionValue` returns must lie within X% of an external reference. Even if the modular swap router had a TWAP fallback, the protocol's borrow-side acceptance check trusts the single number returned by the oracle.\n5. HISTORY OF SAME-CLASS BUG: DeFiLlama records a previous Sharwa Finance loss of $146,000 on 2025-10-20 (defillamaId 6876, classification 'Protocol Logic / Price Manipulation Attack'). That incident, on the same contract stack, suggests the modular swap router / UniswapModuleWithoutChainlink design choice was a known weak point that was not remediated before the 2026-05-01 re-exploitation.",
+  "attackVector": "1. **Funding (block 457808170, 2026-04-30 04:43:13Z):** Attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 received 0.017779 ETH (~17h before the attack) from a Bridgers cross-chain bridge proxy contract 0xB685760EBD368a891F27ae547391F4E2A289895b (verified on Arbiscan, OpenLabelsInitiative tag 'Bridgers'). This single pre-funding covered BOTH attempts (0.008 + 0.008 ETH for the two WETH.deposits) plus swap gas/fee kickback. At block 458231063 (2026-05-01 10:08:20Z) the attacker self-called WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit() with value 0.008 ETH = 8,000,000,000,000,000 wei, wrapping 0.008 ETH of the Bridgers pre-funding into WETH as gas/operational capital. Bridgers funding (rather than direct from an EOA mixer) is consistent with a buyer-pays-gas model where the operator prepays attack capital through a generic cross-chain bridge proxy frequently used by Chinese-speaking attackers.\n2. **Acquisition of Hegic option NFT (10:11:40Z–10:11:46Z):** Attacker approved WETH for Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45, called exactInputSingle (selector 0x414bf389) swapping WETH→USDC.e, then approved USDC.e, then called the Sudoswap 'buy' aggregator at 0xec096ea6eb9aa5ea689b0cf00882366e92377371 (function selector 0x0e5024d7, decoded as buy(address,address,uint256,uint256[]) with NFT contract=PositionsManager 0x5fe380d6, recipient=attacker EOA, maxPrice=0.016345785d8a0000, tokenId=0x3f01). The Sudoswap 'HegicStrategyCall' pool 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c emits `NewSellOrder` (event 0xe6ba0455...) and Transfer(0x000…, 0xe377…, 0x3f01) handing the Hegic option NFT (tokenId 0x3f01) to the attacker EOA for ~0.1 ETH + ~15 USDC.e. (A residual 1e-9 ETH transfer from 0xec096ea6 at 10:11:53Z is the marketplace fee kickback.)\n3. **Exploit-contract deploy (10:17:06Z):** Attacker EOA deployed a Solidity 0.8.20 exploit contract at 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 (runtime 14,272 bytes; code-hash not in this dataset). The contract implements the IERC721Receiver interface (returning its selector on onERC721Received) and contains the multi-step exploit logic described below.\n4. **Trigger: safeTransferFrom + onERC721Received hijack (10:17:07Z, block 458233156, tx 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad):** Attacker EOA called safeTransferFrom(0x4551835e..., 0x7e3c1331..., 0x3f01) on PositionsManager 0x5fe380d6. ERC-721 Transfer log#1 emits (0x4551...→0x7e3c..., tokenId 0x3f01). Because 0x7e3c1331 is a contract, PositionsManager immediately calls `onERC721Received(msg.sender, 0x4551..., 0x3f01, bytes(''))` on the exploit contract — and the exploit contract runs its payload inside this callback, atomically with the safeTransferFrom.\n5. **Position open & pool manipulation (inside callback):** The exploit contract (a) approved PositionsManager/NFT to MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 (Approval logs#9–10), (b) deposited the NFT as collateral through MarginTradingRouter, with Transfer(0x3f01) flow 0x7e3c1331 → 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 (MarginAccount, logs#11–15), (c) executed a single Swap on Uniswap V3 pool 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb (event 0xc42079f9, log#5–6) where amount0 = +21,989,109,760 (USDC in) and amount1 ≈ -9,907,608 (USDC.e out, plus a much larger unsigned negative flow visible in the full 64-byte signed amount1) — this drains USDC.e from the pool, shifting sqrtPriceX96 to make USDC.e much more expensive relative to USDC.\n6. **Inflated valuation + borrow (inside callback):** With the pool's spot price now manipulated, the modular swap router's `getInputPositionValue(amountIn)` returns a Hegic option value (in USDC) that is much higher than the true value. The exploit contract (or its interactions via MarginAccount 0x069cdff4) calls the swap path that resolves through UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f, and MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 emits Borrow(uint marginAccountID=0x13, uint amountDebtTokens=...) along with Exercise / TokenWithdrawn events (logs#16, #19, #21). The 15,368.657012 USDC that lands in the exploit contract is sourced from Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf (its event in log#18 + ERC-20 Transfer in log#17).\n7. **Unwind + consolidation (still inside callback):** The exploit contract runs a series of follow-up swaps (logs#24–55) on three pools: (i) USDC↔USDC.e on the same 0xa9e9cb16... pool, (ii) WETH/USDC on pool 0xc6962004f452be9203591991d15f6b388e09e8d0, (iii) WBTC/USDC on pool 0x0e4831319a50228b9e450861297ab92dee15b44f, accumulating ~4.5157 WETH and ~0.0939 WBTC on the way to consolidating USDC. The contract then sends the net 32,850.892483 USDC to attacker EOA 0x4551835e... via USDC.transfer (log#57, value 32850892483, 6 decimals).\n8. **Bridge-out laundering (10:17:36Z, ~29s after attack):** Attacker EOA approved USDC to Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc (Approval on USDC), then called depositV3 (selector 0x3ce33bff) to bridge the USDC to another chain. A second bridge call from 0x7e3c1331 to Across (also approve + depositV3) follows. Across SpokePool is identified by the function signature `depositV3(string destinationChain, address recipient, uint256 amount, bytes calldata data)`.\n9. **Failed follow-up attempt (2026-05-02 01:30:34Z, tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be):** Attacker deployed a second 14,272-byte exploit contract at 0x96a8b3e8963c577e8136e7c0036afe432940d4da and called safeTransferFrom(0x4551835e..., 0x96a8b3e..., 0x3f04 = 16132) on PositionsManager — but the tx REVERTED with status 0x0 and produced 0 logs. This indicates the protocol had either added a guard, the freshly-acquired tokenId 0x3f04 = 16132 was not the one priced through the same vulnerable oracle, or the oracle had been patched. The attacker reused the same 'HegicStrategyCall' Sudoswap pool, bought the next-next tokenId to see if the bug worked on a fresh option, and it did not.\n10. **Final laundering leg (2026-05-03 09:31:14Z):** Attacker EOA approved USDC.e (0xff970a61a04b1ca14834a43f5de4533ebddb5cc8) to Across SpokePool 0x23981fc3... and called depositV3 again to bridge the residual USDC.e to a different chain, completing the cross-chain cash-out.",
+  "lessons": [
+    "Quoting collateral value from a single-block Uniswap V3 spot price is unsafe by design: a low-liquidity pool can be moved with thousands of dollars of input to inflate any asset whose payoff is denominated in the depleted side of the pair. Any oracle that decides borrow-side collateral must (a) use a Uniswap V3 TWAP oracle (e.g. consult observationCardinalityNext + OracleLibrary.consult) rather than the Quoter, (b) require a minimum liquidity floor, or (c) cross-check with a Chainlink or other independent price source — which is precisely the role of the missing 'WithChainlink' sibling contract that gives the deployed 'UniswapModuleWithoutChainlink' its name.",
+    "onERC721Received is a generic attack surface for any protocol that allows a user to send an NFT to a contract of their choosing: the receiver can hijack the callback to perform an arbitrarily complex multi-step exploit (price manipulation → borrow → unwind → bridge) in a single atomic transaction, leaving the defender no opportunity to front-run a separate attack transaction. Receipt-side checks (onlyProtocol, noReborrow, maxLTV-on-receive) should be applied whenever the receiving contract is user-supplied.",
+    "Modular swap routers that aggregate multiple price sources are not a defense by themselves if the only active module is the spot Quoter. Either the protocol should refuse to borrow against a position whose oracle is the spot Quoter (require Chainlink or TWAP), or the modular router should revert when no Chainlink-equivalent module is configured — the 'WithoutChainlink' naming convention is a red flag that should have triggered a protocol-level review.",
+    "A borrow function that trusts a single number from an oracle without a deviation guard is equivalent to a price-oracle manipulation loan product. The protocol needs at minimum: (a) a max deviation vs TWAP or Chainlink, (b) a max borrow amount cap as a fraction of the pool's available liquidity, (c) a per-tx and per-block borrow rate-limit, and (d) a post-borrow sanity check that compares the borrowed amount against the historical LTV of the same NFT-class.",
+    "The same class of bug was exploited on Sharwa Finance once before (2025-10-20, $146,000, defillamaId 6876). After a public price-manipulation incident, a responsible protocol should (a) immediately disable the affected oracle path, (b) add a TWAP/Chainlink fallback as a hard requirement, (c) publish a post-mortem with the affected oracle address and recommended user action, and (d) consider a reorg of the modular router to remove the 'no-fallback' code path entirely. None of these were visible in the public record for the 2025-10-20 incident, which left the same vulnerability exploitable in 2026-05-01.",
+    "Failed follow-up attempts are themselves on-chain signal: the 2026-05-02 01:30:34Z reverted attempt shows the attacker continued to probe the protocol after the successful 2026-05-01 exploit. Monitoring for repeated safeTransferFrom-of-NFT attempts against the same PositionsManager, especially with non-owner EOA callers, would have given defenders a second chance to harden the code path before a future success.",
+    "Bridging stolen USDC across chains via Across Protocol's depositV3 within ~30 seconds of the exploit is now a standard laundering pattern. Cross-chain monitoring and Across/Avalanche/Celer relayer cooperation (flag + delay large bridged USDC that originated from a freshly-emptied DeFi protocol liquidity pool) is one of the few realistic in-window mitigations, since the on-chain compromise is irreversible once the borrow settles.",
+    "The exploit demonstrates the value of full on-chain transaction decoding: the swap-into-stablecoin pool that breaks the oracle price happens in the same atomic transaction as the borrow, so anyone reading only the borrow event will misattribute the cause. Investigators should always decode the full 50–60 log receipt, not just the function selector on the outer to address."
+  ],
+  "references": [
+    "https://x.com/DefimonAlerts/status/2051691029024084164",
+    "https://arbiscan.io/tx/0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad",
+    "https://arbiscan.io/tx/0x2f8c71771a50257672e01aa09e2438c2bdbf7539ff53c819fe3f61956a8ff923",
+    "https://arbiscan.io/tx/0xe8ad28839da4c1c031d42fba987705c0f8ada147cb93fa7e3767a1c3b42c5f2a",
+    "https://arbiscan.io/tx/0xb8d21d38de184f2f40a4fa25f9ccff8ff482b68e46a4898540464626a772e2e7",
+    "https://arbiscan.io/tx/0xe4202beab13b91021e716231e6ebccba1366c829bc0752f431c22f53046cfc95",
+    "https://arbiscan.io/tx/0x09371721ee490c2f1d8d5d40e53e2bc6ac7821741134f888615dceb89c9387f0",
+    "https://arbiscan.io/tx/0x9922e32e710a20e82dc64c41f80d0a692d535d48b38f7a87c355c2ca5d981639",
+    "https://arbiscan.io/tx/0x8a579e2d59385b619f225c40d8b37dd33ab67eb4e06319fa51955a2a5b304753",
+    "https://arbiscan.io/tx/0x2876c125dd56c39569542d607f8e1260aa2a1c60fbf4b700fc54d45e85185d95",
+    "https://arbiscan.io/tx/0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be",
+    "https://arbiscan.io/tx/0xbc99750b04c874bab9e73772d0e0ba2fa6e3d6f0c8cde2132cefc5e5c218c4b1",
+    "https://arbiscan.io/address/0x4551835e7c40d2a3d407c89d6a91eff98285c681",
+    "https://arbiscan.io/address/0xB685760EBD368a891F27ae547391F4E2A289895b",
+    "https://arbiscan.io/address/0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377",
+    "https://arbiscan.io/address/0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5",
+    "https://arbiscan.io/address/0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7",
+    "https://arbiscan.io/address/0x5b2f774050d590d54165872e4297cf9d2d90ed54",
+    "https://arbiscan.io/address/0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103",
+    "https://arbiscan.io/address/0x069cdff47380bfcfa40d84f70834779daae96726",
+    "https://arbiscan.io/address/0x729cf665c09ef112c607290415a566fffa45826f",
+    "https://arbiscan.io/address/0xa9e9cb16e922892aa563a5adb0f7d976efce36fb",
+    "https://arbiscan.io/address/0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c",
+    "https://arbiscan.io/address/0xa4113ac6cc41141b819f34d81f6ccdabca07aecf",
+    "https://arbiscan.io/address/0x96a8b3e8963c577e8136e7c0036afe432940d4da",
+    "https://arbiscan.io/address/0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc",
+    "https://defillama.com/hacks",
+    "https://mirror.xyz/dedelend.eth/gJriRVVlVGqU3l4qKIP6v08z5KUrdHDpGki6j4jLhss",
+    "https://t.me/SharwaFinance"
+  ],
+  "transactions": [
+    {
+      "txHash": "0x2f8c71771a50257672e01aa09e2438c2bdbf7539ff53c819fe3f61956a8ff923",
+      "blockchain": "arbitrum",
+      "role": "funding",
+      "description": "Arbitrum block 457808170 (2026-04-30 04:43:13Z) — internal tx from Bridgers cross-chain bridge proxy contract 0xB685760EBD368a891F27ae547391F4E2A289895b (verified on Arbiscan, OpenLabelsInitiative tag 'Bridgers') to attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681, value 17,779,000,000,000,000 wei = 0.017779 ETH. This single pre-funding (~17h before the first attempt) covered the cost of BOTH exploit attempts plus wrap + swap fees: 0.008 ETH for the 1st WETH.deposit on 2026-05-01 + 0.008 ETH for the 2nd WETH.deposit on 2026-05-02 + ~0.0017 ETH of swap gas/fee kickback. Bridgers is a known cross-chain aggregator/bridge frequently used by Chinese-speaking attackers; funding via Bridgers (rather than direct from an EOA mixer) is consistent with a buyer-pays-gas model where the operator prepays attack capital through a generic bridge proxy."
+    },
+    {
+      "txHash": "0xe8ad28839da4c1c031d42fba987705c0f8ada147cb93fa7e3767a1c3b42c5f2a",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block 458231063 (2026-05-01 10:08:20Z) — attacker EOA 0x4551835e… called WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit() (no input data, value 0.008 ETH = 8,000,000,000,000,000 wei) to wrap 0.008 ETH of the Bridgers pre-funding into WETH as gas/operational capital. Followed at block 458231149 (10:11:40Z, tx 0x32d1c00a70122d3ba9b12f9efa7ac56e0f422563bc0d90fe0980d094e45d3b69) by WETH.approve(SwapRouter, MAX) and at block 458231152 (10:11:43Z, tx 0xe39b0bfecec92853ca27e87a5a0e56cb914f19563662d3dec63257c52c53655b) by exactInputSingle (selector 0x414bf389) swapping WETH→USDC.e on Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45."
+    },
+    {
+      "txHash": "0xb8d21d38de184f2f40a4fa25f9ccff8ff482b68e46a4898540464626a772e2e7",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block 458231155 (2026-05-01 10:11:46Z) — attacker EOA called Sudoswap 'buy' aggregator at 0xec096ea6eb9aa5ea689b0cf00882366e92377371 (selector 0x0e5024d7, buy(address nft, address recipient, uint256 maxPrice, uint256 tokenId)) with NFT contract = PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5, recipient = attacker EOA 0x4551835e…, maxPrice = 0.1 ETH = 0x016345785d8a0000, tokenId = 0x3f01 (= 16129). The receipt decodes Transfer(0x000…, 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 'HegicStrategyCall' pool, 0x4551835e… attacker EOA, tokenId 16129) — the Sudoswap 'HegicStrategyCall' pool handed the Hegic option NFT to the attacker for ~0.1 ETH + 15.011892 USDC.e (callValue + USDC.e side payments together ~ 15 USDC.e). A residual 1e-9 ETH self-transfer at block 458231162 (10:11:53Z, tx 0xefee551119329435a05ce080349462d40f0e061c8169256aaa2eee2656d7396f) is the Sudoswap marketplace fee kickback."
+    },
+    {
+      "txHash": "0xe4202beab13b91021e716231e6ebccba1366c829bc0752f431c22f53046cfc95",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block 458233155 (2026-05-01 10:17:06Z) — attacker EOA deployed the exploit contract at 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 (Solidity 0.8.20, runtime 14,272 bytes, no proxy, no standard implementation, code-hash 0x9f53e7b...). The contract implements the IERC721Receiver interface (returns the onERC721Received selector 0x150b7a02) and contains the multi-step callback-hijack exploit logic. Same deployer as the 2nd attempt contract 0x96a8b3e8963c577e8136e7c0036afe432940d4da."
+    },
+    {
+      "txHash": "0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad",
+      "blockchain": "arbitrum",
+      "role": "exploit",
+      "description": "Arbitrum block 458233156 (2026-05-01 10:17:07Z, status 1, gas used 8,712,312) — THE MAIN EXPLOIT. Attacker EOA 0x4551835e… called safeTransferFrom(0x4551835e7c40d2a3d407c89d6a91eff98285c681, 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377, 0x3f01) (selector 0x42842e0e) on PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5. The ERC-721 Transfer event fires (0x4551…→0x7e3c…, tokenId 0x3f01) and onERC721Received(operator=attacker EOA, from=attacker EOA, tokenId=0x3f01, data='') is invoked on the exploit contract. Inside the callback, the exploit contract: (1) approves PositionsManager/NFT to MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 (Approval events log#9–10), (2) opens the position on MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7, transferring token 0x3f01 through 0x5b2f7740 → 0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103 → 0x069cdff47380bfcfa40d84f70834779daae96726 (MarginAccount) in logs#11–15, (3) executes a single Swap on USDC.e/USDC pool 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb (event 0xc42079f9, log#5–6, +21,989,109,760 of token0 USDC in, −9,907,608 of token1 USDC.e out) shifting sqrtPriceX96 to make USDC.e expensive vs USDC, (4) routes the borrow through UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f which calls quoter.quoteExactInput on the now-manipulated pool and returns an inflated USDC valuation of the Hegic option, (5) MarginTrading emits Borrow(marginAccountID=0x13, amountDebtTokens=…) along with Exercise / TokenWithdrawn events (logs#16, #19, #21), (6) Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf (named 'LiquidityPool', for Hegic option tokenId 0x13 = 19) transfers 15,368.657012 USDC to the MarginAccount chain (log#17), (7) a series of follow-up WETH/USDC (event 0xc6962004f45a457f...) and WBTC/USDC (event 0x0e483131...) swaps (logs#24–55) accumulate ~4.5157 WETH + ~0.0939 WBTC, (8) USDC.transfer(attacker EOA, 32850892483) consolidates the net 32,850.892483 USDC to attacker EOA 0x4551835e… (log#57). Total logs: 59, gas used: 8,712,312."
+    },
+    {
+      "txHash": "0x09371721ee490c2f1d8d5d40e53e2bc6ac7821741134f888615dceb89c9387f0",
+      "blockchain": "arbitrum",
+      "role": "consolidation",
+      "description": "Arbitrum block 458233185 (2026-05-01 10:17:36Z) — attacker EOA 0x4551835e… called USDC (0xaf88d065e77c8cc2239327c5edb3a432268e5831).approve(0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc, MAX). This is the explicit approval needed for the subsequent Across SpokePool depositV3 call (next tx in the same block). Confirmed via approval event log topic + spender indexed = Across SpokePool."
+    },
+    {
+      "txHash": "0x9922e32e710a20e82dc64c41f80d0a692d535d48b38f7a87c355c2ca5d981639",
+      "blockchain": "arbitrum",
+      "role": "laundering",
+      "description": "Arbitrum block 458233185 (2026-05-01 10:17:36Z, ~29 seconds after the exploit) — attacker EOA 0x4551835e… called Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3(address recipient, address originToken, uint256 amount, uint256 destinationChainId, uint64 relayerFeePct, uint32 quoteTimestamp, bytes memory message, uint256 maxCount) (selector 0x3ce33bff) to bridge ~32,850 USDC (0xaf88d065e77c8cc2239327c5edb3a432268e5831) out of Arbitrum. destinationChainId and recipient are encoded in the calldata; Across's relayer on the destination chain receives the funds. The 29-second delta between the successful exploit and the bridge is consistent with a pre-scripted, automated laundering leg."
+    },
+    {
+      "txHash": "0x8a579e2d59385b619f225c40d8b37dd33ab67eb4e06319fa51955a2a5b304753",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block ~458451xxx (2026-05-02 01:21:53Z) — second attempt preparation. Attacker EOA 0x4551835e… called WETH (0x82aF4944…).deposit() to wrap another 0.008 ETH from the same Bridgers pre-funding. Followed by WETH.approve (block 458451xxx, tx 0x81a76181dd110a0bab9e78c5dbe88bd0ef1155ebf4c1c58d18ad9527019bc85f, 01:21:53Z), exactInputSingle WETH→USDC.e (tx 0x124d82293674847a3ec79a5236d1db84ace85352f45f0d218a8c5145f28f6eb2, 01:21:54Z), USDC.e.approve(Sudoswap) (tx 0xe3296630674d4d37526a8e6d20203d3906b99ae81c11dafbd1a0d200a29f4550, 01:21:56Z), Sudoswap 'buy' tokenId 0x3f04 = 16132 from the same 'HegicStrategyCall' pool for another ~15 USDC.e (tx 0xb97fd7c1ed5266d6a3f66ca81418a3fd140f4b1b9828dd789f9bfa6e7e413cf3, 01:21:57Z). All funded from the same 2026-04-30 Bridgers pre-funding."
+    },
+    {
+      "txHash": "0x2876c125dd56c39569542d607f8e1260aa2a1c60fbf4b700fc54d45e85185d95",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block 458451136 (2026-05-02 01:30:34Z) — attacker EOA deployed the second exploit contract at 0x96a8b3e8963c577e8136e7c0036afe432940d4da (Solidity 0.8.20, runtime 14,272 bytes — byte-identical runtime size to the 1st exploit contract 0x7e3c1331, strongly indicating a single source template with the same deployer). The contract also implements IERC721Receiver."
+    },
+    {
+      "txHash": "0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be",
+      "blockchain": "arbitrum",
+      "role": "setup",
+      "description": "Arbitrum block 458451136 (2026-05-02 01:30:34Z, status 0, gas used 1,416,557 / 25,000,000, 0 logs) — second-attempt safeTransferFrom(0x4551835e…, 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132) on PositionsManager 0x5fe380d6. The transaction REVERTED (no log emission) — the receiver contract was either denied at the onERC721Received hook or the protocol's position accounting for tokenId 16132 was already locked/withdrawn. The reverted call attempted a DIFFERENT tokenId (0x3f04 = 16132, NOT 0x3f01 = 16129 used in the successful attack) on a freshly-deployed 2nd receiver contract. The tokenId choice is consistent with the attacker buying the next-in-line tokenId from the same Sudoswap 'HegicStrategyCall' pool to see if the bug still works on a fresh option. Reuse of byte-identical 14,272-byte runtime + same deployer is a fingerprint linking the 2nd attempt to the same operator."
+    },
+    {
+      "txHash": "0xbc99750b04c874bab9e73772d0e0ba2fa6e3d6f0c8cde2132cefc5e5c218c4b1",
+      "blockchain": "arbitrum",
+      "role": "laundering",
+      "description": "Arbitrum block ~458526xxx (2026-05-03 09:31:14Z) — final laundering leg. Preceded by USDC.e.approve(Across SpokePool, MAX) at the same timestamp (tx 0xe38f34b757f8645b6d0a22b39e33d32ddbdbb81fc955d11db009bb09c61db0f4, ~5 seconds before). Attacker EOA 0x4551835e… called Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3 (selector 0x3ce33bff) to bridge residual USDC.e (0xff970a61a04b1ca14834a43f5de4533ebddb5cc8) — the non-arbitrum-native USDC variant that the attacker received as change from the swap leg and as Hegic option payoff routing — to a destination chain. The 2-day delay between the main exploit and this final bridge is consistent with the attacker waiting for Across's destination-chain relayer fees / liquidity to clear."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x4551835e7c40d2a3d407c89d6a91eff98285c681",
+      "blockchain": "arbitrum",
+      "role": "primary_attacker",
+      "description": "Primary attacker externally owned account on Arbitrum. Received 0.017779 ETH pre-funding from Bridgers cross-chain bridge proxy contract 0xB685760EBD368a891F27ae547391F4E2A289895b at block 457808170 (2026-04-30 04:43:13Z, ~17h before the attack). At block 458231063 (2026-05-01 10:08:20Z) self-called WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit() with value 0.008 ETH to wrap a portion of the Bridgers pre-funding into WETH. Swapped WETH→USDC.e via Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45, bought Hegic option NFT tokenId 0x3f01 from Sudoswap 'HegicStrategyCall' pool 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c for ~0.1 ETH + ~15 USDC.e, deployed the 14,272-byte exploit contract 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 at 10:17:06Z, called safeTransferFrom on PositionsManager 0x5fe380d6 at 10:17:07Z to trigger the onERC721Received hijack that drained 32,850.892483 USDC from Sharwa Finance's MarginTrading module. Then approved USDC/USDC.e to Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc and bridged the looted assets to another chain at 10:17:36Z and 2026-05-03 09:31:14Z. Confirmed EOA via eth_getCode (no contract code at this address). The single Bridgers pre-funding covered the cost of BOTH the 1st (2026-05-01) and 2nd (2026-05-02) exploit attempts plus all swap gas/fee kickback. Bridgers funding (vs direct EOA mixer) is consistent with a buyer-pays-gas model where the operator prepays attack capital through a generic cross-chain bridge proxy frequently used by Chinese-speaking attackers.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377",
+      "blockchain": "arbitrum",
+      "role": "exploit_contract",
+      "description": "Primary exploit smart contract deployed by attacker EOA 0x4551835e... at 2026-05-01 10:17:06Z (block 458231188). Solidity 0.8.20, runtime 14,272 bytes. Implements the IERC721Receiver interface (returns the onERC721Received selector) and contains the multi-step atomic attack logic: (1) approve PositionsManager/NFT to MarginTradingRouter 0x5b2f7740..., (2) open margin position on MarginTrading 0xadc949f8... by depositing tokenId 0x3f01, (3) execute a single Uniswap V3 swap on the USDC.e/USDC pool 0xa9e9cb16... to shift its sqrtPriceX96, (4) trigger the borrow via modular swap router that resolves the price through UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f, (5) unwind with WETH/USDC and WBTC/USDC swaps, (6) consolidate 32,850.892483 USDC to attacker EOA. Reentrancy via the ERC-721 receiver hook is the attack surface, not a literal reentrancy bug. Currently holds 0 USDC after the laundering legs.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x96a8b3e8963c577e8136e7c0036afe432940d4da",
+      "blockchain": "arbitrum",
+      "role": "exploit_contract",
+      "description": "Second exploit smart contract deployed by the same attacker EOA at 2026-05-02 01:30:34Z (block 458451136). Solidity 0.8.20, runtime 14,272 bytes — byte-identical runtime size to the 1st exploit contract 0x7e3c1331, strongly indicating a single source template with the same deployer. Called safeTransferFrom(0x4551835e…, 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132) on PositionsManager 0x5fe380d6. The transaction REVERTED (status 0x0, 0 logs, gas used 1,416,557 / 25,000,000). Indicates the protocol had been hardened or the new tokenId (0x3f04 = 16132, vs the successful attack's 0x3f01 = 16129) was not in a manipulable state. The attacker reused the same NFT source ('HegicStrategyCall' Sudoswap pool) and simply bought the next-next tokenId to see if the same bug would work on a fresh option. Reuse of byte-identical 14,272-byte runtime + same deployer is a fingerprint linking the 2nd attempt to the same operator.",
+      "accountType": "Contract"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5",
+      "blockchain": "arbitrum",
+      "role": "vulnerable_contract",
+      "description": "Sharwa Finance PositionsManager — the ERC-721 wrapper for Hegic option NFTs. Verified on Arbiscan. The contract fired the onERC721Received hook on the attacker's exploit contract 0x7e3c1331... inside the safeTransferFrom at block 458233156, transferring Hegic option NFT tokenId 0x3f01 (= 16129) from the attacker EOA to the exploit contract. The token was subsequently deposited as collateral into MarginTrading 0xadc949f8... and currently remains held by MarginAccount 0x069cdff4... (so the NFT itself is recoverable, but the borrowed 32,850 USDC is not). The contract is the canonical entry point for the attacker's safeTransferFrom calls.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x729cf665c09ef112c607290415a566fffa45826f",
+      "blockchain": "arbitrum",
+      "role": "vulnerable_contract",
+      "description": "Sharwa Finance UniswapModuleWithoutChainlink — the vulnerable oracle module in the modularSwapRouter/uniswap path. Verified on Arbiscan (source path: contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol, defmon alert image reproduced lines 79–86: `function getPositionValue(uint256 amountIn) external virtual returns (uint amountOut) {}` and `function getInputPositionValue(uint256 amountIn) external returns (uint amountOut) { amountOut = quoter.quoteExactInput(path, amountIn); }`). The function calls Uniswap V3's Quoter contract on the USDC.e/USDC pool 0xa9e9cb16... with a single-block spot quote, with no TWAP and no Chainlink fallback. The contract name itself ('WithoutChainlink') indicates the missing oracle redundancy that the design pattern would normally require. This is the core root-cause contract.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sharwa Finance MarginTrading main contract. Verified on Arbiscan. Emits the Borrow(uint marginAccountID, uint amountDebtTokens) event (signature 0xb9c2d7ec...) along with Exercise / TokenWithdrawn events (logs#16, #19, #21) in the attack transaction. The contract's borrow(marginAccountID, amount) function trusts the price returned by UniswapModuleWithoutChainlink without any deviation guard, so the attacker was able to drain 32,850.892483 USDC against the over-valued Hegic option NFT collateral.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x5b2f774050d590d54165872e4297cf9d2d90ed54",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sharwa Finance MarginTradingRouter — verified on Arbiscan. The router that the attacker used to deposit the Hegic option NFT (tokenId 0x3f01) as collateral into the MarginTrading module. Receives the NFT in the first hop of the deposit chain (Transfer 0x7e3c1331 → 0x5b2f7740 in log#11) before passing it to the underlying position manager 0x4a07f03a. Not itself vulnerable; included as the legitimate entry point through which the attacker injected the collateral.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sharwa Finance per-position holding contract (unverified, 33,898 bytes runtime, likely a per-margin-account proxy or vault). Sits between MarginTradingRouter 0x5b2f7740 and MarginAccount 0x069cdff4 in the NFT deposit chain (Transfer 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 in logs#12–15). Not directly vulnerable; included as an intermediate hop in the protocol's collateral flow.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x069cdff47380bfcfa40d84f70834779daae96726",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sharwa Finance MarginAccount — the per-user margin-account vault that holds the attacker's deposited Hegic option NFT (tokenId 0x3f01) after the attack. Receives the 15,368.657012 USDC from Sudoswap LiquidityPool 0xa4113ac6 (log#17) and routes the funds into the attacker's exploit contract 0x7e3c1331 (log#22 → #23). Currently holds the deposited NFT, so the protocol retains recoverable NFT collateral but the cash-side loss is realized.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa9e9cb16e922892aa563a5adb0f7d976efce36fb",
+      "blockchain": "arbitrum",
+      "role": "vulnerable_contract",
+      "description": "Uniswap V3 USDC.e/USDC pool (token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831, token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8, fee=500, liquidity 3,161,863,130 at time of attack). The pool is the price source that the vulnerable UniswapModuleWithoutChainlink 0x729cf665... quotes. The attacker's swap of +21,989,109,760 of token0 USDC into the pool and large negative token1 USDC.e out (Swap event 0xc42079f9 in log#5–6 of the main exploit tx) shifts sqrtPriceX96 to make USDC.e more expensive relative to USDC, which is the single-block price manipulation that drives the Hegic option's USDC valuation above its true value. The pool's low liquidity is the root cause of why such a small swap is sufficient to move the price enough to drain the protocol.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sudoswap 'HegicStrategyCall' AMM pool (named on Blockscout). Used by the attacker to purchase the Hegic option NFT tokenId 0x3f01 for ~0.1 ETH + ~15 USDC.e via the Sudoswap 'buy' aggregator at 0xec096ea6eb9aa5ea689b0cf00882366e92377371. After the attack, the pool's Hegic option NFT inventory is empty. Not attacker-controlled; included to capture the source of the NFT used as collateral.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa4113ac6cc41141b819f34d81f6ccdabca07aecf",
+      "blockchain": "arbitrum",
+      "role": "protocol_contract",
+      "description": "Sudoswap LiquidityPool for the original Hegic option NFT tokenId 0x13 (= 19), which is the NFT referenced in MarginTrading's Borrow/Exercise events (logs#16, #19, #21). Sourced the 15,368.657012 USDC (Transfer in log#17) that the attacker's exploit contract ultimately consolidated. Not directly vulnerable; included as the on-chain USDC source for the borrow leg of the attack.",
+      "accountType": "Contract"
+    }
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "Sharwa Finance MarginTrading 之 onERC721Received Uniswap V3 現貨預言機操縱攻擊",
+      "description": "2026-05-01 10:17:07 UTC（Arbitrum 區塊 458233156），Sharwa Finance 的 MarginTrading 模組遭 onERC721Received 回呼劫持結合低流動性 USDC.e/USDC 池之 Uniswap V3 單區塊現貨操縱攻擊，損失 $32,850。攻擊者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681（無合約程式碼）於 2026-04-30 04:43:13Z（區塊 457808170，攻擊前約 17 小時）自 Bridgers 跨鏈橋代理合約 0xB685760EBD368a891F27ae547391F4E2A289895b（Arbiscan 驗證、OpenLabelsInitiative 標籤 'Bridgers'）取得 0.017779 ETH 預先資金 — 此單筆預付覆蓋第 1 次（2026-05-01）與第 2 次（2026-05-02）攻擊嘗試之全部成本加上 swap gas。攻擊當日 10:08:20Z attacker 經 WETH.deposit() 將 0.008 ETH 包成 WETH，經 Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 換成 USDC.e，再透過 Sudoswap 聚合器（合約 0xec096ea6eb9aa5ea689b0cf00882366e92377371）自 'HegicStrategyCall' 池 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 以約 0.1 ETH + 15 USDC.e 買入 Hegic 選擇權 NFT tokenId 0x3f01 (= 16129，包裝於 Sharwa PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5）。10:17:06Z 部署 Solidity 0.8.20、runtime 14,272 bytes 之攻擊合約 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377。10:17:07Z 攻擊交易 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad：attacker EOA 對 PositionsManager 呼叫 safeTransferFrom(0x4551..., 0x7e3c1331, 0x3f01)，ERC-721 Transfer 觸發，PositionsManager 隨即在攻擊合約上執行 onERC721Received，攻擊合約於此回呼內以單筆原子交易完成整套攻擊：(a) 對 MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 授權 (Approve, log#9–10)；(b) 將 0x3f01 經 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 存入當作擔保品 (Transfer, log#11–15)；(c) 在 USDC.e/USDC 池 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb（fee=500，流動性 ~3.16B）執行單筆 Swap (log#5–6, +21,989,109,760 USDC 進、巨量 USDC.e 出) 將 USDC.e 對 USDC 價格大幅上推；(d) 經 modular swap router 走 UniswapModuleWithoutChainlink 預言機 0x729cf665c09ef112c607290415a566fffa45826f 之 getInputPositionValue，後者直接呼叫 quoter.quoteExactInput(path, amountIn) 取得被操縱之單區塊現貨報價，使以 USDC.e 計價之 Hegic 選擇權 USDC 等值被高估數倍；(e) MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 發出 Borrow / Exercise / TokenWithdrawn 事件 (log#16, #19, #21) 並由 Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf 將 15,368.657012 USDC 注入路徑；(f) 後續 WETH/USDC (0xc6962004...) 與 WBTC/USDC (0x0e4831319a50228b9e450861297ab92dee15b44f) 多次 swap (log#24–55) 累計 ~4.5157 WETH 與 ~0.0939 WBTC；(g) 最終 USDC.transfer(attacker EOA, 32850892483) 將淨 32,850.892483 USDC 整至 attacker EOA (log#57)。UniswapModuleWithoutChainlink 已於 Arbiscan 驗證（合約名稱本身就承認 'WithoutChainlink' 缺 Chainlink 後備）。10:17:36Z attacker 將 USDC approve 至 Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc 並呼叫 depositV3 (selector 0x3ce33bff) 跨鏈離場；2026-05-02 01:30:34Z 第二次嘗試 (tx 0xe46627..., 合約 0x96a8b3e8963c577e8136e7c0036afe432940d4da) 對 tokenId 0x3f04 = 16132 觸發 safeTransferFrom 但 status 0x0 且 0 logs，顯示協議已修補或該 tokenId 不可被利用。2026-05-03 09:31:14Z 末次 USDC.e 跨鏈洗錢。DefimonAlerts 於 2026-05-05 23:50 UTC 公開示警 (https://x.com/DefimonAlerts/status/2051691029024084164)，DeFiLlama 將事件歸於 defillamaId 6876。DeFiLlama 另記錄 Sharwa Finance 2025-10-20 一次 $146,000 之 Price Manipulation Attack，顯示此類 UniswapModuleWithoutChainlink / 低流動性池漏洞曾被利用過但未根本修補。",
+      "rootCause": "1. 單區塊現貨 Quoter 被當擔保品預言機：UniswapModuleWithoutChainlink (Sharwa 合約 0x729cf665c09ef112c607290415a566fffa45826f，源路徑 contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol) 之 getInputPositionValue(uint256 amountIn) 直接呼叫 quoter.quoteExactInput(path, amountIn)，getOutputPositionValue(uint256 amountOut) 直接呼叫 quoter.quoteExactOutput(path, amountOut)，皆為 Uniswap V3 Quoter 之單區塊現貨報價，無 TWAP、無 Chainlink 後備、無偏離斷路器。合約名稱 (UniswapModuleWithoutChainlink) 即承認此缺失。2. 低流動性 USDC.e/USDC 池：被 Quoter 引用之池 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb（token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831、token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8、fee=500、流動性約 3.16B）以約 22k USDC.e 即可大幅移動 sqrtPriceX96，使以 USDC.e 計價之 Hegic 選擇權 USDC 等值被高估。3. onERC721Received 回呼劫持表面：攻擊者可將 Hegic 選擇權 NFT 經 safeTransferFrom 送至自有合約，PositionsManager 0x5fe380d6 之 onERC721Received 觸發後即在同一原子交易中執行閃電貸、價格操縱 swap、MarginTrading.borrow、解倉 swap 與整帳轉移，防守方無前置交易可搶跑。4. 借款端無 sanity 邊界：MarginTrading (0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7) 未限制相對於外部參考之 LTV、未要求二級預言機、亦未限制單筆借出佔池容量比例。5. 同類漏洞歷史：DeFiLlama 顯示 Sharwa Finance 於 2025-10-20 亦有一次 $146,000 之 Price Manipulation Attack (defillamaId 6876)，顯示 modular swap router / UniswapModuleWithoutChainlink 設計選擇曾被利用卻未根本修補。",
+      "attackVector": "1. **資金取得（區塊 457808170, 2026-04-30 04:43:13Z，攻擊前約 17 小時）**：攻擊者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 自 Bridgers 跨鏈橋代理合約 0xB685760EBD368a891F27ae547391F4E2A289895b（OpenLabelsInitiative 標籤 'Bridgers'）取得 0.017779 ETH 預先資金，於區塊 458231063（2026-05-01 10:08:20Z）自呼叫 WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit() 並附 0.008 ETH，將 Bridgers 預先資金之一部分包成 WETH 作為操作資金（此單筆 Bridgers 預付覆蓋第 1 次與第 2 次攻擊嘗試之全部成本加上 swap gas/fee 回扣）。2. **取得 Hegic 選擇權 NFT（10:11:40Z–10:11:46Z）**：attacker 對 Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 授權 WETH 並呼叫 exactInputSingle (selector 0x414bf389) 將 WETH 換為 USDC.e，再 approve USDC.e，呼叫 Sudoswap 聚合器 0xec096ea6eb9aa5ea689b0cf00882366e92377371 (selector 0x0e5024d7) 自 'HegicStrategyCall' 池 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 買入 Hegic 選擇權 NFT tokenId 0x3f01，約 0.1 ETH + 15 USDC.e。3. **攻擊合約部署（10:17:06Z）**：attacker EOA 部署 Solidity 0.8.20、runtime 14,272 bytes 之攻擊合約 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377，實作 IERC721Receiver 並內含多步驟回呼劫持邏輯。4. **觸發：safeTransferFrom + onERC721Received 劫持（10:17:07Z, 區塊 458233156, tx 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad）**：attacker EOA 對 PositionsManager 0x5fe380d6 呼叫 safeTransferFrom(0x4551..., 0x7e3c1331..., 0x3f01)，ERC-721 Transfer 觸發，PositionsManager 隨即對攻擊合約呼叫 onERC721Received(operator, from, tokenId, bytes(''))，攻擊合約於此回呼內 (a) 對 MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 授權 (Approval, log#9–10)；(b) 將 0x3f01 經 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 存入當擔保品 (Transfer, log#11–15)；(c) 在 USDC.e/USDC 池 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb 執行單筆 Swap (event 0xc42079f9, log#5–6, amount0 = +21,989,109,760 USDC 進、巨量 amount1 USDC.e 出) 將 USDC.e 對 USDC 價格大幅上推；(d) 經 modular swap router 走 UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f 取得被操縱之現貨報價後 MarginTrading.borrow；(e) MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 發出 Borrow / Exercise / TokenWithdrawn 事件 (log#16, #19, #21)；(f) Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf 將 15,368.657012 USDC 注入路徑 (log#17–23)；(g) 後續 WETH/USDC (0xc6962004f452be9203591991d15f6b388e09e8d0) 與 WBTC/USDC (0x0e4831319a50228b9e450861297ab92dee15b44f) 多次 swap (log#24–55) 累計 WETH 與 WBTC；(h) USDC.transfer(attacker EOA, 32850892483) 將淨 32,850.892483 USDC 整至 attacker EOA (log#57)。59 個 log、gas used 8,712,312。5. **跨鏈洗錢（10:17:36Z, 攻擊後 29 秒）**：attacker EOA 對 Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc 授權 USDC 後呼叫 depositV3 (selector 0x3ce33bff) 將 USDC 跨鏈離場。6. **第二次嘗試（2026-05-02 01:30:34Z, tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be）**：attacker 部署第二個 14,272 bytes 攻擊合約 0x96a8b3e8963c577e8136e7c0036afe432940d4da 並對 PositionsManager 呼叫 safeTransferFrom(0x4551..., 0x96a8b3e..., 0x3f04 = 16132) — 但交易 REVERTED (status 0x0、0 logs、gas used 1,416,557 / 25,000,000)，顯示協議已修補或新 tokenId 0x3f04 = 16132 不可被利用。7. **最終洗錢（2026-05-03 09:31:14Z）**：attacker EOA 對 Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc 授權 USDC.e 後再次呼叫 depositV3 將殘餘 USDC.e 跨鏈至另一鏈。",
+      "lessons": [
+        "以單區塊 Uniswap V3 現貨作為擔保品估值本質上不安全：低流動性池可被數千美元輸入移動，使任何以被抽乾端計價之資產被高估。決定 borrow 端擔保品之任何預言機必須 (a) 使用 Uniswap V3 TWAP oracle（如 OracleLibrary.consult 配合 observationCardinalityNext）而非 Quoter、(b) 要求最低流動性下限、或 (c) 與 Chainlink 或其他獨立來源交叉驗證 — 這正是部署中 'WithChainlink' 同名模組所肩負而 'UniswapModuleWithoutChainlink' 明確缺失的角色。",
+        "onERC721Received 對任何允許用戶將 NFT 送至自選合約之協議皆為通用攻擊面：接收端可在同一原子交易中執行任意多步驟攻擊（價格操縱 → borrow → 解倉 → 跨鏈），防守方無前置交易可搶跑。一旦接收端合約為用戶提供，應在協議端加註 onlyProtocol / noReborrow / maxLTV-on-receive 等約束。",
+        "模組化 swap router 即使聚合多種價格來源，若唯一啟用模組是現貨 Quoter，則其本身並非防禦。應 (a) 拒絕以現貨 Quoter 為唯一預言機之 borrow、(b) 強制要求 Chainlink 或 TWAP 模組在配置中啟用、(c) 當無 Chainlink 等效模組時 revert — 'WithoutChainlink' 命名本身就是應觸發協議層審查的紅旗。",
+        "信任單一預言機返回數字之 borrow 函數等於價格預言機操縱貸款產品。最低限度需 (a) 相對 TWAP/Chainlink 之最大偏離限制、(b) 借出金額上限相對池流動性之比例、(c) 單筆與單區塊 borrow 速率限制、(d) borrow 後之 sanity check 比較同類 NFT 之歷史 LTV。",
+        "Sharwa Finance 同類漏洞曾被利用過（2025-10-20 $146,000, defillamaId 6876）。公開的價格操縱事件後，負責任的協議應 (a) 立即停用受影響預言機路徑、(b) 強制加入 TWAP/Chainlink 後備、(c) 公開事後分析含受影響預言機地址與建議用戶行動、(d) 考慮重組模組化 router 以徹底移除 'no-fallback' 代碼路徑。2025-10-20 後這些動作在公開記錄中均未見，使同漏洞在 2026-05-01 仍可利用。",
+        "失敗的後續嘗試本身即為鏈上信號：2026-05-02 01:30:34Z 之 revert 嘗試顯示 attacker 在 2026-05-01 成功後仍持續探測。對同一 PositionsManager 多次嘗試 safeTransferFrom 來自非 owner EOA 之監控，將給防守方第二次硬化窗口以避免未來成功攻擊。",
+        "Across Protocol 之 depositV3 在攻擊後 ~30 秒內跨鏈竊得 USDC 已是標準洗錢模式。跨鏈監控及 Across / Avalanche / Celer relayer 合作（標記並延遲來自剛被掏空 DeFi 協議流動性池之大額橋接 USDC）為少數現實的窗口內緩解手段，因鏈上妥協在 borrow 結算後即不可逆。",
+        "此次 exploit 凸顯完整鏈上交易解碼之價值：破壞預言機價格之 swap 與 borrow 發生於同一原子交易中，任何僅閱讀 borrow 事件者將誤判根因。調查者應始終解碼完整 50–60 log 收據，而非僅看外層 to 地址之函式選擇器。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x2f8c71771a50257672e01aa09e2438c2bdbf7539ff53c819fe3f61956a8ff923",
+          "blockchain": "arbitrum",
+          "role": "funding",
+          "description": "Arbitrum 區塊 457808170（2026-04-30 04:43:13Z）— Bridgers 跨鏈橋代理合約 0xB685760EBD368a891F27ae547391F4E2A289895b（Arbiscan 已驗證、OpenLabelsInitiative 標籤 'Bridgers'）對 attacker EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 之內部交易，金額 17,779,000,000,000,000 wei = 0.017779 ETH。此單筆預付資金（第一次嘗試前約 17 小時）涵蓋兩次 exploit 嘗試 + 包裝 + swap 手續費：2026-05-01 第一次 WETH.deposit 之 0.008 ETH + 2026-05-02 第二次 WETH.deposit 之 0.008 ETH + ~0.0017 ETH swap gas/手續費回饋。Bridgers 為華語圈攻擊者常用之跨鏈聚合橋；經 Bridgers 取得資金（而非自 EOA mixer 直接轉出）符合買方預付 gas 之運營商資金籌備模式。"
+        },
+        {
+          "txHash": "0xe8ad28839da4c1c031d42fba987705c0f8ada147cb93fa7e3767a1c3b42c5f2a",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 458231063（2026-05-01 10:08:20Z）— attacker EOA 0x4551835e… 呼叫 WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit()（無 input data，value 0.008 ETH = 8,000,000,000,000,000 wei）將 Bridgers 預付資金中之 0.008 ETH 包成 WETH 作為 gas/操作資金。接續 458231149 區塊（10:11:40Z, tx 0x32d1c00a70122d3ba9b12f9efa7ac56e0f422563bc0d90fe0980d094e45d3b69）為 WETH.approve(SwapRouter, MAX) 及 458231152 區塊（10:11:43Z, tx 0xe39b0bfecec92853ca27e87a5a0e56cb914f19563662d3dec63257c52c53655b）為 exactInputSingle (selector 0x414bf389) 將 WETH→USDC.e 於 Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 完成換幣。"
+        },
+        {
+          "txHash": "0xb8d21d38de184f2f40a4fa25f9ccff8ff482b68e46a4898540464626a772e2e7",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 458231155（2026-05-01 10:11:46Z）— attacker EOA 呼叫 Sudoswap 聚合器 0xec096ea6eb9aa5ea689b0cf00882366e92377371 (selector 0x0e5024d7，buy(address nft, address recipient, uint256 maxPrice, uint256 tokenId))，參數 NFT 合約 = PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5、recipient = attacker EOA 0x4551835e…、maxPrice = 0.1 ETH = 0x016345785d8a0000、tokenId = 0x3f01 (= 16129)。收據解碼 Transfer(0x000…, 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 'HegicStrategyCall' pool, 0x4551835e… attacker EOA, tokenId 16129) — 'HegicStrategyCall' 池以 ~0.1 ETH + 15.011892 USDC.e 將 Hegic 選擇權 NFT 售予 attacker。1e-9 ETH 自轉帳（區塊 458231162, 10:11:53Z, tx 0xefee551119329435a05ce080349462d40f0e061c8169256aaa2eee2656d7396f）為 Sudoswap 平台費回饋。"
+        },
+        {
+          "txHash": "0xe4202beab13b91021e716231e6ebccba1366c829bc0752f431c22f53046cfc95",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 458233155（2026-05-01 10:17:06Z）— attacker EOA 部署攻擊合約 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377（S0lidity 0.8.20、runtime 14,272 bytes，無 proxy、無標準實作）。合約實作 IERC721Receiver（回傳 onERC721Received 選擇器 0x150b7a02）並含多步驟回呼劫持攻擊邏輯。部署者與 2nd attempt 合約 0x96a8b3e8963c577e8136e7c0036afe432940d4da 相同。"
+        },
+        {
+          "txHash": "0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad",
+          "blockchain": "arbitrum",
+          "role": "exploit",
+          "description": "Arbitrum 區塊 458233156（2026-05-01 10:17:07Z, status 1, gas used 8,712,312）— 主要 exploit 交易。Attacker EOA 0x4551835e… 對 PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5 呼叫 safeTransferFrom(0x4551..., 0x7e3c1331..., 0x3f01) (selector 0x42842e0e)。ERC-721 Transfer 觸發 (0x4551…→0x7e3c…, tokenId 0x3f01) 後 PositionsManager 對攻擊合約執行 onERC721Received(operator=attacker EOA, from=attacker EOA, tokenId=0x3f01, data='')，攻擊合約於回呼內：(1) 對 MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 授權 (Approval, log#9–10)；(2) 將 0x3f01 經 0x5b2f7740 → 0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103 → 0x069cdff47380bfcfa40d84f70834779daae96726 (MarginAccount) 存入當擔保品 (log#11–15)；(3) 在 USDC.e/USDC 池 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb 執行單筆 Swap (event 0xc42079f9, log#5–6, +21,989,109,760 token0 USDC 進、−9,907,608 token1 USDC.e 出) 將 sqrtPriceX96 推向 USDC.e 對 USDC 昂貴之方向；(4) 經 modular swap router 走 UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f 取得被操縱之現貨報價後 MarginTrading.borrow；(5) MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 發 Borrow(marginAccountID=0x13, amountDebtTokens=…) 與 Exercise / TokenWithdrawn 事件 (log#16, #19, #21)；(6) Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf（命名 'LiquidityPool'，對應 Hegic option tokenId 0x13 = 19）將 15,368.657012 USDC 注入路徑 (log#17)；(7) 後續 WETH/USDC (event 0xc6962004f45a457f...) 與 WBTC/USDC (event 0x0e483131...) swap (log#24–55) 累計 ~4.5157 WETH + ~0.0939 WBTC；(8) USDC.transfer(attacker EOA, 32850892483) 將淨 32,850.892483 USDC 整至 attacker EOA (log#57)。Total logs 59、gas used 8,712,312。"
+        },
+        {
+          "txHash": "0x09371721ee490c2f1d8d5d40e53e2bc6ac7821741134f888615dceb89c9387f0",
+          "blockchain": "arbitrum",
+          "role": "consolidation",
+          "description": "Arbitrum 區塊 458233185（2026-05-01 10:17:36Z）— attacker EOA 0x4551835e… 對 USDC (0xaf88d065e77c8cc2239327c5edb3a432268e5831) 呼叫 approve(0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc, MAX)。此為同一區塊後續 Across SpokePool depositV3 所需之顯式授權，經 approval event topic + spender indexed = Across SpokePool 確認。"
+        },
+        {
+          "txHash": "0x9922e32e710a20e82dc64c41f80d0a692d535d48b38f7a87c355c2ca5d981639",
+          "blockchain": "arbitrum",
+          "role": "laundering",
+          "description": "Arbitrum 區塊 458233185（2026-05-01 10:17:36Z，攻擊後 ~29 秒）— attacker EOA 0x4551835e… 呼叫 Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3(address recipient, address originToken, uint256 amount, uint256 destinationChainId, uint64 relayerFeePct, uint32 quoteTimestamp, bytes memory message, uint256 maxCount) (selector 0x3ce33bff) 將 ~32,850 USDC (0xaf88d065e77c8cc2239327c5edb3a432268e5831) 自 Arbitrum 跨鏈至他鏈。destinationChainId 與 recipient 編碼於 calldata；Across 目的地鏈之 relayer 接收資金。29 秒之延遲符合預先編寫之自動化洗錢腳本。"
+        },
+        {
+          "txHash": "0x8a579e2d59385b619f225c40d8b37dd33ab67eb4e06319fa51955a2a5b304753",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 ~458451xxx（2026-05-02 01:21:53Z）— 第二次嘗試準備。Attacker EOA 0x4551835e… 自同一 Bridgers 預付資金包裝 0.008 ETH。接續 WETH.approve (區塊 458451xxx, tx 0x81a76181dd110a0bab9e78c5dbe88bd0ef1155ebf4c1c58d18ad9527019bc85f, 01:21:53Z)、exactInputSingle WETH→USDC.e (tx 0x124d82293674847a3ec79a5236d1db84ace85352f45f0d218a8c5145f28f6eb2, 01:21:54Z)、USDC.e.approve(Sudoswap) (tx 0xe3296630674d4d37526a8e6d20203d3906b99ae81c11dafbd1a0d200a29f4550, 01:21:56Z)、Sudoswap 'buy' tokenId 0x3f04 = 16132 自同一 'HegicStrategyCall' 池以 ~15 USDC.e (tx 0xb97fd7c1ed5266d6a3f66ca81418a3fd140f4b1b9828dd789f9bfa6e7e413cf3, 01:21:57Z)。全數由 2026-04-30 Bridgers 預付資金支付。"
+        },
+        {
+          "txHash": "0x2876c125dd56c39569542d607f8e1260aa2a1c60fbf4b700fc54d45e85185d95",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 458451136（2026-05-02 01:30:34Z）— attacker EOA 部署第二個攻擊合約 0x96a8b3e8963c577e8136e7c0036afe432940d4da（S0lidity 0.8.20、runtime 14,272 bytes，與第一個攻擊合約 0x7e3c1331 runtime 大小完全一致，強烈顯示同一 source 模板同部署者）。合約同樣實作 IERC721Receiver。"
+        },
+        {
+          "txHash": "0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum 區塊 458451136（2026-05-02 01:30:34Z, status 0, gas used 1,416,557 / 25,000,000, 0 logs）— 第二次嘗試 safeTransferFrom(0x4551835e…, 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132) 對 PositionsManager 0x5fe380d6。交易 REVERTED（無 log 發射）— 接收合約在 onERC721Received hook 被拒或 tokenId 16132 之 position 帳目已被鎖定/提取。被 revert 之呼叫使用不同 tokenId（0x3f04 = 16132，非攻擊成功之 0x3f01 = 16129）於新部署之 2nd 接收合約。tokenId 之選擇符合 attacker 自同一 'HegicStrategyCall' 池購入下一個 tokenId 以測試漏洞是否仍可利用之模式。byte-identical 14,272-byte runtime + 同 deployer 為同 operator 之指紋。"
+        },
+        {
+          "txHash": "0xbc99750b04c874bab9e73772d0e0ba2fa6e3d6f0c8cde2132cefc5e5c218c4b1",
+          "blockchain": "arbitrum",
+          "role": "laundering",
+          "description": "Arbitrum 區塊 ~458526xxx（2026-05-03 09:31:14Z）— 末次洗錢。此前 ~5 秒為 USDC.e.approve(Across SpokePool, MAX) (tx 0xe38f34b757f8645b6d0a22b39e33d32ddbdbb81fc955d11db009bb09c61db0f4)。Attacker EOA 0x4551835e… 呼叫 Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3 (selector 0x3ce33bff) 將殘餘 USDC.e (0xff970a61a04b1ca14834a43f5de4533ebddb5cc8) — attacker 自 swap 找零及 Hegic option payoff 取得之非 Arbitrum 原生 USDC 變體 — 跨鏈至目的地鏈。攻擊與末次跨鏈間之 2 日延遲符合 attacker 等待 Across 目的地鏈 relayer 手續費/流動性結算之模式。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x4551835e7c40d2a3d407c89d6a91eff98285c681",
+          "blockchain": "arbitrum",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 Arbitrum EOA。於區塊 457808170（2026-04-30 04:43:13Z，攻擊前 ~17 小時）自 Bridgers 跨鏈橋代理合約 0xB685760EBD368a891F27ae547391F4E2A289895b（OpenLabelsInitiative 標籤 'Bridgers'）取得 0.017779 ETH 預先資金，於區塊 458231063（2026-05-01 10:08:20Z）自呼叫 WETH (0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2).deposit() 並附 0.008 ETH，將 Bridgers 預先資金之一部分包成 WETH 作為操作資金。經 Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 將 WETH 換為 USDC.e，再以約 0.1 ETH + ~15 USDC.e 自 Sudoswap 'HegicStrategyCall' 池 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 買入 Hegic 選擇權 NFT tokenId 0x3f01。10:17:06Z 部署 14,272 bytes 攻擊合約 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377，10:17:07Z 對 PositionsManager 0x5fe380d6 呼叫 safeTransferFrom 觸發 onERC721Received 劫持，自 Sharwa Finance MarginTrading 模組吸走 32,850.892483 USDC。10:17:36Z 對 Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc 授權 USDC/USDC.e 並跨鏈；2026-05-03 09:31:14Z 完成末次 USDC.e 跨鏈洗錢。經 eth_getCode 確認為 EOA（無合約程式碼）。Bridgers 單筆預付資金覆蓋第 1 次（2026-05-01）與第 2 次（2026-05-02）攻擊嘗試之全部操作成本加上 swap gas/fee 回扣。相較直接自 EOA mixer 取得資金，Bridgers 模式契合 buyer-pays-gas 模型：操作者透過通用跨鏈橋代理（常見於中文圈攻擊者）預付攻擊資金。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377",
+          "blockchain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "主要 exploit 智能合約，於 2026-05-01 10:17:06Z（區塊 458231188）由 attacker EOA 部署。Solidity 0.8.20、runtime 14,272 bytes。實作 IERC721Receiver (回傳 onERC721Received 選擇器) 並含多步驟原子攻擊邏輯：(1) 對 MarginTradingRouter 0x5b2f7740... 授權 PositionsManager/NFT；(2) 將 tokenId 0x3f01 存入 MarginTrading 0xadc949f8... 開 margin position；(3) 在 USDC.e/USDC 池 0xa9e9cb16... 執行單筆 Uniswap V3 swap 移動 sqrtPriceX96；(4) 經 modular swap router 走 UniswapModuleWithoutChainlink 0x729cf665... 觸發 borrow；(5) 經 WETH/USDC 與 WBTC/USDC 多次 swap 解倉；(6) 將淨 32,850.892483 USDC 整至 attacker EOA。回呼劫持即為攻擊面，並非典型重入漏洞。經洗錢後目前 USDC 餘額為 0。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x96a8b3e8963c577e8136e7c0036afe432940d4da",
+          "blockchain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "第二個 exploit 智能合約，於 2026-05-02 01:30:34Z（區塊 458451136）由同一 attacker EOA 部署。Solidity 0.8.20、runtime 14,272 bytes — 與第一個攻擊合約 0x7e3c1331 byte-identical runtime 大小，強烈顯示同一 source 模板同部署者。對 PositionsManager 0x5fe380d6 呼叫 safeTransferFrom(0x4551..., 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132)。交易 REVERTED (status 0x0、0 logs、gas used 1,416,557 / 25,000,000)，顯示協議已硬化或新 tokenId (0x3f04 = 16132，相較攻擊成功之 0x3f01 = 16129) 不可被利用。Attacker 複用同一 NFT 來源（'HegicStrategyCall' Sudoswap 池）僅買入下下一個 tokenId 試驗漏洞是否仍可利用於新選項。byte-identical 14,272-byte runtime + 同 deployer 為同 operator 之指紋。",
+          "accountType": "Contract"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Sharwa Finance PositionsManager — Hegic 選擇權 NFT 之 ERC-721 包裝合約。Arbiscan 已驗證。於區塊 458233156 之 safeTransferFrom 觸發 onERC721Received 鉤子在 attacker exploit 合約 0x7e3c1331 上執行，將 Hegic 選擇權 NFT tokenId 0x3f01 (= 16129) 從 attacker EOA 傳至 exploit 合約。token 隨後存入 MarginTrading 0xadc949f8... 作為擔保品，目前仍由 MarginAccount 0x069cdff4... 持有（故 NFT 本身可回收，但借出之 32,850 USDC 已不可逆）。此為 attacker safeTransferFrom 呼叫之正規入口。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x729cf665c09ef112c607290415a566fffa45826f",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Sharwa Finance UniswapModuleWithoutChainlink — modularSwapRouter/uniswap 路徑中之漏洞預言機模組。Arbiscan 已驗證（源路徑 contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol，DefimonAlerts 圖片中重現第 79–86 行：`function getPositionValue(uint256 amountIn) external virtual returns (uint amountOut) {}` 與 `function getInputPositionValue(uint256 amountIn) external returns (uint amountOut) { amountOut = quoter.quoteExactInput(path, amountIn); }`）。函式以單區塊現貨呼叫 Uniswap V3 Quoter 對 USDC.e/USDC 池 0xa9e9cb16... 報價，無 TWAP、無 Chainlink 後備。合約名稱 ('WithoutChainlink') 即承認此缺失，是核心 root-cause 合約。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginTrading 主合約。Arbiscan 已驗證。於攻擊交易中發 Borrow(uint marginAccountID, uint amountDebtTokens) 事件 (signature 0xb9c2d7ec...) 並伴隨 Exercise / TokenWithdrawn 事件 (log#16, #19, #21)。其 borrow(marginAccountID, amount) 函式在無偏離守門下信任 UniswapModuleWithoutChainlink 之報價，使 attacker 能以被高估之 Hegic 選擇權 NFT 擔保品吸走 32,850.892483 USDC。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x5b2f774050d590d54165872e4297cf9d2d90ed54",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginTradingRouter — Arbiscan 已驗證。Attacker 用以將 Hegic 選擇權 NFT (tokenId 0x3f01) 存入 MarginTrading 模組之 router。在 deposit 鏈第一跳接收 NFT (Transfer 0x7e3c1331 → 0x5b2f7740, log#11) 再交給底層 position manager 0x4a07f03a。自身無漏洞，列此為 attacker 注入擔保品之正當入口。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance 每筆 position 之 holding 合約（未驗證、33,898 bytes runtime，可能為 per-margin-account proxy 或 vault）。在 MarginTradingRouter 0x5b2f7740 與 MarginAccount 0x069cdff4 之間作為 NFT deposit 鏈之中間 hop（Transfer 0x5b2f7740 → 0x4a07f03a → 0x069cdff4, log#12–15）。非直接被攻擊；列此作為協議擔保品流之中繼節點。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x069cdff47380bfcfa40d84f70834779daae96726",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginAccount — 攻擊後持有 attacker 存入之 Hegic 選擇權 NFT (tokenId 0x3f01) 之 per-user margin-account vault。接收來自 Sudoswap LiquidityPool 0xa4113ac6 之 15,368.657012 USDC (log#17) 並將資金沿路徑送至 attacker exploit 合約 0x7e3c1331 (log#22 → #23)。目前持有被存入之 NFT，故協議仍持有可回收之 NFT 擔保品，但現金側損失已實現。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa9e9cb16e922892aa563a5adb0f7d976efce36fb",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Uniswap V3 USDC.e/USDC 池（token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831、token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8、fee=500、攻擊時流動性 3,161,863,130）。為漏洞 UniswapModuleWithoutChainlink 0x729cf665... Quoter 所引用之池。Attacker 於主要 exploit 交易之 Swap (event 0xc42079f9, log#5–6) 將 +21,989,109,760 USDC 注入池中並使大量 USDC.e 流出，將 sqrtPriceX96 推向使 USDC.e 對 USDC 大幅昂貴之方向，係 Hegic 選擇權 USDC 估值被高估之單區塊價格操縱動作。低流動性即為僅以小額 swap 即可搬動足以掏空協議價格之根本原因。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sudoswap 'HegicStrategyCall' AMM 池（Blockscout 標記名）。Attacker 透過 Sudoswap 聚合器 0xec096ea6eb9aa5ea689b0cf00882366e92377371 自此池以 ~0.1 ETH + ~15 USDC.e 買入 Hegic 選擇權 NFT tokenId 0x3f01。攻擊後此池之 Hegic 選擇權 NFT 庫存為空。非 attacker 控制，列此作為攻擊所用 NFT 之來源。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa4113ac6cc41141b819f34d81f6ccdabca07aecf",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "原始 Hegic 選擇權 NFT tokenId 0x13 (= 19) 之 Sudoswap LiquidityPool，係 MarginTrading Borrow/Exercise 事件 (log#16, #19, #21) 引用之 token。提供 15,368.657012 USDC (Transfer, log#17) 最終被 attacker exploit 合約整帳。非直接被攻擊，列此作為 borrow 端之鏈上 USDC 來源。",
+          "accountType": "Contract"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Sharwa Finance MarginTrading onERC721Received Uniswap V3 スポットオラクル操作",
+      "description": "2026-05-01 10:17:07 UTC（Arbitrum ブロック 458233156）において、Sharwa Finance の MarginTrading モジュールが onERC721Received コールバック乗っ取りと低流動性 USDC.e/USDC プールの Uniswap V3 単一ブロックスポット価格操作を組み合わせて攻撃され、$32,850 の被害が発生した。攻撃者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681（コードなし EOA）は 2026-04-30 04:43:13Z（ブロック 457808170、攻撃約 17 時間前）に Bridgers クロスチェーンブリッジプロキシコントラクト 0xB685760EBD368a891F27ae547391F4E2A289895b（Arbiscan 検証済み、OpenLabelsInitiative タグ 'Bridgers'）から 0.017779 ETH のプレファンドを受領 — この単一プレファンドで 1 回目（2026-05-01）と 2 回目（2026-05-02）の両攻撃試行のすべてのコスト＋スワップ gas をまかなった。攻撃当日 10:08:20Z に WETH.deposit() で 0.008 ETH を WETH にラップ、Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 で USDC.e に両替し、Sudoswap アグリゲーター（コントラクト 0xec096ea6eb9aa5ea689b0cf00882366e92377371）経由で 'HegicStrategyCall' プール 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c から約 0.1 ETH + 15 USDC.e で Hegic オプション NFT tokenId 0x3f01 (= 16129、Sharwa PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5 でラップ済み）を購入した。10:17:06Z に Solidity 0.8.20、ランタイム 14,272 bytes の攻撃コントラクト 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 をデプロイ。10:17:07Z の攻撃トランザクション 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad：攻撃者 EOA が PositionsManager に対して safeTransferFrom(0x4551..., 0x7e3c1331, 0x3f01) を呼び出すと、ERC-721 Transfer が発火し、PositionsManager は攻撃コントラクト上で onERC721Received を即座に実行し、攻撃コントラクトはこのコールバック内で一原子取引として全攻撃を完遂した：(a) MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 への Approve（log#9–10）；(b) 0x3f01 を 0x5b2f7740 → 0x4a07f03a → 0x069cdff4 経由で担保として預入（Transfer、log#11–15）；(c) USDC.e/USDC プール 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb（fee=500、流動性約 3.16B）で単一 Swap（log#5–6、+21,989,109,760 USDC 流入、大量 USDC.e 流出）を実行し、USDC.e の USDC に対する価格を大幅に押し上げ；(d) modular swap router を経由して UniswapModuleWithoutChainlink オラクル 0x729cf665c09ef112c607290415a566fffa45826f の getInputPositionValue を呼び出し、後者が直接 quoter.quoteExactInput(path, amountIn) を呼ぶことで操作済み単一ブロックスポット価格を取得し、USDC.e 建て Hegic オプションの USDC 等価価値を数倍に水増し；(e) MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 が Borrow / Exercise / TokenWithdrawn イベント（log#16、#19、#21）を発火し、Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf から 15,368.657012 USDC がパスに注入される；(f) 続く WETH/USDC（0xc6962004...）および WBTC/USDC（0x0e4831319a50228b9e450861297ab92dee15b44f）での複数 swap（log#24–55）により約 4.5157 WETH と約 0.0939 WBTC を蓄積；(g) 最終的に USDC.transfer(attacker EOA, 32850892483) で正味 32,850.892483 USDC を攻撃者 EOA に集約（log#57）。UniswapModuleWithoutChainlink は Arbiscan 上で検証済み（コントラクト名自体が 'WithoutChainlink' ＝ Chainlink フォールバック欠如を自認）。10:17:36Z に攻撃者 EOA は USDC を Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc に Approve し、depositV3（selector 0x3ce33bff）で USDC を他チェーンへブリッジ。2026-05-02 01:30:34Z の 2 回目の試み（tx 0xe46627...、コントラクト 0x96a8b3e8963c577e8136e7c0036afe432940d4da）は tokenId 0x3f04 = 16132 に対する safeTransferFrom 呼び出しで、status 0x0、0 logs で REVERTED し、プロトコルがパッチ済みか、または当該 tokenId が操作不可能であったことを示す。2026-05-03 09:31:14Z に最終 USDC.e クロスチェーン資金洗浄。DefimonAlerts は 2026-05-05 23:50 UTC に公開アラート（https://x.com/DefimonAlerts/status/2051691029024084164）を発信、DeFiLlama は defillamaId 6876 として事件を記録。DeFiLlama は Sharwa Finance に対し 2025-10-20 の $146,000 Price Manipulation Attack も記録しており、UniswapModuleWithoutChainlink / 低流動性プール脆弱性が過去に悪用されたが根本的に修正されていなかったことを示している。",
+      "rootCause": "1. 単一ブロックスポット Quoter が担保オラクルとして使用：UniswapModuleWithoutChainlink（Sharwa コントラクト 0x729cf665c09ef112c607290415a566fffa45826f、ソースパス contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol）の getInputPositionValue(uint256 amountIn) は quoter.quoteExactInput(path, amountIn) を直接呼び出し、getOutputPositionValue(uint256 amountOut) は quoter.quoteExactOutput(path, amountOut) を直接呼び出す。Uniswap V3 Quoter は呼び出し時点のプール sqrtPriceX96 を読み単一ブロックスポットクォートを返すだけで、TWAP も Chainlink フォールバック もオラクル偏差サーキットブレーカーも存在しない。コントラクト名自体がこの欠落を自認している。2. 低流動性 USDC.e/USDC プール：Quoter が参照するプール 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb（token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831、token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8、fee=500、流動性約 3.16B）は約 22k USDC.e の入力で sqrtPriceX96 を大きく動かし、USDC.e 建て Hegic オプションの USDC 等価価値を水増しできる。3. onERC721Received コールバック乗っ取り面：攻撃者は Hegic オプション NFT を任意のコントラクトへ safeTransferFrom で送れる。受け取り側がコントラクトの場合 PositionsManager 0x5fe380d6 の onERC721Received が発火し、受信側の onERC721Received がフラッシュローン・価格操作 swap・MarginTrading.borrow・巻き戻し swap・集約送金を同一原子取引内で実行可能とし、防御側に front-run 機会を与えない。4. 借款側に sanity バウンダリーなし：MarginTrading（0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7）は外部参照に対する LTV 上限制限、二次オラクル要求、プール流動性に対する単一借款上限をいずれも持たない。5. 同種バグの歴史：DeFiLlama は Sharwa Finance に対し 2025-10-20 の $146,000 Price Manipulation Attack（defillamaId 6876）も記録しており、modular swap router / UniswapModuleWithoutChainlink 設計判断が既に悪用されていたにもかかわらず根本修正されていなかった。",
+      "attackVector": "1. **資金調達（ブロック 457808170、2026-04-30 04:43:13Z、攻撃約 17 時間前）**：攻撃者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 は Bridgers クロスチェーンブリッジプロキシコントラクト 0xB685760EBD368a891F27ae547391F4E2A289895b（OpenLabelsInitiative タグ 'Bridgers'）から 0.017779 ETH のプレファンドを受領。ブロック 458231063（2026-05-01 10:08:20Z）で WETH（0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2）の deposit() を value 0.008 ETH で自呼び出しし、Bridgers プレファンドの一部を WETH にラップして操作資金とする（この単一 Bridgers プレファンドが 1 回目と 2 回目の両攻撃試行のすべてのコスト＋スワップ gas/fee キックバックをまかなった）。2. **Hegic オプション NFT 取得（10:11:40Z–10:11:46Z）**：攻撃者は Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 に WETH を Approve し、exactInputSingle（selector 0x414bf389）で WETH→USDC.e にスワップ、さらに USDC.e を Approve し、Sudoswap アグリゲーター 0xec096ea6eb9aa5ea689b0cf00882366e92377371（selector 0x0e5024d7、buy(address,address,uint256,uint256[]) とデコード）を 'HegicStrategyCall' プール 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c から呼び出し、Hegic オプション NFT tokenId 0x3f01 を約 0.1 ETH + 15 USDC.e で取得。3. **攻撃コントラクトデプロイ（10:17:06Z）**：攻撃者 EOA は Solidity 0.8.20、ランタイム 14,272 bytes の攻撃コントラクト 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 をデプロイ。IERC721Receiver インタフェースを実装し、複数ステップのコールバック乗っ取りロジックを内包する。4. **トリガー：safeTransferFrom + onERC721Received 乗っ取り（10:17:07Z、ブロック 458233156、tx 0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad）**：攻撃者 EOA が PositionsManager 0x5fe380d6 に対して safeTransferFrom(0x4551..., 0x7e3c1331..., 0x3f01) を呼び出す。ERC-721 Transfer イベント（0x4551...→0x7e3c...、tokenId 0x3f01）が発火し、PositionsManager は攻撃コントラクトに対し onERC721Received(msg.sender, 0x4551..., 0x3f01, bytes('')) を即座に呼び出し、攻撃コントラクトはこのコールバック内で攻撃ペイロードを実行する。5. **担保預入と価格操作（コールバック内）**：攻撃コントラクトは (a) PositionsManager/NFT を MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 に Approve（log#9–10）、(b) MarginTradingRouter 経由で NFT を担保として預入、tokenId 0x3f01 の Transfer フロー 0x7e3c1331 → 0x5b2f7740 → 0x4a07f03a → 0x069cdff4（log#11–15）、(c) Uniswap V3 プール 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb で単一 Swap（event 0xc42079f9、log#5–6、amount0 = +21,989,109,760＝USDC 流入、amount1 ≒ -9,907,608 ＝ USDC.e 流出）を実行して USDC.e を排出、sqrtPriceX96 を USDC.e が高価になる方向へシフト。6. **水増し評価 + 借入（コールバック内）**：プールスポット価格操作済みの状態で、modular swap router の getInputPositionValue(amountIn) は Hegic オプションの（USDC 建て）価値を真実より遥かに高い値で返す。攻撃コントラクトは UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f 経由のスワップパスを呼び出し、MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 が Borrow(marginAccountID=0x13, amountDebtTokens=...) を Exercise / TokenWithdrawn イベント（log#16、#19、#21）とともに発火する。exploit コントラクトに入る 15,368.657012 USDC は Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf（log#18 + log#17 の ERC-20 Transfer）から供給される。7. **巻き戻し + 集約（依然コールバック内）**：攻撃コントラクトは 3 つのプール（(i) 同一 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb での USDC↔USDC.e、(ii) WETH/USDC 0xc6962004f452be9203591991d15f6b388e09e8d0、(iii) WBTC/USDC 0x0e4831319a50228b9e450861297ab92dee15b44f）で一連のフォローアップ Swap（log#24–55）を実行し、USDC 集約の過程で WETH と WBTC を蓄積。最後にコントラクトは正味 32,850.892483 USDC を USDC.transfer（log#57、value 32850892483、6 桁小数）で攻撃者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 に送金。8. **ブリッジアウト資金洗浄（10:17:36Z、攻撃後約 29 秒）**：攻撃者 EOA は USDC を Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc に Approve し、depositV3（selector 0x3ce33bff）を呼び出して USDC を他チェーンへブリッジ。0x7e3c1331 から Across への 2 回目の Approve + depositV3 が続く。Across SpokePool は関数シグネチャ `depositV3(string destinationChain, address recipient, uint256 amount, bytes calldata data)` で識別される。9. **失敗した追跡攻撃（2026-05-02 01:30:34Z、tx 0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be）**：攻撃者は 2 つ目の 14,272-byte 攻撃コントラクト 0x96a8b3e8963c577e8136e7c0036afe432940d4da をデプロイし、PositionsManager 0x5fe380d6 に対して safeTransferFrom(0x4551..., 0x96a8b3e..., 0x3f04 = 16132) を呼び出したが、トランザクションは status 0x0、0 logs、gas used 1,416,557 / 25,000,000 で REVERTED。これはプロトコルがガードを追加したか、新たに取得した tokenId 0x3f04 = 16132 が同じ脆弱オラクル経由で価格決定されていなかったことを示唆する。攻撃者は約 12 時間後に再試行し失敗した模様。10. **最終資金洗浄（2026-05-03 09:31:14Z）**：攻撃者 EOA は USDC.e（0xff970a61a04b1ca14834a43f5de4533ebddb5cc8）を Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc に Approve し、再び depositV3 を呼び出して残余 USDC.e を他チェーンへブリッジ、クロスチェーンキャッシュアウトを完了した。",
+      "lessons": [
+        "単一ブロック Uniswap V3 スポット価格を担保評価に用いることは本質的に安全ではない：低流動性プールは数千ドルの入力で動かされ、排出側にペッグされるあらゆる資産を水増しできる。borrow 側担保を決定するあらゆるオラクルは (a) Uniswap V3 TWAP オラクル（例：OracleLibrary.consult を observationCardinalityNext と共に使用）を Quoter の代わりに使用し、(b) 最低流動性フロアを要求し、または (c) Chainlink などの独立価格ソースでクロスチェックすべきである。これがまさにデプロイ済みの 'WithChainlink' 同名モジュールが担うべき役割であり、'UniswapModuleWithoutChainlink' が明示的に欠いている部分である。",
+        "onERC721Received は、NFT をユーザー選択コントラクトへ送信可能なあらゆるプロトコルに対する汎用攻撃面である：受信側は（価格操作 → 借入 → 巻き戻し → ブリッジ）の任意複合多段階エクスプロイトを単一原子取引内で実行でき、防御側に別個の攻撃トランザクションを front-run する機会を与えない。受信側コントラクトがユーザー提供である場合、プロトコル側で onlyProtocol / noReborrow / maxLTV-on-receive 等のチェックを適用すべき。",
+        "複数の価格ソースを集約するモジュラー swap router であっても、唯一有効なモジュールがスポット Quoter である場合は防御にならない。プロトコルは (a) スポット Quoter を唯一の担保オラクルとする借入を拒否し、(b) 設定に Chainlink または TWAP モジュールの有効化を必須とし、(c) Chainlink 等価モジュールが未設定の場合は revert すべき — 'WithoutChainlink' 命名規約は、プロトコルレベルレビューをトリガーすべき赤信号である。",
+        "オラクルから返される単一の数値を信頼する borrow 関数は、価格オラクル操作ローンプロダクトと等価である。プロトコルには最低限 (a) TWAP/Chainlink に対する最大偏差、(b) プール利用流動性に対する借入額上限比率、(c) 単一トランザクション・単一ブロックの借入レート制限、(d) 借入後の sanity チェック（同じ NFT クラスの過去 LTV との比較）が必要。",
+        "Sharwa Finance は同種バグを過去に一度攻撃されている（2025-10-20、$146,000、defillamaId 6876）。公開された価格操作事象の後、責任あるプロトコルは (a) 影響を受けたオラクルパスを直ちに無効化し、(b) TWAP/Chainlink フォールバックの必須化を追加し、(c) 影響を受けたオラクルアドレスと推奨ユーザーアクションを含む事後分析を公開し、(d) モジュラールーターを再構成して 'no-fallback' コードパスを完全に削除することを検討すべき。2025-10-20 の後、これらのアクションは公開記録上見当たらず、2026-05-01 にも同脆弱性が悪用可能のまま残った。",
+        "失敗した追跡攻撃自体がオンチェーンシグナルである：2026-05-02 01:30:34Z のリバート試行は、攻撃者が 2026-05-01 の成功後もプロトコルを継続的にプローブしていたことを示す。同一 PositionsManager に対する非オーナー EOA からの複数回 safeTransferFrom 試行を監視すれば、防御側に将来の成功を防ぐための第二の硬化機会が得られた。",
+        "攻撃後約 30 秒以内の Across Protocol depositV3 による盗難 USDC クロスチェーンは、もはや標準的な資金洗浄パターンである。クロスチェーン監視と Across / Avalanche / Celer リレイヤー協力（新たに空にされた DeFi プロトコル流動性プールを発信源とする大額ブリッジ USDC のフラグ + 遅延）は、borrow 確定後はオンチェーン侵害が不可逆であることから、ウィンドウ内緩和策の数少ない現実的選択肢の一つである。",
+        "このエクスプロイトは完全なオンチェーントランザクション解読の価値を示す：オラクル価格を破壊するスワップと借入は同じ原子取引内で発生するため、borrow イベントのみを読む者は根本原因を誤認する。調査者は外側 to アドレスの関数セレクタだけでなく、常に 50–60 log 全体レシートをデコードすべきである。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x2f8c71771a50257672e01aa09e2438c2bdbf7539ff53c819fe3f61956a8ff923",
+          "blockchain": "arbitrum",
+          "role": "funding",
+          "description": "Arbitrum ブロック 457808170（2026-04-30 04:43:13Z）— Bridgers クロスチェーンブリッジプロキシコントラクト 0xB685760EBD368a891F27ae547391F4E2A289895b（Arbiscan 検証済み、OpenLabelsInitiative タグ 'Bridgers'）から攻撃者 EOA 0x4551835e7c40d2a3d407c89d6a91eff98285c681 への内部トランザクション、金額 17,779,000,000,000,000 wei = 0.017779 ETH。この単一の事前資金調達（1 回目試行の約 17 時間前）は両方のエクスプロイト試行＋ラップ＋スワップ手数料を賄った：2026-05-01 1 回目 WETH.deposit の 0.008 ETH ＋ 2026-05-02 2 回目 WETH.deposit の 0.008 ETH ＋ ~0.0017 ETH のスワップガス／手数料キックバック。Bridgers は中国語圏攻撃者がよく利用するクロスチェーンアグリゲーターブリッジであり、EOA ミキサー直接送金ではなく Bridgers 経由の資金調達は、オペレーターが汎用ブリッジプロキシで攻撃資本を前払いする buyer-pays-gas モデルと整合する。"
+        },
+        {
+          "txHash": "0xe8ad28839da4c1c031d42fba987705c0f8ada147cb93fa7e3767a1c3b42c5f2a",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック 458231063（2026-05-01 10:08:20Z）— 攻撃者 EOA 0x4551835e… が WETH（0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2）.deposit()（input data なし、value 0.008 ETH = 8,000,000,000,000,000 wei）を呼び出し、Bridgers 事前資金調達のうち 0.008 ETH を WETH にラップし gas／操作資金とした。続くブロック 458231149（10:11:40Z、tx 0x32d1c00a70122d3ba9b12f9efa7ac56e0f422563bc0d90fe0980d094e45d3b69）で WETH.approve(SwapRouter, MAX)、ブロック 458231152（10:11:43Z、tx 0xe39b0bfecec92853ca27e87a5a0e56cb914f19563662d3dec63257c52c53655b）で exactInputSingle（selector 0x414bf389）により Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 で WETH→USDC.e スワップを完了。"
+        },
+        {
+          "txHash": "0xb8d21d38de184f2f40a4fa25f9ccff8ff482b68e46a4898540464626a772e2e7",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック 458231155（2026-05-01 10:11:46Z）— 攻撃者 EOA が Sudoswap アグリゲーター 0xec096ea6eb9aa5ea689b0cf00882366e92377371（selector 0x0e5024d7、buy(address nft, address recipient, uint256 maxPrice, uint256 tokenId)）を呼び出し、引数 NFT コントラクト = PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5、recipient = 攻撃者 EOA 0x4551835e…、maxPrice = 0.1 ETH = 0x016345785d8a0000、tokenId = 0x3f01 (= 16129)。レシートは Transfer(0x000…, 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c 'HegicStrategyCall' プール, 0x4551835e… 攻撃者 EOA, tokenId 16129) と解読され、'HegicStrategyCall' プールが Hegic オプション NFT を ~0.1 ETH + 15.011892 USDC.e で攻撃者に売却。1e-9 ETH の自己転送（ブロック 458231162, 10:11:53Z, tx 0xefee551119329435a05ce080349462d40f0e061c8169256aaa2eee2656d7396f）は Sudoswap マーケットプレースフィーのキックバック。"
+        },
+        {
+          "txHash": "0xe4202beab13b91021e716231e6ebccba1366c829bc0752f431c22f53046cfc95",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック 458233155（2026-05-01 10:17:06Z）— 攻撃者 EOA が攻撃コントラクト 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377（Solidity 0.8.20、ランタイム 14,272 bytes、proxy なし、標準実装なし）をデプロイ。コントラクトは IERC721Receiver インタフェースを実装し（onERC721Received セレクタ 0x150b7a02 を返す）、複数ステップのコールバック乗っ取りエクスプロイトロジックを含む。デプロイヤーは 2 回目の攻撃コントラクト 0x96a8b3e8963c577e8136e7c0036afe432940d4da と同一。"
+        },
+        {
+          "txHash": "0x05cfcfe9bdf8d19aaea3ba417e6559aee37c82120974e75335d06e56030f4dad",
+          "blockchain": "arbitrum",
+          "role": "exploit",
+          "description": "Arbitrum ブロック 458233156（2026-05-01 10:17:07Z、status 1、gas used 8,712,312）— 主要エクスプロイト。攻撃者 EOA 0x4551835e… が PositionsManager 0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5 に対して safeTransferFrom(0x4551..., 0x7e3c1331..., 0x3f01)（selector 0x42842e0e）を呼び出す。ERC-721 Transfer イベント（0x4551…→0x7e3c…、tokenId 0x3f01）が発火し、PositionsManager は攻撃コントラクトに対して onERC721Received(operator=攻撃者 EOA, from=攻撃者 EOA, tokenId=0x3f01, data='') を即座に呼び出す。攻撃コントラクトはコールバック内で：(1) PositionsManager/NFT を MarginTradingRouter 0x5b2f774050d590d54165872e4297cf9d2d90ed54 に Approve（Approval イベント log#9–10）、(2) MarginTrading 0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7 へポジションを開き、tokenId 0x3f01 を 0x5b2f7740 → 0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103 → 0x069cdff47380bfcfa40d84f70834779daae96726（MarginAccount）経由で預入（logs#11–15）、(3) USDC.e/USDC プール 0xa9e9cb16e922892aa563a5adb0f7d976efce36fb で単一 Swap（event 0xc42079f9、log#5–6、+21,989,109,760 token0 USDC 流入、−9,907,608 token1 USDC.e 流出）を実行し、sqrtPriceX96 を USDC.e 高価方向へシフト、(4) UniswapModuleWithoutChainlink 0x729cf665c09ef112c607290415a566fffa45826f 経由で操作済みスポットクォートを取得し MarginTrading.borrow を実行、(5) MarginTrading が Borrow(marginAccountID=0x13, amountDebtTokens=…) と Exercise / TokenWithdrawn イベント（log#16、#19、#21）を発火、(6) Sudoswap LiquidityPool 0xa4113ac6cc41141b819f34d81f6ccdabca07aecf（Hegic option tokenId 0x13 = 19 用、'LiquidityPool' 名）が 15,368.657012 USDC をパスに注入（log#17）、(7) 後続 WETH/USDC（event 0xc6962004f45a457f...）と WBTC/USDC（event 0x0e483131...）の複数 swap（logs#24–55）で ~4.5157 WETH + ~0.0939 WBTC を蓄積、(8) USDC.transfer(attacker EOA, 32850892483) で正味 32,850.892483 USDC を攻撃者 EOA に集約（log#57）。合計 59 logs、gas used 8,712,312。"
+        },
+        {
+          "txHash": "0x09371721ee490c2f1d8d5d40e53e2bc6ac7821741134f888615dceb89c9387f0",
+          "blockchain": "arbitrum",
+          "role": "consolidation",
+          "description": "Arbitrum ブロック 458233185（2026-05-01 10:17:36Z）— 攻撃者 EOA 0x4551835e… が USDC（0xaf88d065e77c8cc2239327c5edb3a432268e5831）.approve(0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc, MAX) を呼び出し。これは同一ブロック内の後続 Across SpokePool depositV3 呼び出しに必要な明示的承認。approval イベント topic + spender indexed = Across SpokePool で確認。"
+        },
+        {
+          "txHash": "0x9922e32e710a20e82dc64c41f80d0a692d535d48b38f7a87c355c2ca5d981639",
+          "blockchain": "arbitrum",
+          "role": "laundering",
+          "description": "Arbitrum ブロック 458233185（2026-05-01 10:17:36Z、エクスプロイトの約 29 秒後）— 攻撃者 EOA 0x4551835e… が Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3(address recipient, address originToken, uint256 amount, uint256 destinationChainId, uint64 relayerFeePct, uint32 quoteTimestamp, bytes memory message, uint256 maxCount)（selector 0x3ce33bff）を呼び出し、~32,850 USDC（0xaf88d065e77c8cc2239327c5edb3a432268e5831）を Arbitrum から他チェーンへブリッジ。destinationChainId と recipient は calldata にエンコードされ、Across 宛先チェーンのリレイヤーが資金を受け取る。エクスプロイト成功とブリッジ間の 29 秒の遅延は、事前スクリプト化された自動資金洗浄レッグと整合する。"
+        },
+        {
+          "txHash": "0x8a579e2d59385b619f225c40d8b37dd33ab67eb4e06319fa51955a2a5b304753",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック ~458451xxx（2026-05-02 01:21:53Z）— 2 回目試行準備。攻撃者 EOA 0x4551835e… が同一 Bridgers 事前資金調達から追加 0.008 ETH を WETH にラップ。続く WETH.approve（ブロック 458451xxx、tx 0x81a76181dd110a0bab9e78c5dbe88bd0ef1155ebf4c1c58d18ad9527019bc85f、01:21:53Z）、exactInputSingle WETH→USDC.e（tx 0x124d82293674847a3ec79a5236d1db84ace85352f45f0d218a8c5145f28f6eb2、01:21:54Z）、USDC.e.approve(Sudoswap)（tx 0xe3296630674d4d37526a8e6d20203d3906b99ae81c11dafbd1a0d200a29f4550、01:21:56Z）、Sudoswap 'buy' tokenId 0x3f04 = 16132 を同一 'HegicStrategyCall' プールから ~15 USDC.e で取得（tx 0xb97fd7c1ed5266d6a3f66ca81418a3fd140f4b1b9828dd789f9bfa6e7e413cf3、01:21:57Z）。全て 2026-04-30 Bridgers 事前資金調達で賄われた。"
+        },
+        {
+          "txHash": "0x2876c125dd56c39569542d607f8e1260aa2a1c60fbf4b700fc54d45e85185d95",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック 458451136（2026-05-02 01:30:34Z）— 攻撃者 EOA が 2 番目の攻撃コントラクト 0x96a8b3e8963c577e8136e7c0036afe432940d4da（Solidity 0.8.20、ランタイム 14,272 bytes — 1 番目の攻撃コントラクト 0x7e3c1331 とバイト単位で同一ランタイムサイズで、同一ソーステンプレートと同一デプロイヤーであることを強く示唆）をデプロイ。コントラクトも IERC721Receiver を実装。"
+        },
+        {
+          "txHash": "0xe4662771945563524e465ff5f9c021dfe0526d947c383ff7f9cd43622502f4be",
+          "blockchain": "arbitrum",
+          "role": "setup",
+          "description": "Arbitrum ブロック 458451136（2026-05-02 01:30:34Z、status 0、gas used 1,416,557 / 25,000,000、0 logs）— 2 回目の試行 safeTransferFrom(0x4551835e…, 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132) を PositionsManager 0x5fe380d6 に対して実行。トランザクションは REVERTED（log 発火なし）— 受信コントラクトが onERC721Received フックで拒否されたか、tokenId 16132 のポジション会計が既にロック／引出済みであった可能性。revert された呼び出しは、攻撃成功時に使用された 0x3f01 = 16129 ではなく、tokenId 0x3f04 = 16132 を新しくデプロイされた 2 番目の受信コントラクトに対して使用。tokenId 選択は、攻撃者が同じ 'HegicStrategyCall' プールから次の tokenId を購入し、異なるオプションで脆弱性がまだ機能するかテストするパターンと整合する。バイト単位で同一の 14,272-byte ランタイムと同一デプロイヤーの再利用は、2 回目の試行を同一オペレーターに紐づける指紋。"
+        },
+        {
+          "txHash": "0xbc99750b04c874bab9e73772d0e0ba2fa6e3d6f0c8cde2132cefc5e5c218c4b1",
+          "blockchain": "arbitrum",
+          "role": "laundering",
+          "description": "Arbitrum ブロック ~458526xxx（2026-05-03 09:31:14Z）— 最終資金洗浄レッグ。その約 5 秒前に USDC.e.approve(Across SpokePool, MAX)（tx 0xe38f34b757f8645b6d0a22b39e33d32ddbdbb81fc955d11db009bb09c61db0f4）が先行。攻撃者 EOA 0x4551835e… が Across SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc.depositV3（selector 0x3ce33bff）を呼び出し、残余 USDC.e（0xff970a61a04b1ca14834a43f5de4533ebddb5cc8）— スワップレッグのおつりと Hegic オプション payoff ルーティングで攻撃者が取得した非 Arbitrum ネイティブ USDC バリアント — を宛先チェーンへブリッジ。主要エクスプロイトとこの最終ブリッジの 2 日遅延は、攻撃者が Across 宛先チェーンのリレイヤーフィー／流動性決済を待っているパターンと整合する。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x4551835e7c40d2a3d407c89d6a91eff98285c681",
+          "blockchain": "arbitrum",
+          "role": "primary_attacker",
+          "description": "Arbitrum 上の主要攻撃者 EOA。ブロック 457808170（2026-04-30 04:43:13Z、攻撃 ~17 時間前）で Bridgers クロスチェーンブリッジプロキシコントラクト 0xB685760EBD368a891F27ae547391F4E2A289895b（OpenLabelsInitiative タグ 'Bridgers'）から 0.017779 ETH のプレファンドを受領。ブロック 458231063（2026-05-01 10:08:20Z）で WETH（0x82aF4944D2E85e5DaC49698B78028cC5E40dD0F2）の deposit() を value 0.008 ETH で自呼び出しし、Bridgers プレファンドの一部を WETH にラップ。Uniswap V3 SwapRouter 0xE592427A0AEce1De3B1F8D7C5d36EB8d2D6F1c45 で USDC.e に両替、Sudoswap 'HegicStrategyCall' プール 0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c から約 0.1 ETH + ~15 USDC.e で Hegic オプション NFT tokenId 0x3f01 を取得。10:17:06Z に 14,272-byte の攻撃コントラクト 0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377 をデプロイ、10:17:07Z に PositionsManager 0x5fe380d6 への safeTransferFrom で onERC721Received 乗っ取りをトリガーし、Sharwa Finance MarginTrading モジュールから 32,850.892483 USDC を流出させた。10:17:36Z に Across Protocol SpokePool 0x23981fc34e69eedfe2bd9a0a9fcb0719fe09dbfc に USDC/USDC.e を Approve してブリッジ、2026-05-03 09:31:14Z に最終 USDC.e クロスチェーン資金洗浄を完了。eth_getCode で EOA 確認済み（コードなし）。Bridgers の単一プレファンドが 1 回目（2026-05-01）と 2 回目（2026-05-02）の両攻撃試行のすべての運用コスト＋スワップ gas/fee キックバックをまかなった。EOA ミキサー直接 funding と異なり、Bridgers funding は中国語圏攻撃者に多用される汎用クロスチェーンブリッジプロキシを通じた buyer-pays-gas モデルと整合する。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x7e3c13314ceefc7578242d5eae9ed4dcbeb8d377",
+          "blockchain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "攻撃者 EOA 0x4551835e... により 2026-05-01 10:17:06Z（ブロック 458231188）にデプロイされた主要エクスプロイトスマートコントラクト。Solidity 0.8.20、ランタイム 14,272 bytes。IERC721Receiver インタフェースを実装（onERC721Received セレクタを返却）し、複数ステップの原子攻撃ロジックを含む：(1) PositionsManager/NFT を MarginTradingRouter 0x5b2f7740... に Approve、(2) tokenId 0x3f01 を MarginTrading 0xadc949f8... に担保として預入しマージン建玉を作成、(3) USDC.e/USDC プール 0xa9e9cb16... で単一の Uniswap V3 swap を実行して sqrtPriceX96 をシフト、(4) modular swap router を経由して UniswapModuleWithoutChainlink 0x729cf665... で borrow をトリガー、(5) WETH/USDC および WBTC/USDC での複数 swap で巻き戻し、(6) 正味 32,850.892483 USDC を攻撃者 EOA に集約。コールバック乗っ取りが攻撃面であり、典型的なリエントランシーバグではない。資金洗浄後現在の USDC 残高は 0。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x96a8b3e8963c577e8136e7c0036afe432940d4da",
+          "blockchain": "arbitrum",
+          "role": "exploit_contract",
+          "description": "同一攻撃者 EOA により 2026-05-02 01:30:34Z（ブロック 458451136）にデプロイされた 2 番目のエクスプロイトスマートコントラクト。Solidity 0.8.20、ランタイム 14,272 bytes — 1 番目の攻撃コントラクト 0x7e3c1331 とバイト単位で同一ランタイムサイズで、同一ソーステンプレートと同一デプロイヤーであることを強く示唆。PositionsManager 0x5fe380d6 に対して safeTransferFrom(0x4551..., 0x96a8b3e8963c577e8136e7c0036afe432940d4da, 0x3f04 = 16132) を呼び出した。トランザクションは status 0x0、0 logs（gas used 1,416,557 / 25,000,000）で REVERTED。これはプロトコルが硬化されたか、新規 tokenId（0x3f04 = 16132、攻撃成功時の 0x3f01 = 16129 と比較）が操作可能状態でなかったことを示唆する。攻撃者は同じ 'HegicStrategyCall' Sudoswap プールからの NFT を複用し、次の tokenId を購入して異なるオプションで脆弱性がまだ機能するかテストした。バイト単位で同一の 14,272-byte ランタイムと同一デプロイヤーの再利用は、2 回目の試行を同一オペレーターに紐づける指紋。",
+          "accountType": "Contract"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0x5fe380d68fee022d8acd42dc4d36fbfb249a76d5",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Sharwa Finance PositionsManager — Hegic オプション NFT の ERC-721 ラッパー。Arbiscan 上で検証済み。ブロック 458233156 の safeTransferFrom 内で攻撃者のエクスプロイトコントラクト 0x7e3c1331... に対し onERC721Received フックを発火し、Hegic オプション NFT tokenId 0x3f01（= 16129）を攻撃者 EOA からエクスプロイトコントラクトに転送した。トークンはその後 MarginTrading 0xadc949f8... に担保として預入され、現在も MarginAccount 0x069cdff4... に保持されている（NFT 自体は回収可能だが、借出済み 32,850 USDC は不可逆）。攻撃者の safeTransferFrom 呼び出しの正規エントリーポイント。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x729cf665c09ef112c607290415a566fffa45826f",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Sharwa Finance UniswapModuleWithoutChainlink — modularSwapRouter/uniswap パス上の脆弱オラクルモジュール。Arbiscan 上で検証済み（ソースパス contracts/modularSwapRouter/uniswap/UniswapModuleBase.sol、DefimonAlerts 投稿画像で 79–86 行を再現：`function getPositionValue(uint256 amountIn) external virtual returns (uint amountOut) {}` および `function getInputPositionValue(uint256 amountIn) external returns (uint amountOut) { amountOut = quoter.quoteExactInput(path, amountIn); }`）。関数は USDC.e/USDC プール 0xa9e9cb16... に対して Uniswap V3 Quoter による単一ブロックスポットクォートを呼び出すだけで、TWAP も Chainlink フォールバック も存在しない。コントラクト名自体（'WithoutChainlink'）がこの欠落を自認しており、コアの根本原因コントラクトである。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xadc949f8b8dfb89e4b2fa2cb0d46f11e395c2cf7",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginTrading メインコントラクト。Arbiscan 上で検証済み。攻撃トランザクション内で Borrow(uint marginAccountID, uint amountDebtTokens) イベント（シグネチャ 0xb9c2d7ec...）と Exercise / TokenWithdrawn イベント（log#16、#19、#21）を発火。コントラクトの borrow(marginAccountID, amount) 関数は偏差ガードなしに UniswapModuleWithoutChainlink の価格を信頼するため、攻撃者は水増し評価された Hegic オプション NFT 担保に対して 32,850.892483 USDC を引き出すことができた。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x5b2f774050d590d54165872e4297cf9d2d90ed54",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginTradingRouter — Arbiscan 上で検証済み。攻撃者が Hegic オプション NFT（tokenId 0x3f01）を MarginTrading モジュールに担保として預入するために使用したルーター。預入チェーンの第一 hop で NFT を受信し（Transfer 0x7e3c1331 → 0x5b2f7740、log#11）、その後 0x4a07f03a に渡す。自身は脆弱ではなく、攻撃者が担保を注入した正規エントリーポイントとして記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x4a07f03a2ed4fb4025fffe6d24bdf6a719581103",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance の position 別保有コントラクト（未検証、33,898 bytes ランタイム、per-margin-account プロキシまたは vault と思われる）。MarginTradingRouter 0x5b2f7740 と MarginAccount 0x069cdff4 の間で NFT 預入チェーンの中間ホップ（Transfer 0x5b2f7740 → 0x4a07f03a → 0x069cdff4、log#12–15）。直接は脆弱ではなく、プロトコル担保フローの中継ノードとして記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x069cdff47380bfcfa40d84f70834779daae96726",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sharwa Finance MarginAccount — 攻撃後に攻撃者が預入した Hegic オプション NFT（tokenId 0x3f01）を保持するユーザー別 margin-account vault。Sudoswap LiquidityPool 0xa4113ac6 から 15,368.657012 USDC（log#17）を受領し、資金をパス経由で攻撃者のエクスプロイトコントラクト 0x7e3c1331（log#22 → #23）にルーティング。預入された NFT を現在も保持しているため、プロトコルは回収可能な NFT 担保を保持しているが、現金側の損失は実現している。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa9e9cb16e922892aa563a5adb0f7d976efce36fb",
+          "blockchain": "arbitrum",
+          "role": "vulnerable_contract",
+          "description": "Uniswap V3 USDC.e/USDC プール（token0=USDC 0xaf88d065e77c8cc2239327c5edb3a432268e5831、token1=USDC.e 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8、fee=500、攻撃時流動性 3,161,863,130）。脆弱な UniswapModuleWithoutChainlink 0x729cf665... の Quoter が価格参照するプール。攻撃者が主要エクスプロイトトランザクションの Swap（event 0xc42079f9、log#5–6）で +21,989,109,760 の token0 USDC をプールに注入し、大量の token1 USDC.e を排出（log#5–6）することで、sqrtPriceX96 を USDC.e を USDC に対して大幅に高価にする方向へシフトさせ、これが Hegic オプションの USDC 評価を真実の価値より水増しする単一ブロック価格操作の中核アクションである。プールの低流動性が、この少額スワップでプロトコル空涸らしに十分な価格移動を引き起こす根本原因。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "Sudoswap 'HegicStrategyCall' AMM プール（Blockscout 上の名前）。攻撃者が Sudoswap アグリゲーター 0xec096ea6eb9aa5ea689b0cf00882366e92377371 経由で Hegic オプション NFT tokenId 0x3f01 を約 0.1 ETH + ~15 USDC.e で購入するために使用。攻撃後、このプールの Hegic オプション NFT 在庫は空。攻撃者管理ではなく、攻撃で使用された NFT の発生元として記載。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa4113ac6cc41141b819f34d81f6ccdabca07aecf",
+          "blockchain": "arbitrum",
+          "role": "protocol_contract",
+          "description": "元の Hegic オプション NFT tokenId 0x13（= 19）の Sudoswap LiquidityPool。MarginTrading の Borrow/Exercise イベント（log#16、#19、#21）で参照されるトークン。攻撃者のエクスプロイトコントラクトが最終的に集約した 15,368.657012 USDC（log#17 の Transfer）を供給。直接は脆弱ではなく、攻撃の borrow レグのチェーン上 USDC ソースとして記載。",
+          "accountType": "Contract"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-05-22",
+    "lastUpdated": "2026-06-05",
+    "human_verified": false,
+    "models": [
+      "minimax-m3-free"
+    ]
+  }
+}
