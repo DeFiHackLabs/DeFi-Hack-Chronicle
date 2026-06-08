@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-06-05"
+    "lastUpdated": "2026-06-08"
   },
   "files": [
     {
@@ -64,6 +64,12 @@
       "date": "2026-04-29",
       "protocol": "AftermathFi",
       "file": "20260429-AftermathFi.json"
+    },
+    {
+      "id": "SharwaFinance-20260501",
+      "date": "2026-05-01",
+      "protocol": "Sharwa Finance",
+      "file": "20260501-SharwaFinance.json"
     },
     {
       "id": "EkuboProtocol-20260505",
