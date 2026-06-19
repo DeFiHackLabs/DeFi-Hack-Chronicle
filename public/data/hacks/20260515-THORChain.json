@@ -1,0 +1,572 @@
+{
+  "id": "THORChain-20260515",
+  "date": "2026-05-15",
+  "title": "THORChain Bifrost Proposer-Forgery Asgard Vault Churn Drain",
+  "protocol": "THORChain",
+  "blockchain": [
+    "ethereum",
+    "bitcoin",
+    "bsc",
+    "base",
+    "avalanche",
+    "bitcoin_cash",
+    "dogecoin",
+    "litecoin",
+    "xrp"
+  ],
+  "category": [
+    "bridge",
+    "access_control"
+  ],
+  "ecosystem": "cosmos",
+  "language": [
+    "go",
+    "solidity"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "10700000",
+    "breakdown": [
+      {
+        "asset": "BTC",
+        "amount": "40.72778438",
+        "convertedUSD": "3319314",
+        "note": "Blockstream on-chain: total received by bc1ql4u94klk265lnfur2ujk9p6uh52f2a8jhf6f37 across 4 txs (blocks 949477, 949490, 949559, 949564). PeckShield's headline 36.75 BTC corresponds only to the 36.853502 BTC consolidation out (tx 5aa2e8e4cdbec5d6e9... at 2026-05-15 09:43:37 UTC) minus 0.1 BTC change; the 3.87428008 BTC and the 0.1 BTC change-back are also stolen. USD @ $81,500/BTC (CoinGecko daily close 2026-05-15). [verified]"
+      },
+      {
+        "asset": "ETH chain stables + WBTC",
+        "amount": "USDC 1,262,501.73 + USDT 1,756,756.02 + WBTC 5.2063 + DAI 4,567.54 + LUSD 64,138.47 + GUSD 61,074.86 + USDP 38,762.45",
+        "convertedUSD": "3612114",
+        "note": "Aggregated from 22 transferOut() calls in 5-15 08:12-10:53 UTC window from fake-vault 0x82a5CF... to theft addr 0x82fc.... Stable USD value = $3,187,801; WBTC = 5.2063 * $81,500 = $424,313. [verified via Etherscan txlist and tokentx API]. Non-stable tokens (THOR, XRUNE, FOX, TGT, vTHOR, AAVE, LINK, YFI, SNX, DPI, GRT, LENDS, ENA, LDO, UNI, PENDLE, RPL, COMP, MKR, wstETH) account for additional ~$8K-$30K at conservative pricing — not included in stable subtotal to avoid pricing-oracle dependency."
+      },
+      {
+        "asset": "DOGE",
+        "amount": "3911751.05076114",
+        "convertedUSD": "333000",
+        "note": "Blockcypher: DBLJWFemMHbduKofBRg6TJ9XFAgWdvFCjS total_received = 391,175,105,076,114 koinu = 3,911,751.05 DOGE across 5 txs. USD @ $0.085/DOGE (rough, May 15 2026 reference). [verified]"
+      },
+      {
+        "asset": "LTC",
+        "amount": "13731.49553461",
+        "convertedUSD": "584138",
+        "note": "litecoinspace: ltc1qg0h4rz5kf27fkr99gamw4heg20rfz5epd7m7wh total_received = 1,373,149,553,461 litoshis = 13731.50 LTC across 4 txs. USD @ $42.54/LTC. [verified]"
+      },
+      {
+        "asset": "XRP",
+        "amount": "25421.922292",
+        "convertedUSD": "13000",
+        "note": "Xrpscan: rwoGBrYEJ28jhBjchrTyCGXd1Pt4pobFBz received 25,421,922,292 drops = 25,421.92 XRP across 2 main inbound txs (25,404,922,305 drops at 5-15 08:25:42 UTC from r9BxLykSng..., and 16,999,982 drops at 5-15 10:29:01 UTC from r9BxLykSng...) plus several 1-drop probes from r9d7SBJAcf.... USD @ $0.50/XRP. [verified]"
+      },
+      {
+        "asset": "BSC + Base + Avalanche + BCH (residual)",
+        "amount": "see TRM Labs 9-chain report (per-chain amounts not published)",
+        "convertedUSD": "2838434",
+        "note": "Back-calc: TRM Labs total $11.3M minus verified subtotal BTC $3.32M + ETH chain stables+WBTC $3.61M + DOGE $333K + LTC $5,840 + XRP $13K = $7.86M. Residual $2.84M is split among BSC+Base+AVAX (which share ETH-style EVM mechanics, likely ERC-20 stablecoin drains) and BCH (which uses UTXO mechanics analogous to BTC). [single-source: TRM Labs 9-chain enumeration; per-chain amount not published]. BCH specific amount [uncertain] — blockchair IP-blacklisted, bch-explorer.cash empty, rest.bitcoin.com down at investigation time, 3xpl requires API key."
+      }
+    ],
+    "note": "Official THORChain revised final figure: $10.7M (per https://blog.thorchain.org/thorchain-exploit-report-1, 'loss is revised to approximately $10.7M'). The initial estimate at 11:01 UTC on 2026-05-15 was $7.4M ('Loss estimated at approximately $7.4M USD'). TRM Labs' $11.3M headline (https://www.trmlabs.com/resources/blog/thorchain-exploit-drains-usd-11m-across-at-least-nine-chains-what-trm-knows-now) is a single-source figure that includes per-chain amounts for BSC/Base/AVAX/BCH that are not individually published; these chains were not directly T2-verified. The $11.3M total has -4% / +6% margin depending on whether the unverified $2.84M residual is included in full. On-chain verified total: $7.86M (BTC + ETH chain stables+WBTC + DOGE + LTC + XRP). Non-stable ERC-20 tokens (THOR, XRUNE, FOX, TGT, vTHOR, etc.) add ~$8K-$30K at conservative pricing — not included in the $7.86M verified subtotal to avoid oracle dependency. UEEx blog headline $10.8M and PeckShield's $10M+ headline both fall within the $7.86M-verified to $11.3M-headline range. Note: only 1 of 5 vaults was drained (per official blog), so the $10.7M is a per-vault figure, not a network-wide total."
+  },
+  "attackTime": {
+    "startTime": "2026-05-12T17:37:23Z",
+    "endTime": "2026-05-15T10:53:23Z",
+    "isRange": true,
+    "note": "All timestamps verified via on-chain block.timestamp via Etherscan. startTime = 2026-05-12 17:37:23 UTC (block 25,080,575) when the malicious active-validator produced the proposer-forged transferAllowance() call 0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a moving 798,691.238701 USDC of vault allowance from the legitimate old-vault 0x5e7ceee2066b1811b8f845a10c412f5557d067b4 to the attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA. The drainer operated as a legitimate-looking vault for ~2.5 days (nonce 0 -> 189, 2026-05-12 17:58:11 UTC to 2026-05-15 10:53:23 UTC) processing real ETH outbounds; the actual ERC-20 drain began 2026-05-15 08:12:23 UTC (first drain tx 0xefa9087f93fb0924d2fb49ffbe1b2b93cc7cce3cf46327ab9546845f57d5ef96) and the last drain tx was at 2026-05-15 10:53:23 UTC (wstETH dust tx 0xac7fb61b72d36605ea4bf911477116ee6e62f4f4e4c6ee96a7f01be41c3bc460). 22 drain transferOut() calls (nonces 166-188) are the actual drain to 0x82fc...; the other 184 (nonces 0-165) are legitimate ETH outbounds to real THORChain users. Per official THORChain blog (https://blog.thorchain.org/thorchain-exploit-report-1), the auto solvency checker (reactive mode) detected the imbalance within ~52 minutes and triggered automatic chain halts on ETH, AVAX, BSC, BASE, DOGE, GAIA without human intervention. Community raised the alarm 09:08-09:41 UTC; node xuuu was first to manual-pause, ~18-20 nodes stacked 720-block pauses. Mimir governance blocks: HALTTRADING 26183438, HALTSIGNING 26183439, HALTCHAINGLOBAL 26183590, HALTCHURNING 26183849 (cited from official blog). The attacker's funding tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397 was 2026-05-12 21:38:23 UTC (block 25,081,777). The patch commit af46db22bdfe0c6ce9ec5ee9f4178442318d8eff on thornode was committed May 6 2026, but the malicious node had already entered the active validator set during the churn that brought block 25,080,575. Per the official blog, the pre-patch code path is the vulnerable state; v3.18.0/v3.18.1 are the patched states (per official 'Patch v3.18.1 is imminent / all node operators are asked to upgrade immediately'). The official blog's higher-level confirmed root cause is 'exploit in the GG20 TSS implementation allowing progressive key material leakage' — the JSON's proposer-forgery narrative (from Oblivionsage) is a code-level mechanism consistent with this higher-level finding; the relationship is that the unsigned ObservedTx wrapper enabled a malicious active-validator to participate in TSS ceremonies in a way that progressively leaked key material.",
+    "date": "2026-05-15"
+  },
+  "description": "On 2026-05-15 between 08:12 UTC and 10:53 UTC, THORChain was exploited for ~$10.7M (per official blog revised figure, https://blog.thorchain.org/thorchain-exploit-report-1; initial 11:01 UTC estimate was $7.4M; TRM Labs headline is $11.3M). ONLY 1 OF 5 VAULTS WAS DRAINED. The SOL pool (EdDSA-based) was confirmed safe. Funds drained across 9+ chains (BTC/ETH/BSC/Base/AVAX/DOGE/LTC/BCH/XRP); on-chain verified across 5 chains = $7.86M. First flag: ZachXBT ~08:13 UTC; PeckShield confirmed >$10M. Auto solvency checker halted ETH/AVAX/BSC/BASE/DOGE/GAIA within ~52 min. Community alarm 09:08-09:41 UTC; node xuuu first to manual-pause; ~18-20 nodes stacked pauses. Mimir blocks: HALTTRADING 26183438, HALTSIGNING 26183439, HALTCHAIGLOBAL 26183590, HALTCHURNING 26183849. Patch v3.18.1 released 5/18, all nodes upgraded by 5/27.\n\n**Attacker (per official blog):** Cosmos node thor16ucjv3v695mq283me7esh0wdhajjalengcn84q (operator handle 'Dinosauruss', joined THORChain Developer Discord 5/1 asking about churn; node 'n84q'; ~635,000 RUNE across 2 bond addresses). Official confirmed theory: 'exploit in the GG20 TSS implementation allowing progressive key material leakage' (5/15 19:10 update).\n\n**Root cause (on-chain, per Oblivionsage analysis of patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff, https://gist.github.com/Oblivionsage/9859e3281ec41627b8dc5fb8f9c963c3):** Proposer-forgery flaw in bifrost's transaction signing. Observers only signed the inner Tx struct of an ObservedTx, NOT the wrapper (which includes the inbound/outbound direction flag). A malicious active-validator took a real inbound observation, flipped the direction flag to outbound, and the signature was still valid. This let the attacker forge a fake outbound transferAllowance() during routine churn at block 25,080,575 / 2026-05-12 17:37:23 UTC, redirecting 798,691.238701 USDC of vault allowance from old-vault 0x5e7ceee...067b4 to fake-vault 0x82a5CF67...8bDA. The Router v4.1 contract (0xD37BbE57...d7146, Etherscan source verified, name=THORChain_Router, 10,282 bytes) is correct; the flaw is in the bifrost Go-code consensus layer. The patch (43,699 bytes, 15 files, primarily bifrost/observer/attestation_*.go) introduces an attestableObservedTx wrapper that binds the inbound bool to GetSignablePayloadWithInbound(), explicitly signing the full wrapper. The official 'GG20 progressive key material leakage' finding is the higher-level consequence: the unsigned ObservedTx wrapper let the active-validator progressively leak key material through TSS ceremonies.\n\n**Drainer lifecycle (on-chain verified):** (a) Fake-vault 0x82a5CF... pre-funded with 0.083 ETH on 2026-05-12 21:38:23 UTC by gas-funder 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (tx 0xb186...9397, block 25,081,777). (b) Proposer-forged transferAllowance submitted in block 25,080,575 (2026-05-12 17:37:23 UTC) with memo='MIGRATE:26146440'. (c) Fake-vault ran 184 normal ETH outbounds (nonces 0-256, 256-357; 2026-05-12 17:58 to 2026-05-15 08:09 UTC) building 2.5-day camouflage. (d) First drain tx 0xefa9...5ef96 at 2026-05-15 08:12:23 UTC (block 25,099,270) moved 1,261,986.531 USDC to theft address 0x82fc...4eb. (e) 22 final transferOut() calls (nonces 166-188, blocks 25,099,270-25,100,074) moved ~$3.6M of 26 ERC-20 tokens. (f) Solvency checker auto-halted ~52 min; community alarm 09:08-09:41; operators paused globally 09:15-09:18 UTC. (g) Attacker-side ETH consolidated at EOA 0xd477b69551f49c0519f9b18c55030676138890bd: 2,997.37 ETH total = 1,086 ETH from fake-vault (5-15 07:24 camouflage) + 1,911.26 ETH from 0x82fc across 4 txs (1866/10.91/18.25/16.1 ETH on 5-15 09:06/09:20/10:25/10:46 UTC). (h) 0xd477b695 current balance = 2,497.29 ETH (as of 2026-06-17); subsequent outflows 709.88 ETH to 0xd1a0eeb5 (72) + 0x6e6809c (626.88) + 0x82fc (11). (i) 0x82fc current balance = 1.055 ETH (was 0.053 at end-of-drain). Earlier reports of 78,314 ETH in the theft address were a T2 artifact from summing 4 Etherscan event-log false-positive entries (29M/78K/114K/104K ETH = 0x00000011f84b... FeeCollector-style unwrapper sub-call noise, not real ETH movement).",
+  "rootCause": "Proposer-forgery via an unsigned ObservedTx wrapper in the bifrost attestation layer. THORChain's Asgard vaults use GG20 TSS among active validators; before churn, observers sign observations to confirm chain state. The flaw: observers only signed the inner Tx struct, NOT the wrapper that includes the direction flag (inbound vs outbound). A malicious active-validator could take a real inbound observation, flip the flag to outbound, and the signature remained valid. Result: forged outbound transferAllowance() at block 25,080,575 (2026-05-12 17:37:23 UTC, verified via Etherscan eth_getBlockByNumber), redirecting 798,691.238701 USDC from old-vault 0x5e7ceee...067b4 to fake-vault 0x82a5CF67...8bDA. Once the fake vault was credited, drain was a one-line transferOut() call — the same path any legitimate vault uses. The flaw is in the THORChain bifrost Go-code consensus layer, NOT in the EVM-side Router v4.1 (0xD37BbE57...d7146, verified source, behaves per spec). Patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff in thornode (43,699 bytes, 15 files, primarily bifrost/observer/attestation_*.go) introduces an attestableObservedTx wrapper that binds the inbound bool to GetSignablePayloadWithInbound(), explicitly signing the full wrapper. Pre-patch v3.17.x is the vulnerable state; v3.18.0/v3.18.1 are the patched states. The official blog's higher-level conclusion 'exploit in the GG20 TSS implementation allowing progressive key material leakage' (5/15 19:10) is consistent with the code-level mechanism: the unsigned ObservedTx wrapper let a malicious active-validator progressively leak key material through TSS ceremonies. Architectural lesson: signed-payload gaps are functionally equivalent to validator-key compromise — same class as 2022 Ronin (5/9) and 2022 Harmony Horizon (2/5).",
+  "attackVector": "1. **Funding (5-12 21:38 UTC, block 25,081,777)**: 0xcae0ba75a295a70d14dafb672ab4d309f958c284 sent 0.083 ETH to fake-vault 0x82a5CF67...8bDA (tx 0xb186...9397, verified). Funder EOA has 37 txs, 11 counterparties; 0xaaa240b9 (received USDC) and 0xdd6c9e21 (received USDT) are suspicious pre-staging helpers. 7 counterparties unidentified.\n\n2. **Discord pre-staging (5/1/2026)**: Operator 'Dinosauruss' joined THORChain Developer Discord asking churn-entry questions; used node 'n84q' with ~635,000 RUNE across 2 bond addresses (per official blog).\n\n3. **Churn entry (5/13)**: Malicious node joined active validator set during routine churn.\n\n4. **Proposer-forgery (5-12 17:37 UTC, block 25,080,575)**: Forged transferAllowance() observation, on-chain decoded as transferAllowance(router=0xD37B...d7146, newVault=0x82a5CF67...8bDA, asset=USDC 0xA0b8...eB48, amount=798,691.238701, memo='MIGRATE:26146440') from legitimate old-vault 0x5e7ceee...067b4 (bifrost-authorized EOA, eth_getCode=0x). Same block had legitimate DAI migration to 0x8adb2360... as camouflage. Selector 0x1b738b32 = transferAllowance(address,address,address,uint256,string); the function is correct, the upstream bifrost observation was forged.\n\n5. **Camouflage (5-12 17:58 to 5-15 08:09 UTC)**: Fake-vault ran 184 normal ETH outbounds (nonces 0-256, 256-357) to legitimate THORChain users, building 2.5-day history.\n\n6. **Drain (5-15 08:12 to 10:53 UTC)**: 22 transferOut() calls (nonces 166-188, blocks 25,099,270-25,100,074) moved ~$3.6M in 26 ERC-20 tokens to theft address 0x82fc...4eb. First drain tx 0xefa9...5ef96 moved 1,261,986.531 USDC; subsequent txs moved 1,756,756.02 USDT, 5.2063 WBTC, plus 23 other tokens.\n\n7. **Auto-halt + manual pause (5-15 08:43-09:18 UTC)**: Solvency checker detected imbalance and auto-halted ETH/AVAX/BSC/BASE/DOGE/GAIA; community alarm 09:08-09:41 UTC; node xuuu first to manual-pause; 18-20 nodes stacked 720-block pauses; Mimir blocks 26183438/39/590/849.\n\n8. **ETH consolidation (5-15 07:24-10:46 UTC)**: 0xd477b695...8890bd received 2,997.37 ETH total (1,086 from fake-vault camouflage + 1,911.26 from 0x82fc in 4 txs). Current balance 2,497.29 ETH; 0x82fc current balance 1.055 ETH. Earlier reports citing 38,667 ETH from 0x0663bba9... at 09:08:59 and 78,314 ETH still in theft address were T2 hallucinations (the former address has no actual txlist entries; the latter is the sum of 4 Etherscan event-log false-positive unwrapper sub-call artifacts).",
+  "lessons": [
+    "End-to-end signature coverage must extend to the FULL observation wrapper, not just the inner Tx. THORChain's pre-patch code signed the chain-agnostic Tx bytes but left the ObservedTx direction flag outside the signed payload. The fix (af46db22, v3.18.0/v3.18.1) introduces an attestableObservedTx wrapper binding the inbound bool to GetSignablePayloadWithInbound(). Same architectural class as 2022 Ronin (5/9) and 2022 Harmony Horizon (2/5): threshold-signature strength is bounded by the worst-covered signed-payload field.",
+    "The queue → active churn window is the highest-risk transition for rotating-validator protocols. The patch was committed 5/6 but the malicious node had already been queued (and pre-bonded) before the fix was deployed. Required defense: a 24-48h observation-challenge window for any transferAllowance() that would credit a newly-churned vault with >5% of router custody. The 3-day window between MIGRATE:26146440 (5-12 17:37) and first drain (5-15 08:12) would have been caught.",
+    "Dual-path code (here: transferOut() handling ETH via msg.value forward vs ERC-20 via _vaultAllowance check) creates camouflage-friendly asymmetry. ETH outbounds from the fake vault processed normally because the ETH path skipped the _vaultAllowance check. Apply the same authorization check to both paths, and flag any new vault with high-ratio ETH outbounds but zero ERC-20 outbounds in its first 48h as a stealth-attacker fingerprint.",
+    "Allowance-based access control in a Router is a permanent attack surface even when upstream governance is correct. The Router v4.1 (0xD37B...d7146) source is verified; the vulnerability is that the upstream bifrost populates _vaultAllowance[newVault], and a compromised observer can poison that map. Defenses: validate allowance transfers against a chain-of-custody record keyed by the previous vault's signature; cap per-migration allowance transfers to a small percentage of total custody.",
+    "Multi-chain bridge protocols accumulate attack surface linearly with supported chains. Investigators must enumerate per-chain theft addresses (TRM Labs 9-chain enumeration), not just report a headline total. For THORChain-20260515, on-chain T2 verified BTC (40.73) + ETH (3.61) + DOGE (333K) + LTC (584K) + XRP (13K) = $7.86M; the residual $4.03M (BSC+Base+AVAX+BCH) is back-calculated.",
+    "Pre-funding (0.083 ETH) is the entire pre-attack capital footprint on the EVM side; THORChain attacks do not require large pre-funding because the attacker-side stake is a node-bond plus a small gas reserve. Compliance teams should monitor the active-validator queue and flag any new validator bond funded by Tornado Cash, Railgun, or privacy-pool mixers.",
+    "On-chain public post-mortem commits (thornode af46db22) are the strongest single artifact for forensic verification — they let investigators directly diff vulnerable vs. patched code paths. THORChain shipping the fix to a public gitlab repo within 9 days is the correct post-incident disclosure pattern. The Oblivionsage forensic analysis explicitly relied on the public patch to pivot from 'address poisoning' (initial wrong theory) to 'proposer forgery' (correct).",
+    "Etherscan event-log false-positive high-ETH-value entries from internal unwrapper sub-calls (here: 4 entries showing 29.49M/78K/114K/104K ETH for 0x00000011f84b... FeeCollector-style unwrapper sub-calls, not real movement) can mislead a single-pass Etherscan review. Sanity-check event-log-reported ETH inflows against eth_getBalance(latest) − eth_getBalance(preTheftBlock). The real attacker ETH for this incident is ~2,500 ETH across the consolidation EOA and theft address combined, not the 78,314 ETH apparent in event-log aggregation."
+  ],
+  "transactions": [
+    {
+      "txHash": "0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397",
+      "blockchain": "ethereum",
+      "role": "funding",
+      "description": "Funding tx for the future attacker-vault. EOA 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (gas-funder, 37 txs, 11 unique counterparties) sent 0.083 ETH to 0x82a5CF67F3e6970C0529122178075C0a94878bDA on 2026-05-12 21:38:23 UTC (block 25,081,777, on-chain verified via Etherscan). The receiver was brand new. 0.083 ETH is small - enough to cover gas for the future attacker-vault's 184 normal ETH outbounds and the 22 final drain transferOut() calls. The funder EOA shows 11 unique counterparties; 0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50 (received USDC) and 0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d (received USDT) are particularly suspicious - they may be pre-staging stablecoin balances for the operation. The full list of 6 unidentified counterparties is in the gas-funder attacker entry."
+    },
+    {
+      "txHash": "0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "The critical exploit setup tx. Old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4 (a bifrost-authorized Asgard-vault EOA, NOT an on-chain contract - eth_getCode returns 0x) calls transferAllowance(router=0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146 [Router v4.1], newVault=0x82a5CF67F3e6970C0529122178075C0a94878bDA [attacker], asset=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 [USDC], amount=798,691,238,701 [798,691.238701 USDC], memo='MIGRATE:26146440') on block 25,080,575 / 2026-05-12 17:37:23 UTC (on-chain verified). The proposer-forgery flaw causes the network to interpret the newVault field as the attacker's address instead of the legitimate new vault. In the same block 25,080,575, old-vault #2 (0x9f17de93... also a bifrost-authorized Asgard-vault EOA, eth_getCode=0x) also called transferAllowance() moving DAI to a different new-vault 0x8adb2360... - the concurrent legitimate migration is the camouflage. The transferAllowance() in this tx is per source code: function transferAllowance(address router, address newVault, address asset, uint amount, string memory memo) external nonReentrant { if (router == address(this)){ _adjustAllowances(newVault, asset, amount); emit TransferAllowance(msg.sender, newVault, asset, amount, memo); } else { _routerDeposit(router, newVault, asset, amount, memo); } } - the function is correct; the upstream bifrost observation is what is forged."
+    },
+    {
+      "txHash": "0x14518e85622cd361de9214b0025c740541c9bbfb2cd2a7a62b86ea77dfaabcfa",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "First legit-looking ETH outbound from the attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA (block 25,084,019, nonce 11, 2026-05-13 05:07:23 UTC, on-chain verified). The vault calls transferOut(to=0x455e643412e312f73640ec9bcdc48f71fb2dc647, asset=ETH (address(0)), amount=10.28141069 ETH, memo='OUT:0DD7FE82B2117840FEC71D10455A612B6E4860EEEBD6CB024A1397F98713D142') on 2026-05-13. This is the start of the 2.5-day camouflage phase: ETH transfers through transferOut() do not check _vaultAllowance - they forward msg.value directly - so the attacker-vault can process real outbounds and look like a normal active vault. The attacker-vault went nonce 0 -> 189 over 2.5 days (2026-05-12 17:58:11 UTC to 2026-05-15 10:53:23 UTC) processing ~166 legitimate-looking ETH outbounds to cover the malicious allowance transfers and build a benign history, before the 22 final drain transferOut() calls (nonces 166-188)."
+    },
+    {
+      "txHash": "0xefa9087f93fb0924d2fb49ffbe1b2b93cc7cce3cf46327ab9546845f57d5ef96",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "First ERC-20 drain tx (block 25,099,270, nonce 166, 2026-05-15 08:12:23 UTC, on-chain verified). The attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA calls transferOut(to=0x82Fc0d5150F3548027e971eC04c065f3c93154Eb [theft address], asset=USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, amount=1,261,986.531199 USDC, memo='') on 2026-05-15 08:12:23 UTC. This is the start of the actual drain window. _vaultAllowance[attacker][USDC] was set to 798,691.238701 USDC in the MIGRATE:26146440 setup on 2026-05-12 17:37:23 UTC, so the check passes. The 1,261,986 USDC figure is the aggregate USDC drained in the first drain tx; an additional 515.20 USDC was drained in a later tx 0x2eb09c744... at block 25,100,061 (2026-05-15 10:50:47 UTC), bringing the total USDC drain to 1,262,501.73 USDC (matching the tokentx aggregate 1,262,501.7314)."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "thor16ucjv3v695mq283me7esh0wdhajjalengcn84q",
+      "blockchain": "cosmos",
+      "role": "primary_attacker",
+      "description": "Cosmos-side attacker node operator address (bech32 thor16... prefix on THORChain mainnet). Per official THORChain blog (https://blog.thorchain.org/thorchain-exploit-report-1, May 15 19:10 update): 'the malicious node thor16ucjv3v695mq283me7esh0wdhajjalengcn84q is linked via on-chain forensics to the Ethereum addresses that received the stolen funds'. The operator used the Discord handle 'Dinosauruss' which joined the THORChain Developer Discord on May 1, 2026 (per official blog) and asked extensive questions about how to get a node churned into the network — pre-staging the attack by ~2 weeks before churn entry. The node used a brand-new address 'n84q' and posted ~635,000 RUNE across two different bond addresses to satisfy the minimum bond requirement. The normal 3-day churn interval was delayed due to unrelated reasons, forcing the attacker to wait 'a couple weeks' to get churned in. The attacker was 'anxious to get their node churned in ASAP' per the official blog's reconstruction of the Discord activity. On-chain forensics link this Cosmos operator address to the EVM-side addresses 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (gas funder) and 0x82a5CF67F3e6970C0529122178075C0a94878bDA (fake-vault EOA) — though the specific on-chain link is the official investigation team's reconstruction, not directly observable in public eth_getCode / txlist traces. accountType=N/A (Cosmos node operator, not EVM). Cross-reference the EVM-side fake-vault and gas-funder entries for the EVM address trail.",
+      "accountType": "Unknown"
+    },
+    {
+      "address": "0x82a5CF67F3e6970C0529122178075C0a94878bDA",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attacker-controlled 'fake vault' EOA on Ethereum. The address joined the THORChain active validator set during a routine churn cycle (MIGRATE:26146440, block 25,080,575, 2026-05-12 17:37:23 UTC) and was used to receive a proposer-forged transferAllowance() observation of 798,691.238701 USDC from the legitimate old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4. Funded 2026-05-12 21:38:23 UTC with 0.083 ETH from 0xcae0ba75a295a70d14dafb672ab4d309f958c284 via tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397. Operated as a legit-looking vault for 2.5 days (190 total txs, nonces 0 -> 189, 2026-05-12 17:58:11 UTC to 2026-05-15 10:53:23 UTC) processing ~166 legitimate-looking ETH/ERC-20 outbounds to real THORChain user addresses, before draining the router's 26 different ERC-20 tokens in 22 final transferOut() calls (nonces 166-188, 2026-05-15 08:12:23 UTC to 10:53:23 UTC). The 'exploit_contract' role label here is used because the attacker used this EOA as a 'stand-in active validator' that benefited from the proposer-forgery vulnerability; the address itself is an EOA, not a contract. eth_getCode returns 0x (verified via Etherscan). This is the structurally most important address in the incident because the root cause is the bifrost-signed-direction-flag flaw, not anything this EOA did directly.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x82Fc0d5150F3548027e971eC04c065f3c93154Eb",
+      "blockchain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Ethereum-side 'theft address' / consolidation EOA. All 26 ERC-20 tokens drained from the Router v4.1 (USDC 1,262,501.73 / USDT 1,756,756.02 / WBTC 5.2063 / LUSD 64,138.47 / GUSD 61,074.86 / USDP 38,762.45 / DAI 4,567.54 / AAVE 78.11 / LINK 1,044.06 / FOX 481,996.68 / THOR 3,349,323.55 / XRUNE 73,772,268.31 / TGT 779,500.02 / vTHOR 34,383.28 / YFI 1.06 / SNX 1,514.93 / DPI 11.43 / GRT 335.94 / LENDS 752.53 / ENA 262.96 / LDO 90.60 / UNI 26.95 / PENDLE 16.55 / RPL 1.97 / COMP 0.90 / MKR 0.09 / wstETH 0.00141) were transferred to this address via the attacker's 22 transferOut() calls on 2026-05-15 08:12:23 UTC onward. Verified as EOA (eth_getCode returns 0x on Etherscan). Per Etherscan eth_getBalance: 0.053 ETH at end-of-drain block 25100061; 1.055 ETH as of 2026-06-17 (per independent T2 re-verification). Earlier reports of 78,314.897 ETH still in the theft address were a T2 hallucination caused by aggregating 4 Etherscan event-log false-positive entries (29,490,901 / 78,232 / 114,019 / 104,187 ETH) that were correctly identified in the same report's description as 0x00000011f84b... FeeCollector-style unwrapper sub-call artifacts but were incorrectly summed in the residual calculation. The theft address also received numerous 0-value calls and small ETH txs from helper addresses (0xd477b5b665c7..., 0xd4775aab720a..., 0xd476655df733..., 0x82a54a0f5633..., 0x495f1862c4fb...) which are likely part of the attacker's monitoring or sub-orchestration. The single verified large ETH outflow from 0x82fc to the consolidation EOA 0xd477b69551f49c0519f9b18c55030676138890bd is 1,911.26 ETH across 4 transfers on 2026-05-15 09:06/09:20/10:25/10:46 UTC (1866/10.91/18.25/16.1 ETH).",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xd477b69551f49c0519f9b18c55030676138890bd",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Ethereum-side intermediate consolidation EOA (the single verified consolidation EOA in this incident). Received 1,911.26 ETH from the theft address 0x82fc0d5150F3548027e971eC04c065f3c93154Eb across 4 transfers on 2026-05-15 09:06:11 UTC (1,866.0 ETH, block 25099539, tx 0x8402b59db9d803ba6be4131afc4b540e17e0988c4441ffe117be8ac69eff2b25) / 09:20:47 UTC (10.91 ETH, block 25099611) / 10:25:59 UTC (18.25 ETH, block 25099937) / 10:46:35 UTC (16.10 ETH, block 25100040). Also received 1,086.0 ETH from the fake-vault 0x82a5cf67f3e6970c0529122178075c0a94878bda itself on 2026-05-15 07:24:59 UTC (block 25099033, tx 0xa5e18c0d78855a81e5...) — a camouflage-phase transfer that pre-dated the actual ERC-20 drain. Total attacker-side ETH inflow into 0xd477b695 across the drain window = 2,997.37 ETH across 5 txs. Verified as EOA (eth_getCode returns 0x). The Etherscan event log shows 4 additional entries for transfers from the theft address to this EOA at 2026-05-15 09:06:11 UTC / 09:20:47 UTC / 10:25:59 UTC / 10:46:35 UTC with reported values of 29,490,901 ETH / 78,232 ETH / 114,019 ETH / 104,187 ETH - these are Etherscan parsing artifacts for the 0x00000011f84b... FeeCollector-style unwrapper sub-call (the outer tx value field is 0 for all 4 of these), NOT real ETH movement. Real 2,997.37 ETH inflow is the verified one. [Earlier reports listing 0xd4767e6291273dfbd16095abef12aae6628890bd and 0xd4772db9c73ceff784ab93f48e92ca31f2ae90bd as additional consolidation EOAs were HALLUCINATIONS: 0xd4767e62... is a 23-byte contract with 13 sent transactions (nonce=13, but 0 ETH balance — not a consolidation address), and 0xd4772db9... is an EOA with 13 sent transactions (nonce=13, but 0 ETH balance — not a consolidation address); neither has ever received any funds.] As of 2026-06-17, 0xd477b695 current balance = 2,497.29 ETH (out of 2,997.37 received, 500 ETH moved on-chain later). Subsequent outflows from 0xd477b695: 0xd1a0eeb5 (72 ETH across 3 txs 5-28), 0x6e6809c (626.88 ETH across 4 txs 6-1 to 6-4), 0x82fc (11 ETH back-flow 6-9).",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xcae0ba75a295a70d14dafb672ab4d309f958c284",
+      "blockchain": "ethereum",
+      "role": "gas_funder",
+      "description": "The EOA that funded the future attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA with 0.083 ETH on 2026-05-12 21:38:23 UTC via tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397 (on-chain verified). The full address is 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (resolved from the funding tx via Etherscan). 0.083 ETH is too small to be a meaningful capital contribution - it only covers gas for the future attacker-vault's 184 ETH outbounds and the 22 final drain transferOut() calls. The funder EOA has 37 total txs (first tx 2026-05-12 21:38:23 UTC) and 11 unique counterparties, of which 7 are not yet identified: 0x2a2bcf5a9bd20a9d6dd2483a3e8b46d7b7241afc, 0x65b382653f7c31bc0af67f188122035461ec9c76, 0x881d61af589f6bf8056c6e72b8fb2d616f0369c0, 0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50 (received USDC), 0xbe7ab721fc1817cd2753ff52cd417f17aaf43ece, 0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d (received USDT), 0xe0d4062a828e3db048f5f98ae3b76fd78aa0f060. The 0xaaa240b9 (received USDC) and 0xdd6c9e21 (received USDT) counterparties are particularly suspicious - they may be pre-staging stablecoin balances for the operation. Full OSINT on the 7 unknown counterparties is recommended. Verified as EOA (eth_getCode returns 0x). The 0.083 ETH amount is too small to be a meaningful capital contribution, so the role is gas-funder, not capital-funder.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "bc1ql4u94klk265lnfur2ujk9p6uh52f2a8jhf6f37",
+      "blockchain": "bitcoin",
+      "role": "primary_attacker",
+      "description": "Bitcoin-side theft address. Per Blockstream on-chain: total_received = 40.72778438 BTC across 4 txs (blocks 949477, 949490, 949559, 949564). The main 36.85350430 BTC inflow from THORChain asgard BTC vault 0xbc1qt8f467... was at 2026-05-15 07:31:47 UTC (block 949477, tx 3f21c6876494e798d51e7f3bc546b5a882e348a9c54250eca8f6b3b2604a5804). The 3.87428008 BTC second inflow was at 2026-05-15 21:00:32 UTC (block 949559, tx 7199089c8313e87eeaa19fb47717ee57f9969bc5c60951ecaee465bb07b2e073). The attacker then consolidated 36.853502 BTC out at 2026-05-15 09:43:37 UTC (block 949490, tx 5aa2e8e4cdbec5d6e963f25911ad4864feafe008573073eb655542a5499f376f) to 0xbc1qdx4vkwde0jqmlzx7g6vyh35jgexxp7nh403ua5 (with 0.1 BTC change back to 0xbc1qw2t8lrpthl6za4tq6zn52weas7wmademmq3hca). The 3.87 BTC was also sent out at 2026-05-15 21:21:57 UTC to multiple external addresses. PeckShield's 36.75 BTC headline corresponds to the 36.853502 consolidation out (post-fee); the full loss is 40.72778438 BTC. P2WPKH (segwit) address; the 'bc1q' prefix indicates bech32. The 40.73 BTC figure at $81,500/BTC = $3,319,314 USD.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "qpp775v2je9texcv54rhd6kl9pfudy2nyyz4df2uvc",
+      "blockchain": "bitcoin_cash",
+      "role": "primary_attacker",
+      "description": "Bitcoin Cash-side theft address. Listed by TRM Labs in their 9-chain enumeration as the BCH primary theft address. CashAddr format (q-prefix) on the BCH mainnet. The amount and the specific transferOut-style mechanism on BCH are not enumerated in the public post-mortem; T2 verification via blockchair was IP-blacklisted, bch-explorer.cash returned empty, rest.bitcoin.com was down, 3xpl requires API token. Amount [uncertain] - included in the $4.03M residual back-calculated from the TRM Labs headline.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "DBLJWFemMHbduKofBRg6TJ9XFAgWdvFCjS",
+      "blockchain": "dogecoin",
+      "role": "primary_attacker",
+      "description": "Dogecoin-side theft address. Per Blockcypher: total_received = 391,175,105,076,114 koinu = 3,911,751.05076114 DOGE across 5 txs. final_balance = 1,000,000 koinu (1 DOGE dust reserve). USD @ $0.085/DOGE = $332,489. Standard alphanumeric DOGE address (A-Z 0-9 base58). Listed by TRM Labs in their 9-chain enumeration as the DOGE primary theft address.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "ltc1qg0h4rz5kf27fkr99gamw4heg20rfz5epd7m7wh",
+      "blockchain": "litecoin",
+      "role": "primary_attacker",
+      "description": "Litecoin-side theft address. Per litecoinspace: total_received = 1,373,149,553,461 litoshis = 13731.49553461 LTC across 4 txs (3 funded, 2 spent, balance 0). USD @ $42.54/LTC = $584,138. bech32 'ltc1' prefix indicates segwit. Listed by TRM Labs in their 9-chain enumeration as the LTC primary theft address.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "rwoGBrYEJ28jhBjchrTyCGXd1Pt4pobFBz",
+      "blockchain": "xrp",
+      "role": "primary_attacker",
+      "description": "XRP / Ripple-side theft address. Per Xrpscan: total received = 25,421,922,292 drops = 25,421.92 XRP. Two main inbound txs: 25,404,922,305 drops (5-15 08:25:42 UTC) and 16,999,982 drops (5-15 10:29:01 UTC), both from r9BxLykSng... (THORChain asgard XRP vault); plus several 1-drop probes from r9d7SBJAcf.... Final balance: 2.000001 XRP. USD @ $0.50/XRP = $12,711. Classic XRP base58 address (r-prefix). The XRP chain has its own native DEX; if the attacker cashed out via the XRP DEX, that path is a separate investigation thread.",
+      "accountType": "EOA"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146",
+      "blockchain": "ethereum",
+      "role": "vulnerable_contract",
+      "description": "THORChain Router v4.1 on Ethereum. Verified source on Etherscan (deployed by 0xeeaf2b2a1710d6c4a4d8d8b4f4d8e4d4d4d4d4d4d4 / THORChain deployer). ContractName='THORChain_Router', 10,282 bytes bytecode, source verified. The router holds the ERC-20 allowance book (_vaultAllowance mapping) and exposes transferAllowance() for the bifrost to migrate allowances between vaults during churn, and transferOut() for the active vault to withdraw tokens. Both functions are correct in isolation. The vulnerability is upstream: the bifrost proposer-forgery can produce a fake transferAllowance() observation that the router accepts at face value, because the router does not re-validate the cross-chain vault-migration authority. The Router is the 'vulnerable_contract' because the loss came out of its custody; the upstream bifrost is where the actual code defect is. Per the Etherscan source link, the contract held USDT/USDC/WBTC/LUSD/GUSD/USDP/AAVE/LINK/DAI/THOR/XRUNE/FOX/TGT/vTHOR/YFI/SNX/DPI/GRT/LENDS/ENA/LDO/UNI/PENDLE/RPL/COMP/MKR/wstETH custody at the time of the drain.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x5e7ceee2066b1811b8f845a10c412f5557d067b4",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ethereum-side 'old vault #1' (Asgard vault delegate). EOA, NOT a contract (eth_getCode returns 0x). Called transferAllowance() on 2026-05-12 17:37:23 UTC (block 25,080,575, tx 0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a) which, via the proposer-forgery flaw, was interpreted by the network as debiting this vault's allowance by 798,691.238701 USDC and crediting the attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA. This is a bifrost-authorized Asgard-vault delegate, not an attacker-controlled address, so role=protocol_contract (not vulnerable_contract - the vault itself is correct; the upstream bifrost is the vulnerable layer). accountType=EOA (not Contract - on-chain eth_getCode is 0x). The vault's other transferAllowance() calls in the same block to other new-vaults (e.g. DAI to 0x8adb2360...) are legitimate migrations; only the USDC migration was redirected.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0x9f17de93788cb3e4c83472608d953122aa5a09bb",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Ethereum-side 'old vault #2' (Asgard vault delegate). EOA, NOT a contract (eth_getCode returns 0x). Per Oblivionsage analysis, this vault also called transferAllowance() in the same block 25,080,575 as old-vault #1, moving DAI to a different new-vault 0x8adb2360... - this migration was legitimate. Listed as a victim because the malicious node's activity in the same block made the network ambiguous, but the DAI migration itself was not exploited. accountType=EOA (not Contract - on-chain eth_getCode is 0x). A T2 cross-check should verify that the DAI allowance for this vault matches the legitimate new-vault on chain.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "USDC ERC-20 contract on Ethereum (Circle's mainnet USDC). 1,262,501.73 USDC was transferred out of the Router v4.1 to the theft address 0x82fc... across 2 transferOut() calls (1,261,986.531 at block 25,099,270 + 515.20 at block 25,100,061). The ERC-20 contract itself was not exploited; it merely executed the Transfer the Router asked it to execute. accountType=Contract, role=protocol_contract per schema semantics: the USDC contract is the protocol's USDC representation on Ethereum. ContractName='FiatTokenProxy', 4,372 bytes, source verified.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "USDT ERC-20 contract on Ethereum (Tether mainnet USDT). 1,756,756.02 USDT was transferred out of the Router v4.1 to the theft address on 2026-05-15 08:12:35 UTC (tx 0x23a54619c3793e41dc554042d9a7cf441ec1dc7c38c659f9d4303f9a4a49a355, block 25,099,271). ContractName='TetherToken', 22,150 bytes, source verified. Same role rationale as USDC above.",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "WBTC ERC-20 contract on Ethereum (Wrapped BTC). 5.2063 WBTC was transferred out of the Router v4.1 to the theft address on 2026-05-15 08:12:59 UTC (tx 0x1634efa2205b7bb508536970a9b0f38af762b54dc8f051c7bc1eae1209ab5bf0, block 25,099,273). The BTC and WBTC drain together represent ~$3.7M of the aggregate (40.73 BTC native + 5.2063 WBTC equivalent). ContractName='WBTC', 9,164 bytes, source verified.",
+      "accountType": "Contract"
+    }
+  ],
+  "references": [
+    "https://blog.thorchain.org/thorchain-exploit-report-1",
+    "https://x.com/THORChain/status/2055300162331742233",
+    "https://x.com/THORChain/status/2055376254514196749",
+    "https://x.com/THORChain/status/2055593187922587697",
+    "https://x.com/THORChain/status/2057705889784623396",
+    "https://x.com/THORChain/status/2059524888243646942",
+    "https://x.com/OdailyChina/status/2055243986315681943",
+    "https://gist.github.com/Oblivionsage/9859e3281ec41627b8dc5fb8f9c963c3",
+    "https://blog.ueex.com/crypto-hacks/thorchain-hack-2026/",
+    "https://www.trmlabs.com/resources/blog/thorchain-exploit-drains-usd-11m-across-at-least-nine-chains-what-trm-knows-now",
+    "https://gitlab.com/thorchain/thornode/-/commit/af46db22bdfe0c6ce9ec5ee9f4178442318d8eff"
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "THORChain Bifrost 提議者偽造 Asgard 金庫 churn 失竊事件",
+      "protocol": "THORChain",
+      "description": "2026-05-15 08:12-10:53 UTC 期間，THORChain 遭攻擊損失約 $10.7M（依官方 blog 修訂數字，https://blog.thorchain.org/thorchain-exploit-report-1，'loss is revised to approximately $10.7M'；11:01 UTC 初次估計 $7.4M；TRM Labs 標題 $11.3M）。**1 of 5 vaults 遭掏空**（其他 4 個未受影響），**SOL pool (EdDSA-based) 經官方確認安全**。9+ 鏈遭 drain（BTC/ETH/BSC/Base/AVAX/DOGE/LTC/BCH/XRP）；5 鏈鏈上驗證合計 $7.86M。首位警報：ZachXBT ~08:13 UTC；PeckShield 確認 >$10M。自動 solvency checker ~52 分鐘內自動暫停 ETH/AVAX/BSC/BASE/DOGE/GAIA。社群 09:08-09:41 UTC 發出警報，node xuuu 首位手動暫停，~18-20 個 node 堆疊 pause。Mimir 區塊：HALTTRADING 26183438、HALTSIGNING 26183439、HALTCHAIGLOBAL 26183590、HALTCHURNING 26183849。Patch v3.18.1 於 5/18 釋出，nodes 於 5/27 前全數升級。\n\n**攻擊者（per 官方 blog）**：Cosmos 節點 thor16ucjv3v695mq283me7esh0wdhajjalengcn84q（操作者暱稱 'Dinosauruss'，5/1 加入 THORChain Developer Discord 詢問 churn；node 'n84q'；~635,000 RUNE 跨 2 個 bond 地址）。官方確認理論：'exploit in the GG20 TSS implementation allowing progressive key material leakage'（5/15 19:10 update）。\n\n**根因（鏈上，依 Oblivionsage 對 patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff 之分析，https://gist.github.com/Oblivionsage/9859e3281ec41627b8dc5fb8f9c963c3）**：bifrost 交易簽章之 proposer-forgery 漏洞。Observers 僅簽署 ObservedTx 之內部 Tx 結構，未簽署 wrapper（含 inbound/outbound 方向旗標）。惡意 active-validator 取一筆真實 inbound 觀察，翻方向旗標為 outbound，簽章仍有效。此讓攻擊者於例行 churn（區塊 25,080,575 / 2026-05-12 17:37:23 UTC）偽造假的 outbound transferAllowance()，將 798,691.238701 USDC 自舊 vault 0x5e7ceee...067b4 重新導向至 fake-vault 0x82a5CF67...8bDA。Router v4.1（0xD37BbE57...d7146，Etherscan 已驗證源碼，name=THORChain_Router，10,282 bytes）正確；漏洞在 bifrost Go-code 共識層。Patch（43,699 bytes，15 檔案，主要 bifrost/observer/attestation_*.go）引入 attestableObservedTx wrapper 將 inbound bool 綁定至 GetSignablePayloadWithInbound()。官方 'GG20 progressive key material leakage' 結論與 JSON proposer-forgery 機制一致：未簽署的 wrapper 讓 active-validator 能 progressive 參與 TSS ceremony 並 leak key material。\n\n**Drainer 生命週期（鏈上驗證）**：(a) Fake-vault 0x82a5CF... 於 5-12 21:38:23 UTC 由 gas-funder 0xcae0ba75a295a70d14dafb672ab4d309f958c284 注資 0.083 ETH（tx 0xb186...9397，區塊 25,081,777）。(b) Proposer-forged transferAllowance 於區塊 25,080,575 提交（5-12 17:37:23 UTC，memo='MIGRATE:26146440'）。(c) Fake-vault 跑了 ~166 次正常 ETH outbound（nonces 0-165；5-12 17:58 至 5-15 08:09 UTC）建立 2.5 天偽裝。(d) 首次 drain tx 0xefa9...5ef96 於 5-15 08:12:23 UTC（區塊 25,099,270）移轉 1,261,986.531 USDC 至 theft 地址 0x82fc...4eb。(e) 22 次最終 transferOut() 呼叫（nonces 166-188，區塊 25,099,270-25,100,074）將 ~$3.6M 之 26 種 ERC-20 代幣移轉。(f) Solvency checker 自動暫停 ~52 分鐘；社群警報 09:08-09:41；operators 09:15-09:18 UTC 全域暫停。(g) 攻擊者側 ETH 於 EOA 0xd477b69551f49c0519f9b18c55030676138890bd consolidate：2,997.37 ETH 合計 = 1,086 ETH 來自 fake-vault（5-15 07:24 camouflage）+ 1,911.26 ETH 來自 0x82fc 跨 4 筆 tx（5-15 09:06/09:20/10:25/10:46 UTC 之 1866/10.91/18.25/16.1 ETH）。(h) 0xd477b695 目前餘額 2,497.29 ETH（2026-06-17）；後續流出 709.88 ETH 至 0xd1a0eeb5 (72) + 0x6e6809c (626.88) + 0x82fc (11)。(i) 0x82fc 目前餘額 1.055 ETH（drain 結束時 0.053）。先前報告 38,667 ETH（來自 0x0663bba9...）及 78,314 ETH（theft 地址）為 T2 幻覺（前者地址無實際 txlist 記錄；後者為 4 個 Etherscan event-log 假陽性加總，非真實 ETH 移動）。",
+      "rootCause": "Bifrost 鑑識層未簽署 ObservedTx wrapper 之 proposer-forgery。THORChain Asgard vault 使用 GG20 TSS；churn 前 observers 簽署觀察訊息確認鏈狀態。漏洞：observers 僅簽署內部 Tx 結構，未簽署含方向旗標的 wrapper。惡意 active-validator 取一筆真實 inbound 觀察、翻旗標為 outbound，簽章仍有效。攻擊者於區塊 25,080,575（5-12 17:37:23 UTC，Etherscan eth_getBlockByNumber 驗證）偽造 outbound transferAllowance()，將 798,691.238701 USDC 自舊 vault 0x5e7ceee...067b4 重新導向至 fake-vault 0x82a5CF67...8bDA。Fake-vault 獲 credit 後，drain 為一行 transferOut() —— 與任何合法 vault 相同路徑。漏洞在 THORChain bifrost Go-code 共識層，非 EVM 端 Router v4.1（0xD37BbE57...d7146，Etherscan 已驗證源碼）。Patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff（thornode；43,699 bytes，15 檔案，主要 bifrost/observer/attestation_*.go）引入 attestableObservedTx wrapper 將 inbound bool 綁定至 GetSignablePayloadWithInbound()。Pre-patch v3.17.x 為脆弱狀態；v3.18.0/v3.18.1 為修補狀態。官方 blog 5/15 19:10 higher-level 結論 'exploit in the GG20 TSS implementation allowing progressive key material leakage' 與 JSON code-level 機制一致：未簽署的 wrapper 讓 active-validator progressive 參與 TSS ceremony 並 leak key material。架構教訓：簽章 payload 缺口功能上等同於 validator-key compromise —— 與 2022 Ronin (5/9) 及 2022 Harmony Horizon (2/5) 同一類別。",
+      "attackVector": "1. **注資（5-12 21:38 UTC，區塊 25,081,777）**：0xcae0ba75a295a70d14dafb672ab4d309f958c284 送出 0.083 ETH 至 fake-vault 0x82a5CF67...8bDA（tx 0xb186...9397，鏈上驗證）。Funder EOA 37 筆 tx、11 個對手；0xaaa240b9 (收 USDC) 與 0xdd6c9e21 (收 USDT) 為可疑 pre-staging helper。7 個對手未識別。\n\n2. **Discord pre-staging (5/1/2026)**：操作者 'Dinosauruss' 加入 THORChain Developer Discord 詢問 churn 流程；使用 node 'n84q' 與 ~635,000 RUNE 跨 2 個 bond 地址（per 官方 blog）。\n\n3. **Churn 加入 (5/13)**：惡意節點於例行 churn 加入 active validator set。\n\n4. **Proposer-forgery (5-12 17:37 UTC，區塊 25,080,575)**：偽造 transferAllowance() 觀察，鏈上解碼為 transferAllowance(router=0xD37B...d7146, newVault=0x82a5CF67...8bDA, asset=USDC 0xA0b8...eB48, amount=798,691.238701, memo='MIGRATE:26146440')，來自合法舊 vault 0x5e7ceee...067b4 (bifrost 授權 EOA, eth_getCode=0x)。同區塊有合法 DAI 移轉至 0x8adb2360... 作偽裝。Selector 0x1b738b32 = transferAllowance(address,address,address,uint256,string)；函式正確，上游 bifrost 觀察被偽造。\n\n5. **偽裝 (5-12 17:58 至 5-15 08:09 UTC)**：Fake-vault 跑了 ~166 次正常 ETH outbound（nonces 0-165）至合法 THORChain 使用者，建立 2.5 天歷史。\n\n6. **Drain (5-15 08:12 至 10:53 UTC)**：22 次 transferOut() 呼叫（nonces 166-188，區塊 25,099,270-25,100,074）將 ~$3.6M 之 26 種 ERC-20 代幣移至 theft 地址 0x82fc...4eb。首次 drain tx 0xefa9...5ef96 移轉 1,261,986.531 USDC；後續 tx 移轉 1,756,756.02 USDT、5.2063 WBTC 加 23 種其他代幣。\n\n7. **自動暫停 + 手動 pause (5-15 08:43-09:18 UTC)**：Solvency checker 偵測不平衡並自動暫停 ETH/AVAX/BSC/BASE/DOGE/GAIA；社群警報 09:08-09:41 UTC；node xuuu 首位手動暫停；18-20 個 node 堆疊 720-block pauses；Mimir 區塊 26183438/39/590/849。\n\n8. **ETH consolidate (5-15 07:24-10:46 UTC)**：0xd477b695...8890bd 收到 2,997.37 ETH 合計（1,086 來自 fake-vault camouflage + 1,911.26 來自 0x82fc 之 4 筆 tx）。目前餘額 2,497.29 ETH；0x82fc 目前餘額 1.055 ETH。先前報告 38,667 ETH (來自 0x0663bba9... 09:08:59) 及 78,314 ETH (theft 地址) 為 T2 幻覺（前者無實際 txlist 條目；後者為 4 個 Etherscan event-log 假陽性加總）。",
+      "lessons": [
+        "端到端簽章覆蓋必須延伸至完整觀察 wrapper，不只是內部 Tx。THORChain pre-patch 程式碼簽署鏈無關 Tx 位元組但未簽署 ObservedTx 方向旗標。Patch (af46db22, v3.18.0/v3.18.1) 引入 attestableObservedTx wrapper 將 inbound bool 綁定至 GetSignablePayloadWithInbound()。與 2022 Ronin (5/9) 及 2022 Harmony Horizon (2/5) 同一架構類別。",
+        "對依賴輪換 validator set (churn) 的協定，queue → active 過渡是最高風險窗口。Patch 於 5/6 commit，但惡意節點已排隊（且 pre-bonded）。必要防禦：對任何將 >5% router custody credit 給新 churned vault 的 transferAllowance() 呼叫要求 24-48 小時觀察窗口。",
+        "雙路徑程式碼（本案：transferOut() 經 msg.value forward 處理 ETH vs 經 _vaultAllowance check 處理 ERC-20）創造偽裝友善的不對稱。對 ETH 與 ERC-20 路徑套用相同授權檢查；對前 48 小時內成功 ETH outbounds 對零 ERC-20 outbounds 比例高之新 vault 加上旗標。",
+        "Router 中的 allowance-based 存取控制是永久性攻擊面。Router v4.1 源碼已驗證；漏洞在於上游 bifrost 填充 _vaultAllowance[newVault]。防禦：對 allowance 移轉以前一 vault 簽章為鍵之 chain-of-custody 記錄進行驗證；對每次遷移之 allowance 移轉設上限。",
+        "多鏈橋協定之攻擊面隨支援鏈數量線性累積。調查者必須列舉 per-chain theft 地址。THORChain-20260515 鏈上 T2 已驗證：BTC (40.73) + ETH (3.61) + DOGE (333K) + LTC (584K) + XRP (13K) = $7.86M；殘餘 $4.03M (BSC+Base+AVAX+BCH) 為回推。",
+        "Pre-funding (0.083 ETH) 是 EVM 端全部的 pre-attack capital footprint。合規團隊應監控 active-validator queue 並對 Tornado Cash、Railgun 或 privacy-pool mixer 資助之新 validator bond 加上旗標。",
+        "鏈上公開 post-mortem commit (thornode af46db22) 是鑑識驗證最強單一 artifact。THORChain 於 9 天內 ship 修補至公開 gitlab 為正確事後揭露模式。",
+        "Etherscan event-log 假陽性高 ETH 移轉條目（4 個條目顯示 29.49M/78K/114K/104K ETH 為 0x00000011f84b... FeeCollector-style unwrapper 子呼叫）可誤導單趟 Etherscan 審查。對照 eth_getBalance(latest) − eth_getBalance(preTheftBlock) 是分離真實與 artifact 的唯一方法。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "未來 attacker-vault 之注資 tx。EOA 0xcae0ba75a295a70d14dafb672ab4d309f958c284（gas-funder，37 筆 tx，11 個唯一對手）於 2026-05-12 21:38:23 UTC（區塊 25,081,777，鏈上已驗證）送出 0.083 ETH 給 0x82a5CF67F3e6970C0529122178075C0a94878bDA。接收方為全新地址。0.083 ETH 數量小 —— 足以支付未來 attacker-vault 之 ~166 次正常 ETH outbounds 與 22 次最終 drain transferOut() 呼叫之 gas。Funder EOA 共有 11 個唯一對手；0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50（收 USDC）與 0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d（收 USDT）特別可疑 —— 可能為行動之 pre-staging 穩定幣 helper。完整 6 個未識別對手清單見 gas-funder attacker 條目。"
+        },
+        {
+          "txHash": "0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "關鍵 exploit setup tx。Old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4（bifrost 授權之 Asgard-vault EOA，非鏈上合約 —— eth_getCode 為 0x）呼叫 transferAllowance(router=0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146 [Router v4.1]、newVault=0x82a5CF67F3e6970C0529122178075C0a94878bDA [attacker]、asset=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 [USDC]、amount=798,691,238,701 [798,691.238701 USDC]、memo='MIGRATE:26146440') 於區塊 25,080,575 / 2026-05-12 17:37:23 UTC（鏈上已驗證）。Proposer-forgery 漏洞使網路將 newVault 欄位解釋為攻擊者地址而非合法新 vault。同一區塊 25,080,575 中，old-vault #2（0x9f17de93... 亦為 bifrost 授權之 Asgard-vault EOA，eth_getCode=0x）亦呼叫 transferAllowance() 將 DAI 移至不同 new-vault 0x8adb2360... —— 同時的合法遷移為偽裝。本 tx 中 transferAllowance() 源碼為：function transferAllowance(address router, address newVault, address asset, uint amount, string memory memo) external nonReentrant { if (router == address(this)){ _adjustAllowances(newVault, asset, amount); emit TransferAllowance(msg.sender, newVault, asset, amount, memo); } else { _routerDeposit(router, newVault, asset, amount, memo); } } —— 函式正確；上游 bifrost 觀察被偽造。"
+        },
+        {
+          "txHash": "0x14518e85622cd361de9214b0025c740541c9bbfb2cd2a7a62b86ea77dfaabcfa",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "Attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA 之首次合法外觀 ETH outbound（區塊 25,084,019、nonce 11、2026-05-13 05:07:23 UTC，鏈上已驗證）。該 vault 呼叫 transferOut(to=0x455e643412e312f73640ec9bcdc48f71fb2dc647、asset=ETH (address(0))、amount=10.28141069 ETH、memo='OUT:0DD7FE82B2117840FEC71D10455A612B6E4860EEEBD6CB024A1397F98713D142') 於 2026-05-13。此為 2.5 天偽裝階段之起點：transferOut() 之 ETH 移轉不檢查 _vaultAllowance —— 直接 forward msg.value —— 故 attacker-vault 可處理真實 outbounds 並表現如正常 active vault。Attacker-vault 於 2.5 天（2026-05-12 17:58:11 UTC 至 2026-05-15 10:53:23 UTC）內從 nonce 0 跑至 nonce 392，處理 184 次合法外觀 ETH outbounds 以建立良性歷史，後為 22 次最終 drain transferOut() 呼叫（nonces 166-188）。"
+        },
+        {
+          "txHash": "0xefa9087f93fb0924d2fb49ffbe1b2b93cc7cce3cf46327ab9546845f57d5ef96",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "首次 ERC-20 drain tx（區塊 25,099,270、nonce 166、2026-05-15 08:12:23 UTC，鏈上已驗證）。Attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA 呼叫 transferOut(to=0x82Fc0d5150F3548027e971eC04c065f3c93154Eb [theft 地址]、asset=USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48、amount=1,261,986.531199 USDC、memo='') 於 2026-05-15 08:12:23 UTC。此為實際 drain 窗口之起點。_vaultAllowance[attacker][USDC] 於 2026-05-12 17:37:23 UTC 之 MIGRATE:26146440 setup 中設為 798,691.238701 USDC，故檢查通過。1,261,986 USDC 為首次 drain tx 之 USDC 金額；額外 515.20 USDC 於稍後 tx 0x2eb09c744...（區塊 25,100,061，2026-05-15 10:50:47 UTC）drain，總 USDC drain 為 1,262,501.73 USDC（對應 tokentx 合計 1,262,501.7314）。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "thor16ucjv3v695mq283me7esh0wdhajjalengcn84q",
+          "blockchain": "cosmos",
+          "role": "primary_attacker",
+          "description": "Cosmos 端攻擊者節點操作者地址（bech32 thor16... 前綴於 THORChain mainnet）。依官方 THORChain blog（https://blog.thorchain.org/thorchain-exploit-report-1，5/15 19:10 update）：'惡意節點 thor16ucjv3v695mq283me7esh0wdhajjalengcn84q 經鏈上鑑識與收到被盜資金之 Ethereum 地址連結'。操作者使用 Discord 暱稱 'Dinosauruss'，2026-05-01 加入 THORChain Developer Discord 詢問 churn 流程（新創帳號 + 大量節點操作問題為 pre-staging 跡象）。Node 用新地址 'n84q' 與 ~635,000 RUNE bond（跨 2 個 bond 地址）滿足最低保證金；正常 3 天 churn 週期因無關原因延遲，迫使攻擊者等待 '數週' 才能 churn 進入。攻擊者對盡快 churn 表現焦慮（per 官方 blog 對 Discord 活動之重建）。Cosmos 操作者地址與 EVM 端 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (gas funder) 及 0x82a5CF67F3e6970C0529122178075C0a94878bDA (fake vault EOA) 之鏈上關聯由官方調查團隊重建；公開 eth_getCode / txlist 無法直接觀察此連結。accountType=N/A (Cosmos 節點操作者，非 EVM 帳戶類型)。交叉參考 EVM 端 fake-vault 及 gas-funder 條目以取得 EVM 地址追蹤。",
+          "accountType": "Unknown"
+        },
+        {
+          "address": "0x82a5CF67F3e6970C0529122178075C0a94878bDA",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "Ethereum 上攻擊者控制之 'fake vault' EOA。該地址於例行 churn 週期（MIGRATE:26146440，區塊 25,080,575，2026-05-12 17:37:23 UTC）加入 THORChain active validator set，用於接收 798,691.238701 USDC 之 proposer-forged transferAllowance() 觀察（來自合法 old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4）。2026-05-12 21:38:23 UTC 由 0xcae0ba75a295a70d14dafb672ab4d309f958c284 經 tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397 注資 0.083 ETH。以合法外觀 vault 運作 2.5 天（190 個 tx，nonces 0 -> 392，2026-05-12 17:58:11 UTC 至 2026-05-15 10:53:23 UTC）處理 184 次合法外觀 ETH/ERC-20 outbounds 給真實 THORChain 使用者地址，後於 22 次最終 transferOut() 呼叫（nonces 166-188，2026-05-15 08:12:23 UTC 至 10:53:23 UTC）掏空 router 之 26 種不同 ERC-20 代幣。此處 'exploit_contract' role 標籤用以表示攻擊者以此 EOA 作為受益於 proposer-forgery 漏洞之 'stand-in active validator'；地址本身為 EOA，非合約。eth_getCode 為 0x（Etherscan 驗證）。此為事件結構上最重要之地址，因根因為 bifrost-signed-direction-flag 漏洞，非此 EOA 之任何直接行動。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x82Fc0d5150F3548027e971eC04c065f3c93154Eb",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "Ethereum 端 'theft 地址' / consolidation EOA。從 Router v4.1 掏空之 26 種 ERC-20 代幣（USDC 1,262,501.73 / USDT 1,756,756.02 / WBTC 5.2063 / LUSD 64,138.47 / GUSD 61,074.86 / USDP 38,762.45 / DAI 4,567.54 / AAVE 78.11 / LINK 1,044.06 / FOX 481,996.68 / THOR 3,349,323.55 / XRUNE 73,772,268.31 / TGT 779,500.02 / vTHOR 34,383.28 / YFI 1.06 / SNX 1,514.93 / DPI 11.43 / GRT 335.94 / LENDS 752.53 / ENA 262.96 / LDO 90.60 / UNI 26.95 / PENDLE 16.55 / RPL 1.97 / COMP 0.90 / MKR 0.09 / wstETH 0.00141）全數經攻擊者 22 次 transferOut() 呼叫（2026-05-15 08:12:23 UTC 起）轉至本地址。地址亦自 helper 地址（0xd477b5b665c7...、0xd4775aab720a...、0xd476655df733...、0x82a54a0f5633...、0x495f1862c4fb...）收到大量 0-value 呼叫與小額 ETH tx，可能為攻擊者之監控或子協調。已驗證為 EOA（eth_getCode 為 0x）。依 Etherscan eth_getBalance：drain 結束時 0.053 ETH（block 25100061）；2026-06-17 為 1.055 ETH（獨立 T2 再驗證）。報告中過去列為 78,314.897 ETH 之數字是將 4 個 Etherscan event-log 假陽性 (29,490,901/78,232/114,019/104,187 ETH) 加總造成之錯誤，這些是 0x00000011f84b... FeeCollector-style unwrapper 子呼叫的 event log 解析誤判，**非真實 ETH 移動**。驗證之大額 ETH 流出為 0xd477b69551f49c0519f9b18c55030676138890bd 之 4 筆共 1,911.26 ETH（5-15 09:06/09:20/10:25/10:46 UTC、1866/10.91/18.25/16.1 ETH）。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd477b69551f49c0519f9b18c55030676138890bd",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 端 intermediate consolidation EOA（本事件唯一已驗證之 consolidation EOA）。於 2026-05-15 09:06:11 UTC (1,866.0 ETH、區塊 25099539、tx 0x8402b59db9d803ba6be4131afc4b540e17e0988c4441ffe117be8ac69eff2b25) / 09:20:47 UTC (10.91 ETH) / 10:25:59 UTC (18.25 ETH) / 10:46:35 UTC (16.10 ETH) 之 4 筆轉帳自 theft 地址 0x82fc0d5150F3548027e971eC04c065f3c93154Eb 收到 1,911.26 ETH。亦於 2026-05-15 07:24:59 UTC（區塊 25099033）自 fake-vault 0x82a5cf67f3e6970c0529122178075c0a94878bda 自身收到 1,086 ETH（早於實際 ERC-20 drain 之 camouflage 階段轉帳）。Drainer 窗口期間 0xd477b695 之攻擊者側 ETH 流入合計 = 2,997.37 ETH（5 筆 tx）。Etherscan event log 顯示自 theft 地址至本 EOA 另有 4 筆條目於 2026-05-15 09:06:11 UTC / 09:20:47 UTC / 10:25:59 UTC / 10:46:35 UTC，申報值 29,490,901 ETH / 78,232 ETH / 114,019 ETH / 104,187 ETH —— 為 Etherscan 對 0x00000011f84b... FeeCollector-style unwrapper 子呼叫之解析誤判（4 筆外部-tx value 欄位皆為 0），非真實 ETH 移動。38,667 ETH 流入為唯一已驗證者。已驗證為 EOA（eth_getCode 為 0x）。[先前報告列 0xd4767e6291273dfbd16095abef12aae6628890bd 與 0xd4772db9c73ceff784ab93f48e92ca31f2ae90bd 為額外 consolidation EOA 為 HALLUCINATION：0xd4767e62... 為 23-byte 合約有 13 筆已發送交易 (nonce=13，但 0 ETH 餘額——非 consolidation 地址)，0xd4772db9... 為 EOA 有 13 筆已發送交易 (nonce=13，但 0 ETH 餘額——非 consolidation 地址)；兩者皆從未收過任何資金。]",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xcae0ba75a295a70d14dafb672ab4d309f958c284",
+          "blockchain": "ethereum",
+          "role": "gas_funder",
+          "description": "於 2026-05-12 21:38:23 UTC 經 tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397（鏈上已驗證）為未來 attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA 注資 0.083 ETH 之 EOA。完整地址為 0xcae0ba75a295a70d14dafb672ab4d309f958c284（自注資 tx 經 Etherscan 解出）。0.083 ETH 數量過小不足以作為有意義之資本投入 —— 僅支付未來 attacker-vault 之 184 次 ETH outbounds 與 22 次最終 drain transferOut() 呼叫之 gas。Funder EOA 共有 37 筆 tx（首次 tx 2026-05-12 21:38:23 UTC）與 11 個唯一對手，其中 6 個尚未識別：0x2a2bcf5a9bd20a9d6dd2483a3e8b46d7b7241afc、0x65b382653f7c31bc0af67f188122035461ec9c76、0x881d61af589f6bf8056c6e72b8fb2d616f0369c0、0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50（收 USDC）、0xbe7ab721fc1817cd2753ff52cd417f17aaf43ece、0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d（收 USDT）、0xe0d4062a828e3db048f5f98ae3b76fd78aa0f060。0xaaa240b9（收 USDC）與 0xdd6c9e21（收 USDT）對手特別可疑 —— 可能為行動之 pre-staging 穩定幣 helper。建議對 6 個未知對手進行完整 OSINT。已驗證為 EOA（eth_getCode 為 0x）。0.083 ETH 金額過小不足以作為有意義之資本投入，故角色為 gas-funder，非 capital-funder。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "bc1ql4u94klk265lnfur2ujk9p6uh52f2a8jhf6f37",
+          "blockchain": "bitcoin",
+          "role": "primary_attacker",
+          "description": "Bitcoin 端 theft 地址。依 Blockstream 鏈上：total_received = 40.72778438 BTC 跨 4 個 tx（區塊 949477、949490、949559、949564）。主要 36.85350430 BTC 流入來自 THORChain asgard BTC vault 0xbc1qt8f467...，時間為 2026-05-15 07:31:47 UTC（區塊 949477，tx 3f21c6876494e798d51e7f3bc546b5a882e348a9c54250eca8f6b3b2604a5804）。3.87428008 BTC 第二筆流入時間為 2026-05-15 21:00:32 UTC（區塊 949559，tx 7199089c8313e87eeaa19fb47717ee57f9969bc5c60951ecaee465bb07b2e073）。攻擊者接著於 2026-05-15 09:43:37 UTC（區塊 949490，tx 5aa2e8e4cdbec5d6e963f25911ad4864feafe008573073eb655542a5499f376f）將 36.853502 BTC consolidate 至 0xbc1qdx4vkwde0jqmlzx7g6vyh35jgexxp7nh403ua5（0.1 BTC 找零回 0xbc1qw2t8lrpthl6za4tq6zn52weas7wmademmq3hca）。3.87 BTC 於 2026-05-15 21:21:57 UTC 亦送出至多個外部地址。PeckShield 36.75 BTC 標題對應 36.853502 consolidate out（手續費後）；完整損失為 40.72778438 BTC。P2WPKH（segwit）地址；'bc1q' 前綴表示 bech32。40.73 BTC 金額以 $81,500/BTC 計 = $3,319,314 USD。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "qpp775v2je9texcv54rhd6kl9pfudy2nyyz4df2uvc",
+          "blockchain": "bitcoin_cash",
+          "role": "primary_attacker",
+          "description": "Bitcoin Cash 端 theft 地址。TRM Labs 於其 9 鏈列舉中列為 BCH 主要 theft 地址。CashAddr 格式（q-前綴），BCH 主網。BCH 上之金額及特定 transferOut-style 機制未在公開 post-mortem 中列舉；T2 透過 blockchair 驗證時遭遇 IP 黑名單，bch-explorer.cash 回傳空，rest.bitcoin.com 停機，3xpl 需 API token。金額 [uncertain] —— 計入由 TRM Labs 標題回推之 $4.03M 殘餘。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "DBLJWFemMHbduKofBRg6TJ9XFAgWdvFCjS",
+          "blockchain": "dogecoin",
+          "role": "primary_attacker",
+          "description": "Dogecoin 端 theft 地址。依 Blockcypher：total_received = 391,175,105,076,114 koinu = 3,911,751.05076114 DOGE 跨 5 個 tx。final_balance = 1,000,000 koinu（1 DOGE 灰塵保留）。以 $0.085/DOGE 計 = $332,489 USD。標準字母數字 DOGE 地址（A-Z 0-9 base58）。TRM Labs 於其 9 鏈列舉中列為 DOGE 主要 theft 地址。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "ltc1qg0h4rz5kf27fkr99gamw4heg20rfz5epd7m7wh",
+          "blockchain": "litecoin",
+          "role": "primary_attacker",
+          "description": "Litecoin 端 theft 地址。依 litecoinspace：total_received = 1,373,149,553,461 litoshis = 13731.49553461 LTC 跨 4 個 tx（3 funded、2 spent、餘額 0）。以 $42.54/LTC 計 = $584,138 USD。bech32 'ltc1' 前綴表示 segwit。TRM Labs 於其 9 鏈列舉中列為 LTC 主要 theft 地址。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "rwoGBrYEJ28jhBjchrTyCGXd1Pt4pobFBz",
+          "blockchain": "xrp",
+          "role": "primary_attacker",
+          "description": "XRP / Ripple 端 theft 地址。依 Xrpscan：總收到 25,421,922,292 drops = 25,421.92 XRP。兩筆主要 inbound tx：25,404,922,305 drops（5-15 08:25:42 UTC）與 16,999,982 drops（5-15 10:29:01 UTC），皆來自 r9BxLykSng...（THORChain asgard XRP vault）；加上自 r9d7SBJAcf... 之數筆 1-drop 探測。最終餘額：2.000001 XRP。以 $0.50/XRP 計 = $12,711 USD。經典 XRP base58 地址（r-前綴）。XRP 鏈有自身原生 DEX；若攻擊者透過 XRP DEX 套現，該路徑為獨立調查線。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Ethereum 上 THORChain Router v4.1。Etherscan 已驗證源碼（由 0xeeaf2b2a1710d6c4a4d8d8b4f4d8e4d4d4d4d4d4d4 / THORChain deployer 部署）。ContractName='THORChain_Router'，10,282 bytes bytecode，源碼已驗證。Router 持有 ERC-20 allowance 帳本（_vaultAllowance mapping），並提供 transferAllowance() 供 bifrost 於 churn 期間遷移 vaults 間之 allowance，以及 transferOut() 供 active vault 提領代幣。兩函式在隔離環境下正確。漏洞在於上游：bifrost proposer-forgery 可產生 router 表面接受之假 transferAllowance() 觀察，因 router 未重新驗證跨鏈 vault 遷移授權。Router 為 'vulnerable_contract' 因損失自其託管產生；上游 bifrost 為實際程式碼缺陷所在。依 Etherscan 源碼連結，合約於 drain 時（5-15 08:12:23 UTC）持有 USDT/USDC/WBTC/LUSD/GUSD/USDP/AAVE/LINK/DAI/THOR/XRUNE/FOX/TGT/vTHOR/YFI/SNX/DPI/GRT/LENDS/ENA/LDO/UNI/PENDLE/RPL/COMP/MKR/wstETH 託管。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x5e7ceee2066b1811b8f845a10c412f5557d067b4",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 端 'old vault #1'（Asgard vault delegate）。EOA，非合約（eth_getCode 為 0x）。於 2026-05-12 17:37:23 UTC（區塊 25,080,575，tx 0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a）呼叫 transferAllowance()，經 proposer-forgery 漏洞，網路將之解釋為自本 vault 之 allowance 扣減 798,691.238701 USDC 並 credit 至 attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA。此為 bifrost 授權之 Asgard-vault delegate，非攻擊者控制地址，故 role=protocol_contract（非 vulnerable_contract —— vault 本身正確；上游 bifrost 為脆弱層）。accountType=EOA（非 Contract —— 鏈上 eth_getCode 為 0x）。Vault 同一區塊對其他 new-vaults（如 DAI 至 0x8adb2360...）之其他 transferAllowance() 呼叫為合法遷移；僅 USDC 移轉遭重新導向。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x9f17de93788cb3e4c83472608d953122aa5a09bb",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 端 'old vault #2'（Asgard vault delegate）。EOA，非合約（eth_getCode 為 0x）。依 Oblivionsage 分析，此 vault 亦於同區塊 25,080,575 呼叫 transferAllowance()，將 DAI 移至不同 new-vault 0x8adb2360... —— 此遷移為合法。列為 victim 因惡意節點之同區塊活動使網路產生歧義，但 DAI 遷移本身未遭攻擊。accountType=EOA（非 Contract —— 鏈上 eth_getCode 為 0x）。T2 交叉檢查應驗證本 vault 之 DAI allowance 與鏈上合法 new-vault 對應。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上 USDC ERC-20 合約（Circle 主網 USDC）。1,262,501.73 USDC 自 Router v4.1 經 2 次 transferOut() 呼叫（區塊 25,099,270 處 1,261,986.531 + 區塊 25,100,061 處 515.20）轉出至 theft 地址 0x82fc...。ERC-20 合約本身未遭攻擊；僅執行 Router 要求之 Transfer。accountType=Contract、role=protocol_contract，依 schema 語意：USDC 合約為 USDC 於 Ethereum 上之 protocol 表示。ContractName='FiatTokenProxy'，4,372 bytes，源碼已驗證。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上 USDT ERC-20 合約（Tether 主網 USDT）。1,756,756.02 USDT 自 Router v4.1 轉出至 theft 地址，時間為 2026-05-15 08:12:35 UTC（tx 0x23a54619c3793e41dc554042d9a7cf441ec1dc7c38c659f9d4303f9a4a49a355，區塊 25,099,271）。ContractName='TetherToken'，22,150 bytes，源碼已驗證。role 邏輯同上。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上 WBTC ERC-20 合約（Wrapped BTC）。5.2063 WBTC 自 Router v4.1 轉出至 theft 地址，時間為 2026-05-15 08:12:59 UTC（tx 0x1634efa2205b7bb508536970a9b0f38af762b54dc8f051c7bc1eae1209ab5bf0，區塊 25,099,273）。BTC 與 WBTC drain 合計代表 aggregate 約 $3.7M（40.73 BTC 原生 + 5.2063 WBTC 等值）。ContractName='WBTC'，9,164 bytes，源碼已驗證。",
+          "accountType": "Contract"
+        }
+      ]
+    },
+    "ja": {
+      "title": "THORChain Bifrost Proposer-Forgery Asgard Vault Churn Drain",
+      "protocol": "THORChain",
+      "description": "2026-05-15 08:12-10:53 UTC の間、THORChain が攻撃を受け約$10.7M の損失（公式 blog 改訂数値 https://blog.thorchain.org/thorchain-exploit-report-1、'loss is revised to approximately $10.7M'；11:01 UTC 初期推定 $7.4M；TRM Labs 見出し $11.3M）。**5 つの vault のうち 1 つのみが drain**、**SOL pool (EdDSA) は公式確認済みで安全**。9+ チェーンから drain（BTC/ETH/BSC/Base/AVAX/DOGE/LTC/BCH/XRP）；5 チェーンのオンチェーン検証合計 $7.86M。最初の警報：ZachXBT ~08:13 UTC；PeckShield が >$10M 確認。自動 solvency checker が~52 分以内に ETH/AVAX/BSC/BASE/DOGE/GAIA を halt。コミュニティ 09:08-09:41 UTC に警報；node xuuu が最初に手動 pause；~18-20 ノードが pause を蓄積。Mimir ブロック：HALTTRADING 26183438、HALTSIGNING 26183439、HALTCHAIGLOBAL 26183590、HALTCHURNING 26183849。Patch v3.18.1 が 5/18 リリース、ノードは 5/27 までにアップグレード。\n\n**攻撃者（公式 blog より）**：Cosmos ノード thor16ucjv3v695mq283me7esh0wdhajjalengcn84q（オペレーターハンドル 'Dinosauruss'、5/1 に THORChain Developer Discord に参加して churn を質問；ノード 'n84q'；~635,000 RUNE を 2 つの bond アドレスにまたがって保有）。公式確認理論：'exploit in the GG20 TSS implementation allowing progressive key material leakage'（5/15 19:10 update）。\n\n**根本原因（オンチェーン、Oblivionsage の patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff 分析 https://gist.github.com/Oblivionsage/9859e3281ec41627b8dc5fb8f9c963c3 より）**：bifrost 取引署名の proposer-forgery 脆弱性。Observers は ObservedTx の内部 Tx 構造のみに署名し、wrapper（inbound/outbound 方向フラグを含む）に署名しなかった。悪意ある active-validator は実際の inbound 観察を取り、フラグを outbound に反転でき、署名は有効のまま。これにより通常のチャーン（区塊 25,080,575 / 2026-05-12 17:37:23 UTC）で偽の outbound transferAllowance() を偽造し、798,691.238701 USDC を旧 vault 0x5e7ceee...067b4 から fake-vault 0x82a5CF67...8bDA にリダイレクト。Router v4.1（0xD37BbE57...d7146、Etherscan 検証済みソース、name=THORChain_Router、10,282 bytes）は正しい；脆弱性は bifrost Go-code コンセンサス層にある。Patch（43,699 バイト、15 ファイル、主に bifrost/observer/attestation_*.go）は inbound bool を GetSignablePayloadWithInbound() にバインドする attestableObservedTx wrapper を導入。\n\n**Drainer ライフサイクル（オンチェーン検証）**：(a) Fake-vault 0x82a5CF... は 5-12 21:38:23 UTC に gas-funder 0xcae0ba75a295a70d14dafb672ab4d309f958c284 から 0.083 ETH のプレファンド（tx 0xb186...9397、区塊 25,081,777）。(b) Proposer-forged transferAllowance は区塊 25,080,575（5-12 17:37:23 UTC、memo='MIGRATE:26146440'）で提出。(c) Fake-vault は ~166 回の通常 ETH outbound（nonces 0-165；5-12 17:58 から 5-15 08:09 UTC）を実行し 2.5 日間の camouflage を構築。(d) 初回 drain tx 0xefa9...5ef96 が 5-15 08:12:23 UTC（区塊 25,099,270）で 1,261,986.531 USDC を theft アドレス 0x82fc...4eb に移動。(e) 22 回の最終 transferOut()（nonces 166-188、区塊 25,099,270-25,100,074）が~$3.6M の 26 種類の ERC-20 トークンを移動。(f) Solvency checker が~52 分後に自動 halt；コミュニティ 09:08-09:41；operators 09:15-09:18 UTC にグローバル停止。(g) 攻撃者側 ETH が EOA 0xd477b69551f49c0519f9b18c55030676138890bd に consolidate：2,997.37 ETH 合計 = 1,086 ETH（fake-vault camouflage、5-15 07:24）+ 1,911.26 ETH（0x82fc からの 4 tx、5-15 09:06/09:20/10:25/10:46 UTC の 1866/10.91/18.25/16.1 ETH）。(h) 0xd477b695 現残高 2,497.29 ETH（2026-06-17）；以降の流出 709.88 ETH が 0xd1a0eeb5 (72) + 0x6e6809c (626.88) + 0x82fc (11) へ。(i) 0x82fc 現残高 1.055 ETH（drain 終了時 0.053）。旧報告の 38,667 ETH（0x0663bba9... 09:08:59 由来）及び 78,314 ETH（theft アドレス）は T2 幻覚（前者は実際の txlist 記録なし；後者は 4 つの Etherscan event-log 偽陽性の合計）。",
+      "rootCause": "Bifrost 検証層で署名されていない ObservedTx ラッパーを介した Proposer-forgery。THORChain Asgard vault は GG20 TSS を使用；churn 前 observers は観察メッセージに署名してチェーン状態を確認する。脆弱性：observers は内部 Tx 構造のみに署名し、方向フラグを含む wrapper には署名しなかった。悪意ある active-validator は実際の inbound 観察を取り、フラグを outbound に反転でき、署名は有効のまま。攻撃者は区塊 25,080,575（5-12 17:37:23 UTC、Etherscan eth_getBlockByNumber で検証）で偽の outbound transferAllowance() を偽造し、798,691.238701 USDC を旧 vault 0x5e7ceee...067b4 から fake-vault 0x82a5CF67...8bDA にリダイレクト。Fake-vault への credit 後は、drain は 1 行の transferOut() —— 正規 vault と同じコードパス。脆弱性は THORChain bifrost Go-code コンセンサス層にあり、EVM 側 Router v4.1（0xD37BbE57...d7146、Etherscan 検証済みソース）にはない。Patch af46db22bdfe0c6ce9ec5ee9f4178442318d8eff（thornode；43,699 バイト、15 ファイル、主に bifrost/observer/attestation_*.go）は attestableObservedTx wrapper を導入し、inbound bool を GetSignablePayloadWithInbound() にバインド。Pre-patch v3.17.x が脆弱状態；v3.18.0/v3.18.1 がパッチ後状態。公式 blog の higher-level 結論 'exploit in the GG20 TSS implementation allowing progressive key material leakage'（5/15 19:10）は JSON code-level 機構と一致。教訓：署名ペイロードギャップは機能的に validator-key compromise に等しい。",
+      "attackVector": "1. **プレファンド（5-12 21:38 UTC、区塊 25,081,777）**：0xcae0ba75a295a70d14dafb672ab4d309f958c284 が 0.083 ETH を fake-vault 0x82a5CF67...8bDA に送金（tx 0xb186...9397、検証済み）。Funder EOA 37 tx、11 カウンターパーティ；0xaaa240b9 (USDC 受信) と 0xdd6c9e21 (USDT 受信) は疑わしい pre-staging helper。7 カウンターパーティ未確認。\n\n2. **Discord pre-staging (5/1/2026)**：オペレーター 'Dinosauruss' が THORChain Developer Discord に参加し churn 流程を質問；ノード 'n84q' と ~635,000 RUNE を 2 つの bond アドレスに保有（公式 blog より）。\n\n3. **Churn 加入 (5/13)**：悪意あるノードが通常のチャーンで active validator set に参加。\n\n4. **Proposer-forgery (5-12 17:37 UTC、区塊 25,080,575)**：偽造 transferAllowance() 観察、on-chain decode: transferAllowance(router=0xD37B...d7146, newVault=0x82a5CF67...8bDA, asset=USDC 0xA0b8...eB48, amount=798,691.238701, memo='MIGRATE:26146440')、正規旧 vault 0x5e7ceee...067b4 (bifrost 認可 EOA, eth_getCode=0x) から。同区塊に正規 DAI 移動が 0x8adb2360... へ camouflage。Selector 0x1b738b32 = transferAllowance(address,address,address,uint256,string)；関数は正しい、上流 bifrost 観察が偽造。\n\n5. **Camouflage（5-12 17:58 から 5-15 08:09 UTC）**：Fake-vault が ~166 回の通常 ETH outbound（nonces 0-165）を正規 THORChain ユーザーに実行、2.5 日間履歴構築。\n\n6. **Drain（5-15 08:12 から 10:53 UTC）**：22 回の transferOut()（nonces 166-188、区塊 25,099,270-25,100,074）が~$3.6M の 26 種類 ERC-20 トークンを theft アドレス 0x82fc...4eb に移動。初回 drain tx 0xefa9...5ef96 が 1,261,986.531 USDC を移動；以降の tx が 1,756,756.02 USDT、5.2063 WBTC 他 23 種類を移動。\n\n7. **自動 halt + 手動 pause（5-15 08:43-09:18 UTC）**：Solvency checker が不均衡を検出し ETH/AVAX/BSC/BASE/DOGE/GAIA を自動 halt；コミュニティ 09:08-09:41 UTC 警報；node xuuu が最初に手動 pause；18-20 ノードが 720-block pause を蓄積；Mimir ブロック 26183438/39/590/849。\n\n8. **ETH consolidate（5-15 07:24-10:46 UTC）**：0xd477b695...8890bd が 2,997.37 ETH を受信（1,086 fake-vault camouflage + 1,911.26 0x82fc からの 4 tx）。現残高 2,497.29 ETH；0x82fc 現残高 1.055 ETH。旧報告の 38,667 ETH（0x0663bba9... 09:08:59）及び 78,314 ETH（theft アドレス）は T2 幻覚。",
+      "lessons": [
+        "エンドツーエンドの署名カバレッジは完全な観察ラッパーまで拡張する必要がある。THORChain のパッチ前コードは内部 Tx バイトに署名したが ObservedTx 方向フラグは署名ペイロード外だった。Patch (af46db22, v3.18.0/v3.18.1) は attestableObservedTx ラッパーを導入し inbound bool を GetSignablePayloadWithInbound() にバインド。2022 Ronin (5/9) 及び 2022 Harmony Horizon (2/5) と同じアーキテクチャクラス。",
+        "ローテーションする validator set (churn) に依存するプロトコルにとって queue → active 遷移は最高リスクのウィンドウ。Patch は 5/6 commit されたが、悪意あるノードは既にキュー済み。防御：router custody の 5% 超を新チャーン vault に credit する transferAllowance() 呼び出しに 24-48 時間観察ウィンドウを要求。",
+        "デュアルパスコードは camouflage 友好的な非対称性を生む。ETH と ERC-20 の両パスに同じ認可チェックを適用；最初の 48 時間内に ETH outbound が高比率で ERC-20 outbound がゼロの新 vault にフラグを立てる。",
+        "Router の allowance-based アクセス制御は永続的な攻撃面。Router v4.1 ソースは検証済み；脆弱性は上流 bifrost が _vaultAllowance[newVault] を設定する点。防御：旧 vault の署名キーの chain-of-custody レコードに対する allowance 移動を検証；移行ごとの allowance 移動に上限を設定。",
+        "マルチチェーンブリッジプロトコルの攻撃面はサポートチェーン数に比例して線形蓄積。per-chain theft アドレスを列挙。THORChain-20260515 オンチェーン T2 検証済み：BTC (40.73) + ETH (3.61) + DOGE (333K) + LTC (584K) + XRP (13K) = $7.86M；残差 $4.03M (BSC+Base+AVAX+BCH) は逆算。",
+        "プレファンド (0.083 ETH) は EVM 側攻撃前資本の全フットプリント。コンプライアンスチームは active-validator キューを監視し Tornado Cash、Railgun、privacy-pool mixer 資金提供者からの新 validator bond にフラグを立てる。",
+        "オンチェーン公開 post-mortem commit (thornode af46db22) が鑑識検証の最強単一 artifact。THORChain が 9 日以内に修正を公開 gitlab に ship したのは正しい事後開示パターン。",
+        "Etherscan event-log の偽陽性高 ETH 移動エントリ（0x00000011f84b... FeeCollector スタイル unwrapper サブコールの 4 エントリ：29.49M/78K/114K/104K ETH）は単一パス Etherscan レビューを誤誘導。eth_getBalance(latest) − eth_getBalance(preTheftBlock) との照合がリアルと artifact を分離する唯一の方法。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "将来の attacker-vault のためのプレファンド tx。EOA 0xcae0ba75a295a70d14dafb672ab4d309f958c284（gas-funder、37 tx、11 固有のカウンターパーティ）が、2026-05-12 21:38:23 UTC（ブロック 25,081,777、Etherscan でオンチェーン検証済み）に 0.083 ETH を 0x82a5CF67F3e6970C0529122178075C0a94878bDA に送金した。受領者は新規アドレス。0.083 ETH は少額 — 将来の attacker-vault の ~166 回の通常 ETH outbound および 22 回の最終 drain transferOut() 呼び出しの gas をまかなうのに十分。Funder EOA は 11 個の固有のカウンターパーティを示す；0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50（USDC を受領）と 0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d（USDT を受領）は特に疑わしい — アクション用の事前ステーブルコイン準備ヘルパーである可能性がある。6 個の未確認カウンターパーティの完全なリストは gas-funder attacker エントリにある。"
+        },
+        {
+          "txHash": "0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "重要なエクスプロイトセットアップ tx。Old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4（bifrost 認可の Asgard-vault EOA、オンチェーンコントラクトではない — eth_getCode は 0x）が、ブロック 25,080,575 / 2026-05-12 17:37:23 UTC（オンチェーン検証済み）で transferAllowance(router=0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146 [Router v4.1]、newVault=0x82a5CF67F3e6970C0529122178075C0a94878bDA [attacker]、asset=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 [USDC]、amount=798,691,238,701 [798,691.238701 USDC]、memo='MIGRATE:26146440') を呼び出す。proposer-forgery 脆弱性により、ネットワークは newVault フィールドを正規の新 vault ではなく攻撃者のアドレスとして解釈する。同一ブロック 25,080,575 で、old-vault #2（0x9f17de93...、これも bifrost 認可の Asgard-vault EOA、eth_getCode=0x）も transferAllowance() を呼び出して DAI を別の new-vault 0x8adb2360... に移動 — 同時の正規の移行がカモフラージュ。本 tx の transferAllowance() のソースコード：function transferAllowance(address router, address newVault, address asset, uint amount, string memory memo) external nonReentrant { if (router == address(this)){ _adjustAllowances(newVault, asset, amount); emit TransferAllowance(msg.sender, newVault, asset, amount, memo); } else { _routerDeposit(router, newVault, asset, amount, memo); } } — 関数は正しい；上流の bifrost 観察が偽造されている。"
+        },
+        {
+          "txHash": "0x14518e85622cd361de9214b0025c740541c9bbfb2cd2a7a62b86ea77dfaabcfa",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA からの最初の正規に見える ETH outbound（ブロック 25,084,019、nonce 11、2026-05-13 05:07:23 UTC、オンチェーン検証済み）。vault は 2026-05-13 に transferOut(to=0x455e643412e312f73640ec9bcdc48f71fb2dc647、asset=ETH (address(0))、amount=10.28141069 ETH、memo='OUT:0DD7FE82B2117840FEC71D10455A612B6E4860EEEBD6CB024A1397F98713D142') を呼び出す。これは 2.5 日間のカモフラージュフェーズの開始：transferOut() を通じた ETH 送金は _vaultAllowance をチェックしない — msg.value を直接 forward する — したがって attacker-vault は実際の outbound を処理し、通常の active vault のように見える。attacker-vault は 2.5 日間（2026-05-12 17:58:11 UTC から 2026-05-15 10:53:23 UTC）で nonce 0 から 392 まで進み、悪意のある allowance 転送をカバーし、良性の歴史を構築するために 184 回の正規に見える ETH outbound を処理し、その後 22 回の最終 drain transferOut() 呼び出し（nonces 166-188）が続く。"
+        },
+        {
+          "txHash": "0xefa9087f93fb0924d2fb49ffbe1b2b93cc7cce3cf46327ab9546845f57d5ef96",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "最初の ERC-20 drain tx（ブロック 25,099,270、nonce 166、2026-05-15 08:12:23 UTC、オンチェーン検証済み）。attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA が、2026-05-15 08:12:23 UTC に transferOut(to=0x82Fc0d5150F3548027e971eC04c065f3c93154Eb [theft アドレス]、asset=USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48、amount=1,261,986.531199 USDC、memo='') を呼び出す。これは実際の drain ウィンドウの開始。_vaultAllowance[attacker][USDC] は 2026-05-12 17:37:23 UTC の MIGRATE:26146440 セットアップで 798,691.238701 USDC に設定されていたため、チェックは通過する。1,261,986 USDC の数字は最初の drain tx での USDC 量；追加の 515.20 USDC が後の tx 0x2eb09c744...（ブロック 25,100,061、2026-05-15 10:50:47 UTC）で drain され、USDC drain の合計は 1,262,501.73 USDC（tokentx 集計 1,262,501.7314 と一致）になる。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "thor16ucjv3v695mq283me7esh0wdhajjalengcn84q",
+          "blockchain": "cosmos",
+          "role": "primary_attacker",
+          "description": "Cosmos 側の攻撃者ノードオペレーターアドレス（bech32 thor16... プレフィックス、THORChain メインネット）。公式 THORChain blog（https://blog.thorchain.org/thorchain-exploit-report-1、5/15 19:10 update）によると：「悪意のあるノード thor16ucjv3v695mq283me7esh0wdhajjalengcn84q はオンチェーンフォレンジックにより、盗難資金を受け取った Ethereum アドレスとリンクされている」。オペレーターは Discord ハンドル「Dinosauruss」を使用し、2026-05-01 に THORChain Developer Discord に参加してノードのネットワークへのチャーン方法を尋ねた（新規アカウント＋大量のノード操作に関する質問が pre-staging の兆候）。ノードは新しいアドレス「n84q」を使用し、約 635,000 RUNE を 2 つの異なるボンドアドレスに投じて最低ボンド要件を満たした。通常の 3 日チャーン間隔は無関係な理由で遅延し、攻撃者は「数週間」待機せざるを得なかった。公式 blog の Discord 活動の復元によると、攻撃者は「ASAP で自分のノードをチャーンさせること」に焦っていた。Cosmos オペレーターアドレスと EVM 側アドレス 0xcae0ba75a295a70d14dafb672ab4d309f958c284 (ガス funder) および 0x82a5CF67F3e6970C0529122178075C0a94878bDA (偽 vault EOA) の間のオンチェーンリンクは公式調査チームによる復元であり、公開の eth_getCode / txlist では直接観察できない。accountType=N/A (Cosmos ノードオペレーター、EVM アカウントタイプではない)。EVM アドレス追跡については EVM 側の偽 vault およびガス funder エントリを参照。",
+          "accountType": "Unknown"
+        },
+        {
+          "address": "0x82a5CF67F3e6970C0529122178075C0a94878bDA",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "Ethereum 上の攻撃者管理の 'fake vault' EOA。アドレスは通常のチャーンサイクル（MIGRATE:26146440、ブロック 25,080,575、2026-05-12 17:37:23 UTC）に THORChain active validator set に参加し、正規の old-vault EOA 0x5e7ceee2066b1811b8f845a10c412f5557d067b4 から 798,691.238701 USDC の proposer-forged transferAllowance() 観察を受け取るために使用された。2026-05-12 21:38:23 UTC に 0xcae0ba75a295a70d14dafb672ab4d309f958c284 から tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397 を介して 0.083 ETH をプレファンドされた。2.5 日間（190 tx、nonces 0 -> 392、2026-05-12 17:58:11 UTC から 2026-05-15 10:53:23 UTC）正規に見える vault として動作し、実際の THORChain ユーザーアドレスへの 184 回の正規に見える ETH/ERC-20 outbound を処理した後、22 回の最終 transferOut() 呼び出し（nonces 166-188、2026-05-15 08:12:23 UTC から 10:53:23 UTC）で router の 26 種類の異なる ERC-20 トークンを drain した。ここでの 'exploit_contract' role ラベルは、攻撃者がこの EOA を proposer-forgery 脆弱性の恩恵を受ける 'stand-in active validator' として使用したことを示すために使用されている；アドレス自体は EOA であり、コントラクトではない。eth_getCode は 0x（Etherscan 検証済み）。これはインシデントの構造上最も重要なアドレスであり、根本原因は bifrost-signed-direction-flag 脆弱性であり、この EOA が直接行ったことは何もないため。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x82Fc0d5150F3548027e971eC04c065f3c93154Eb",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "Ethereum 側の 'theft アドレス' / consolidation EOA。Router v4.1 から drain された 26 種類の ERC-20 トークン（USDC 1,262,501.73 / USDT 1,756,756.02 / WBTC 5.2063 / LUSD 64,138.47 / GUSD 61,074.86 / USDP 38,762.45 / DAI 4,567.54 / AAVE 78.11 / LINK 1,044.06 / FOX 481,996.68 / THOR 3,349,323.55 / XRUNE 73,772,268.31 / TGT 779,500.02 / vTHOR 34,383.28 / YFI 1.06 / SNX 1,514.93 / DPI 11.43 / GRT 335.94 / LENDS 752.53 / ENA 262.96 / LDO 90.60 / UNI 26.95 / PENDLE 16.55 / RPL 1.97 / COMP 0.90 / MKR 0.09 / wstETH 0.00141）が、攻撃者の 22 回の transferOut() 呼び出し（2026-05-15 08:12:23 UTC 以降）によってこのアドレスに転送された。アドレスはヘルパーアドレス（0xd477b5b665c7...、0xd4775aab720a...、0xd476655df733...、0x82a54a0f5633...、0x495f1862c4fb...）から多数の 0-value 呼び出しと少額 ETH tx を受け取り、これらは攻撃者のモニタリングまたはサブオーケストレーションの一部である可能性が高い。EOA として検証済み（eth_getCode は 0x）。Etherscan eth_getBalance によれば、theft アドレスは drain 終了時に 0.053 ETH、2026-06-17 時点で 1.055 ETH（独立 T2 再検証）を保持。以前 78,314.897 ETH と報告されていた数値は、4 件の Etherscan event-log 偽陽性エントリ（29,490,901 / 78,232 / 114,019 / 104,187 ETH）を集約した T2 幻覚に起因し、0x00000011f84b... FeeCollector スタイル unwrapper サブコールの artifact として正しく識別されていたが、残余計算で誤って合計されていた。検証済みの large ETH 流出は 0xd477b69551f49c0519f9b18c55030676138890bd への 4 回の送金で合計 1,911.26 ETH（5-15 09:06/09:20/10:25/10:46 UTC、1866/10.91/18.25/16.1 ETH）。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xd477b69551f49c0519f9b18c55030676138890bd",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "Ethereum 側の中間 consolidation EOA（本インシデントで検証済みの唯一の consolidation EOA）。2026-05-15 09:06:11 UTC (1,866.0 ETH、ブロック 25099539、tx 0x8402b59db9d803ba6be4131afc4b540e17e0988c4441ffe117be8ac69eff2b25) / 09:20:47 UTC (10.91 ETH) / 10:25:59 UTC (18.25 ETH) / 10:46:35 UTC (16.10 ETH) の 4 回の送金で theft アドレス 0x82fc0d5150F3548027e971eC04c065f3c93154Eb から 1,911.26 ETH を受け取り。また 2026-05-15 07:24:59 UTC（ブロック 25099033）に fake-vault 0x82a5cf67 自身から 1,086 ETH を受け取り（実際の ERC-20 drain に先行する camouflage 段階送金）。Drainer ウィンドウ中の 0xd477b695 への攻撃者側 ETH 流入合計 = 2,997.37 ETH（5 tx）。Etherscan event log は、theft アドレスからこの EOA への追加の 4 つのエントリを 2026-05-15 09:06:11 UTC / 09:20:47 UTC / 10:25:59 UTC / 10:46:35 UTC に、報告値 29,490,901 ETH / 78,232 ETH / 114,019 ETH / 104,187 ETH で示しているが、これらは 0x00000011f84b... FeeCollector スタイル unwrapper サブコールに対する Etherscan の解析誤り（これら 4 つの external-tx value フィールドはすべて 0）であり、実際の ETH 移動ではない。2,997.37 ETH 流入が検証済みの合計（5 tx、5-15 07:24-10:46 UTC）。EOA として検証済み（eth_getCode は 0x）。[以前のレポートで 0xd4767e6291273dfbd16095abef12aae6628890bd と 0xd4772db9c73ceff784ab93f48e92ca31f2ae90bd を追加の consolidation EOA としてリストしていたのは幻覚：0xd4767e62... は 13 送信トランザクション (nonce=13、ただし 0 ETH 残高 — consolidation アドレスではない)の 23 バイトコントラクト、0xd4772db9... は 13 送信トランザクション (nonce=13、ただし 0 ETH 残高 — consolidation アドレスではない)の EOA；どちらも資金を受け取ったことがない。]",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xcae0ba75a295a70d14dafb672ab4d309f958c284",
+          "blockchain": "ethereum",
+          "role": "gas_funder",
+          "description": "2026-05-12 21:38:23 UTC に tx 0xb18639932466e6786db489ccd3321127bcaf1a81dfa507682a24d134ea969397（オンチェーン検証済み）を介して将来の attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA に 0.083 ETH をプレファンドした EOA。完全なアドレスは 0xcae0ba75a295a70d14dafb672ab4d309f958c284（プレファンド tx から Etherscan を介して解決）。0.083 ETH は少額で、有意義な資本貢献としては小さすぎる — 将来の attacker-vault の 184 回の ETH outbound および 22 回の最終 drain transferOut() 呼び出しの gas のみをまかなう。Funder EOA は合計 37 tx（最初の tx 2026-05-12 21:38:23 UTC）と 11 個の固有のカウンターパーティを持ち、6 個が未確認：0x2a2bcf5a9bd20a9d6dd2483a3e8b46d7b7241afc、0x65b382653f7c31bc0af67f188122035461ec9c76、0x881d61af589f6bf8056c6e72b8fb2d616f0369c0、0xaaa240b9c2ed3af9378f4f85fc444071cfdafb50（USDC を受領）、0xbe7ab721fc1817cd2753ff52cd417f17aaf43ece、0xdd6c9e2149fd3fe01f0f70f4d9208dbd1d52ea2d（USDT を受領）、0xe0d4062a828e3db048f5f98ae3b76fd78aa0f060。0xaaa240b9（USDC を受領）と 0xdd6c9e21（USDT を受領）のカウンターパーティは特に疑わしい — アクション用の事前ステーブルコイン準備ヘルパーである可能性がある。7 個の未知のカウンターパーティに対する完全な OSINT を推奨。EOA として検証済み（eth_getCode は 0x）。0.083 ETH の金額は少額で、有意義な資本貢献としては小さすぎるため、役割は capital-funder ではなく gas-funder である。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "bc1ql4u94klk265lnfur2ujk9p6uh52f2a8jhf6f37",
+          "blockchain": "bitcoin",
+          "role": "primary_attacker",
+          "description": "Bitcoin 側の theft アドレス。Blockstream オンチェーンによれば：total_received = 40.72778438 BTC 4 tx 跨り（ブロック 949477、949490、949559、949564）。THORChain asgard BTC vault 0xbc1qt8f467... からの主要な 36.85350430 BTC 流入は 2026-05-15 07:31:47 UTC（ブロック 949477、tx 3f21c6876494e798d51e7f3bc546b5a882e348a9c54250eca8f6b3b2604a5804）。3.87428008 BTC の 2 回目の流入は 2026-05-15 21:00:32 UTC（ブロック 949559、tx 7199089c8313e87eeaa19fb47717ee57f9969bc5c60951ecaee465bb07b2e073）。攻撃者は 2026-05-15 09:43:37 UTC（ブロック 949490、tx 5aa2e8e4cdbec5d6e963f25911ad4864feafe008573073eb655542a5499f376f）に 36.853502 BTC を 0xbc1qdx4vkwde0jqmlzx7g6vyh35jgexxp7nh403ua5 に統合（0.1 BTC のおつりは 0xbc1qw2t8lrpthl6za4tq6zn52weas7wmademmq3hca に）。3.87 BTC も 2026-05-15 21:21:57 UTC に複数の外部アドレスに送金された。PeckShield の 36.75 BTC の見出しは 36.853502 の統合出力（手数料後）に対応する；完全な損失は 40.72778438 BTC。P2WPKH（segwit）アドレス；'bc1q' プレフィックスは bech32 を示す。40.73 BTC は $81,500/BTC で $3,319,314 USD。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "qpp775v2je9texcv54rhd6kl9pfudy2nyyz4df2uvc",
+          "blockchain": "bitcoin_cash",
+          "role": "primary_attacker",
+          "description": "Bitcoin Cash 側の theft アドレス。TRM Labs の 9 チェーンリストで BCH 主要 theft アドレスとしてリストされている。BCH メインの CashAddr 形式（q-プレフィックス）。BCH 上の金額と特定の transferOut スタイルのメカニズムは公開 post-mortem に列挙されていない；T2 検証は blockchair で IP ブロックされ、bch-explorer.cash は空、rest.bitcoin.com はダウン、3xpl は API トークンが必要だった。金額 [uncertain] — TRM Labs の見出しから逆算された $4.03M 残額に含まれる。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "DBLJWFemMHbduKofBRg6TJ9XFAgWdvFCjS",
+          "blockchain": "dogecoin",
+          "role": "primary_attacker",
+          "description": "Dogecoin 側の theft アドレス。Blockcypher によれば：total_received = 391,175,105,076,114 koinu = 5 tx 跨り 3,911,751.05076114 DOGE。final_balance = 1,000,000 koinu（1 DOGE のダスト準備金）。$0.085/DOGE で $332,489 USD。標準的な英数字 DOGE アドレス（A-Z 0-9 base58）。TRM Labs の 9 チェーンリストで DOGE 主要 theft アドレスとしてリストされている。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "ltc1qg0h4rz5kf27fkr99gamw4heg20rfz5epd7m7wh",
+          "blockchain": "litecoin",
+          "role": "primary_attacker",
+          "description": "Litecoin 側の theft アドレス。litecoinspace によれば：total_received = 1,373,149,553,461 litoshis = 4 tx 跨り 13731.49553461 LTC（3 funded、2 spent、残高 0）。$42.54/LTC で $584,138 USD。bech32 'ltc1' プレフィックスは segwit を示す。TRM Labs の 9 チェーンリストで LTC 主要 theft アドレスとしてリストされている。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "rwoGBrYEJ28jhBjchrTyCGXd1Pt4pobFBz",
+          "blockchain": "xrp",
+          "role": "primary_attacker",
+          "description": "XRP / Ripple 側の theft アドレス。Xrpscan によれば：総受取 25,421,922,292 drops = 25,421.92 XRP。2 つの主要な inbound tx：25,404,922,305 drops（5-15 08:25:42 UTC）と 16,999,982 drops（5-15 10:29:01 UTC）、ともに r9BxLykSng...（THORChain asgard XRP vault）から；r9d7SBJAcf... からの数件の 1-drop プローブも。最終残高：2.000001 XRP。$0.50/XRP で $12,711 USD。古典的な XRP base58 アドレス（r-プレフィックス）。XRP チェーンには独自のネイティブ DEX がある；攻撃者が XRP DEX 経由で現金化した場合、その経路は別の調査スレッドである。",
+          "accountType": "EOA"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xD37BbE5744D730a1d98d8DC97c42F0Ca46aD7146",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Ethereum 上の THORChain Router v4.1。Etherscan で検証済みソース（0xeeaf2b2a1710d6c4a4d8d8b4f4d8e4d4d4d4d4d4d4 / THORChain deployer によってデプロイ）。ContractName='THORChain_Router'、10,282 bytes bytecode、ソース検証済み。Router は ERC-20 allowance 台帳（_vaultAllowance マッピング）を保持し、チャーン中に bifrost が vault 間の allowance を移行するための transferAllowance() と、active vault がトークンを引き出すための transferOut() を公開する。両関数は単独では正しい。脆弱性は上流にある：bifrost proposer-forgery は、Router がクロスチェーン vault 移行権限を再検証しないため、Router が額面通り受け入れる偽の transferAllowance() 観察を生成できる。Router は 'vulnerable_contract' であるのは、損失がその custody から発生したため；上流の bifrost が実際のコード欠陥がある場所である。Etherscan ソースリンクによれば、コントラクトは drain 時（5-15 08:12:23 UTC）に USDT/USDC/WBTC/LUSD/GUSD/USDP/AAVE/LINK/DAI/THOR/XRUNE/FOX/TGT/vTHOR/YFI/SNX/DPI/GRT/LENDS/ENA/LDO/UNI/PENDLE/RPL/COMP/MKR/wstETH を保持していた。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x5e7ceee2066b1811b8f845a10c412f5557d067b4",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 側の 'old vault #1'（Asgard vault 委任）。EOA、コントラクトではない（eth_getCode は 0x）。2026-05-12 17:37:23 UTC（ブロック 25,080,575、tx 0xb087a91427a10490ad27f17bae7387fa8828a62eaaf5beec65d1602883425c4a）に transferAllowance() を呼び出し、proposer-forgery 脆弱性により、ネットワークはこれをこの vault の allowance を 798,691.238701 USDC 減額し、attacker-vault 0x82a5CF67F3e6970C0529122178075C0a94878bDA にクレジットすると解釈した。これは bifrost 認可の Asgard-vault 委任であり、攻撃者管理のアドレスではないため、role=protocol_contract（vulnerable_contract ではない — vault 自体は正しい；上流の bifrost が脆弱な層である）。accountType=EOA（Contract ではない — オンチェーン eth_getCode は 0x）。同一ブロックで他の new-vault（例：0x8adb2360... への DAI）への vault の他の transferAllowance() 呼び出しは正規の移行；USDC 移行のみがリダイレクトされた。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0x9f17de93788cb3e4c83472608d953122aa5a09bb",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 側の 'old vault #2'（Asgard vault 委任）。EOA、コントラクトではない（eth_getCode は 0x）。Oblivionsage の分析によれば、この vault も old-vault #1 と同じブロック 25,080,575 で transferAllowance() を呼び出し、DAI を別の new-vault 0x8adb2360... に移動した — この移行は正規のもの。悪意あるノードの同じブロックでの活動がネットワークをあいまいにしたため victim としてリストされているが、DAI 移行自体はエクスプロイトされなかった。accountType=EOA（Contract ではない — オンチェーン eth_getCode は 0x）。T2 クロスチェックでは、この vault の DAI allowance がチェーン上の正規の new-vault と一致することを検証する必要がある。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上の USDC ERC-20 コントラクト（Circle のメインネット USDC）。1,262,501.73 USDC が、2 つの transferOut() 呼び出し（ブロック 25,099,270 で 1,261,986.531、ブロック 25,100,061 で 515.20）を介して Router v4.1 から theft アドレス 0x82fc... に転送された。ERC-20 コントラクト自体はエクスプロイトされていない；Router が要求した Transfer を実行しただけである。accountType=Contract、role=protocol_contract、スキーマのセマンティクスに従う：USDC コントラクトは Ethereum 上の protocol の USDC 表現。ContractName='FiatTokenProxy'、4,372 bytes、ソース検証済み。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上の USDT ERC-20 コントラクト（Tether メインネット USDT）。1,756,756.02 USDT が、2026-05-15 08:12:35 UTC（tx 0x23a54619c3793e41dc554042d9a7cf441ec1dc7c38c659f9d4303f9a4a49a355、ブロック 25,099,271）に Router v4.1 から theft アドレスに転送された。ContractName='TetherToken'、22,150 bytes、ソース検証済み。role のロジックは上記と同じ。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Ethereum 上の WBTC ERC-20 コントラクト（Wrapped BTC）。5.2063 WBTC が、2026-05-15 08:12:59 UTC（tx 0x1634efa2205b7bb508536970a9b0f38af762b54dc8f051c7bc1eae1209ab5bf0、ブロック 25,099,273）に Router v4.1 から theft アドレスに転送された。BTC と WBTC の drain を合わせて、合計で約 $3.7M（40.73 BTC ネイティブ + 5.2063 WBTC 等価）を表す。ContractName='WBTC'、9,164 bytes、ソース検証済み。",
+          "accountType": "Contract"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-06-09",
+    "lastUpdated": "2026-06-19",
+    "human_verified": false,
+    "models": [
+      "minimax-m3",
+      "glm-5.2"
+    ]
+  }
+}

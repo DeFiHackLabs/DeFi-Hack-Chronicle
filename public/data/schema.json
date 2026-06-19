@@ -211,6 +211,26 @@
         "id": "monero",
         "name": "Morero",
         "description": "Monero private untraceable Layer 1 blockchain"
+      },
+      {
+        "id": "bitcoin_cash",
+        "name": "Bitcoin Cash",
+        "description": "Bitcoin Cash (BCH) mainnet, fork of Bitcoin"
+      },
+      {
+        "id": "dogecoin",
+        "name": "Dogecoin",
+        "description": "Dogecoin mainnet, fork of Litecoin"
+      },
+      {
+        "id": "litecoin",
+        "name": "Litecoin",
+        "description": "Litecoin mainnet, fork of Bitcoin"
+      },
+      {
+        "id": "xrp",
+        "name": "XRP Ledger",
+        "description": "XRP Ledger (XRPL), the Ripple-associated payment network"
       }
     ],
     "languages": [
