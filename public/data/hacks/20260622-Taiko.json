@@ -1,0 +1,486 @@
+{
+  "id": "Taiko-20260622",
+  "date": "2026-06-22",
+  "title": "Taiko Bridge SGX Enclave Key Leak Exploit",
+  "protocol": "Taiko",
+  "blockchain": [
+    "ethereum"
+  ],
+  "category": [
+    "key_compromise",
+    "access_control",
+    "bridge"
+  ],
+  "ecosystem": "evm",
+  "language": [
+    "solidity",
+    "rust"
+  ],
+  "estimatedLoss": {
+    "totalUSD": "1700000",
+    "breakdown": [
+      {
+        "asset": "ETH",
+        "amount": "295.97222",
+        "convertedUSD": "517063",
+        "note": "Drained from Taiko L1 Bridge (0xd60247c6...) via 26 internal call txs across blocks 25368853-25370061 (2026-06-21 22:18 to 2026-06-22 02:10 UTC). 267 ETH to 0xa98035081fb739..., 18 ETH to 0xe08d97e151473..., 10.97 ETH in additional txs. USD @ $1,747/ETH (BlockTempo reported 870 ETH ≈ $1.52M). [verified via Etherscan internal txs]"
+      },
+      {
+        "asset": "USDC",
+        "amount": "675761.24",
+        "convertedUSD": "675761",
+        "note": "2 transferOut txs from ERC20Vault (0x996282cA...): 649,761.24 at block 25368853 + 26,000 at block 25368910. [verified via Etherscan tokentx]"
+      },
+      {
+        "asset": "crvUSD",
+        "amount": "156832.01",
+        "convertedUSD": "156832",
+        "note": "1 transferOut from ERC20Vault at block 25368853. [verified]"
+      },
+      {
+        "asset": "USDT",
+        "amount": "138139.56",
+        "convertedUSD": "138140",
+        "note": "1 transferOut from ERC20Vault at block 25368854. [verified]"
+      },
+      {
+        "asset": "TAIKO",
+        "amount": "1990000",
+        "convertedUSD": "189050",
+        "note": "1 transferOut from ERC20Vault at block 25368955. Attacker sent 1.99M TAIKO to 0x5fbc60a12bc6... (MEXC deposit) at block 25368959. USD @ $0.095/TAIKO (PeckShield: 1.99M TAIKO ≈ $189.12K). [verified]"
+      },
+      {
+        "asset": "CRV",
+        "amount": "126160.97",
+        "convertedUSD": "63080",
+        "note": "1 transferOut from ERC20Vault at block 25368855. USD @ ~$0.50/CRV (approximate). [verified]"
+      },
+      {
+        "asset": "iZi",
+        "amount": "2140403.03",
+        "convertedUSD": "42808",
+        "note": "1 transferOut from ERC20Vault at block 25368856. izumi Finance token. USD @ ~$0.02/iZi (conservative estimate; exact price uncertain). [verified on-chain, USD approximate]"
+      },
+      {
+        "asset": "WBTC",
+        "amount": "0.426344",
+        "convertedUSD": "40503",
+        "note": "1 transferOut from ERC20Vault at block 25368855. USD @ ~$95,000/WBTC (approximate). [verified]"
+      },
+      {
+        "asset": "WETH",
+        "amount": "20.704820",
+        "convertedUSD": "36171",
+        "note": "1 transferOut from ERC20Vault at block 25368854. Attacker unwrapped to ETH via WETH contract (0xc02aaa39...) at block 25368937. USD @ $1,747/ETH. [verified]"
+      },
+      {
+        "asset": "weETH",
+        "amount": "0.530999",
+        "convertedUSD": "946",
+        "note": "1 transferOut from ERC20Vault at block 25368856. ether.fi wrapped ETH. USD @ $1,747 × 1.02. [verified]"
+      }
+    ],
+    "note": "On-chain verified total: ~$1.86M at approximate prices. PeckShield and BlockTempo headline: ~$1.7M. The ~$160K gap is attributable to (1) iZi price uncertainty ($0.02 estimate yields $42.8K), (2) CRV price approximation ($0.50 yields $63K), and (3) WBTC price approximation ($95K yields $40.5K). The $1.7M headline figure is consistent with the on-chain verified total at more conservative token pricing. All 10 asset types drained from ERC20Vault (0x996282cA...) and Bridge (0xd60247c6...) are verified via Etherscan V2 API tokentx + internal tx queries. The attacker swapped all ERC-20 tokens via 0x9108828e30f2... (a DEX router) for ETH, then sent 500 ETH to 0xa98035081fb739... (exchange deposit address) and 1.99M TAIKO to 0x5fbc60a12bc6... (MEXC)."
+  },
+  "attackTime": {
+    "startTime": "2026-06-21T19:03:59Z",
+    "endTime": "2026-06-22T02:10:35Z",
+    "isRange": true,
+    "note": "startTime = block 25367938 (2026-06-21 19:03:59 UTC) when attacker deployed helper contract 0xe0df6fc36deb... and called registerInstance on SgxVerifier (0x08568df2... and 0xa1018ba2...) using the leaked enclave-key.pem from the public taikoxyz/raiko GitHub repo. First proveBlocks at block 25368853 (22:07:23 UTC) triggered the first asset drain (USDC 649,761 + crvUSD 156,832). First processMessage at block 25368908 (22:18:23 UTC) drained 130 ETH from the Bridge. Last processMessage / ETH drain at block 25370061 (2026-06-22 02:10:35 UTC). Funding tx was 2026-06-17 19:18:35 UTC (block 25339312), 4 days before the attack. All timestamps verified via eth_getBlockByNumber.",
+    "date": "2026-06-22"
+  },
+  "description": "On 2026-06-21 between 19:03 UTC and 2026-06-22 02:10 UTC, Taiko's L1 Bridge and ERC20Vault on Ethereum were exploited for approximately $1.7M (PeckShield/BlockTempo headline; on-chain verified ~$1.86M at approximate token prices). The root cause was an RSA private key (enclave-key.pem) committed to the public taikoxyz/raiko GitHub repository. This key is used to sign all of Taiko's SGX (Software Guard Extensions) enclaves — it IS the entire trust model for Taiko's SGX-based proof verification.\n\nThe attacker derived the MrSigner hash from the leaked RSA public key, signed their own malicious SGX enclave with the leaked private key, and registered attacker-controlled SGX instances via SgxVerifier.registerInstance(). The SgxVerifier contracts (0x08568df252ec... and 0xa1018ba2e221...) verified the DCAP quote (ECDSA signature + certificate chain) but did not restrict which MrSigner values are accepted — any enclave signed with a valid DCAP quote passes. Since the attacker's enclave was signed with the same RSA key as Taiko's legitimate enclaves, the MrSigner matched.\n\nOnce registered, the attacker's SGX instances could sign proof public inputs accepted by Taiko's proof verifier (verifyProof in SgxVerifier). The attacker forged SGX attestations on fake L2 block state, called proveBlocks() on TaikoL1 (0xd60247c6...) to mark fraudulent L2 blocks as proven, then used processMessage() and retryMessage() to make the ERC20Vault (0x996282cA...) release canonical L1 assets (USDC, USDT, WETH, WBTC, CRV, crvUSD, TAIKO, iZi, weETH) and the Bridge release ETH.\n\nTaiko officially confirmed: 'We have confirmed a compromise of Taiko's chain state verification mechanism. As a result, the security assumptions of all bridges deployed on Taiko can no longer be relied upon.' The team paused block production, contacted exchanges (MEXC) to pause TAIKO deposits, and advised all users to withdraw from all bridges deployed on Taiko immediately.\n\nThe attacker consolidated all stolen ERC-20 tokens via a DEX swap (0x9108828e30f2...) into ETH, then sent 500 ETH to 0xa98035081fb739... (exchange deposit) and 1.99M TAIKO (~$189K) to 0x5fbc60a12bc6... (MEXC). Per BlockTempo, the attacker still held ~870 ETH (~$1.52M) at the time of reporting.\n\nNo private key theft. No social engineering. No SGX hardware exploit. Just a .pem file sitting in a public GitHub repo — the whole system was only as strong as the secrecy of one RSA key.",
+  "rootCause": "An RSA private key file (enclave-key.pem, 2392 bytes, 39-line RSA private key) was committed to the public taikoxyz/raiko GitHub repository at path docker/enclave-key.pem (latest commit f9f37cad9b87b3ab56ffc2fbdbc78b8354dcf364, 2026-04-10). This key is used by the Raiko SGX prover to sign all SGX enclaves — the MrSigner (SHA-256 hash of the enclave's RSA public key) is the identity that Taiko's SgxVerifier contracts trust. The SgxVerifier.registerInstance() function (verified in source at 0x08568df2...) calls IAttestation(automataDcapAttestation).verifyParsedQuote() which performs DCAP verification (ECDSA signature + certificate chain) on the quote, but does NOT restrict which MrSigner values are accepted — any enclave with a valid DCAP quote passes registration. Since the attacker possessed the same RSA private key, they could sign their own malicious enclave, produce a valid DCAP quote with the matching MrSigner, and register it as a trusted SGX prover instance. Once registered, verifyProof() only checks that (1) the instance is registered and valid, and (2) the ECDSA signature in the proof matches the registered instance address — both of which the attacker-controlled instance satisfies. This let the attacker forge proof public inputs for arbitrary L2 block states, bypassing Taiko's entire chain state verification mechanism. Architectural lesson: a multi-prover system's security is only as strong as its weakest prover's key management — one leaked .pem file invalidated the entire SGX trust model.",
+  "attackVector": "1. **Key leak (pre-existing)**: The RSA private key `enclave-key.pem` was committed to the public `taikoxyz/raiko` GitHub repo at `docker/enclave-key.pem`. This key signs all SGX enclaves; its public-key hash (MrSigner) is the identity trusted by SgxVerifier.\n\n2. **Funding (2026-06-17 19:18 UTC, block 25339312)**: EOA 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 sent 0.994 ETH to attacker EOA 0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a (verified). The funder EOA has only 1 tx, suggesting it may be a funded burner address.\n\n3. **SGX instance registration (2026-06-21 19:03 UTC, block 25367938)**: Attacker deployed a helper contract 0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a (tx 0x2c8160cd..., verified: contractCreator = 0x7506DeA0...) and called registerInstance on TWO SgxVerifier contracts: 0x08568df252ecf37d6c3efd24f6ca3688118697f1 (slot 5) and 0xa1018ba2e22139076f91da2a856b2cab22d968f6 (slot 6). The registerInstance calls (selector 0x09c5eabe) passed DCAP verification because the attacker's enclave was signed with the leaked RSA key (matching MrSigner). 24 logs emitted including InstanceAdded events from both SgxVerifiers and BlockVerified events from TaikoL1.\n\n4. **Forged proveBlocks (2026-06-21 22:07 UTC, blocks 25368853-25368856)**: 8 proveBlocks() calls (selector 0x0432873c) to TaikoL1 (0xd60247c6...) in rapid succession (22:07:23 to 22:07:59 UTC, 4 blocks, ~36 seconds). Each call forged proof for a fake L2 block state, verified by the attacker's registered SGX instances. The proveBlocks events triggered the ERC20Vault to release canonical L1 assets: USDC 649,761 + crvUSD 156,832 (block 25368853), USDT 138,140 + WETH 20.705 (block 25368854), WBTC 0.426 + CRV 126,161 (block 25368855), iZi 2,140,403 + weETH 0.531 (block 25368856). All 9 ERC-20 tokens transferred from ERC20Vault (0x996282cA...) to attacker 0x7506DeA0... (verified via Etherscan tokentx).\n\n5. **processMessage / ETH drain (2026-06-21 22:18 to 2026-06-22 02:10 UTC, blocks 25368908-25370061)**: Attacker called processMessage() (selector 0x2035065e) on TaikoL1 repeatedly (23+ calls). Each call used the forged L2 state to release ETH from the Bridge (0xd60247c6...) via internal calls. Total 295.97 ETH drained across 26 internal txs to two addresses: 267 ETH to 0xa98035081fb739... and 18 ETH to 0xe08d97e151473.... An additional 26,000 USDC was drained in a second batch (block 25368910).\n\n6. **TAIKO drain (2026-06-21 22:28 UTC, block 25368955)**: 1,990,000 TAIKO tokens (contract 0x10dea67478c5f8c5e2d90e5e9b26dbe60c54d800) transferred from ERC20Vault to attacker.\n\n7. **Consolidation and laundering (2026-06-21 22:11 to 2026-06-22 06:07 UTC)**: Attacker approved all ERC-20 tokens to DEX router 0x9108828e30f2... (blocks 25368867-25368873) and swapped them for ETH. WETH was unwrapped (20.7 ETH from WETH contract at block 25368937). TAIKO 1.99M sent to MEXC deposit 0x5fbc60a12bc6... at block 25368959. ETH consolidated: 500 ETH to 0xa98035081fb739... (exchange, 5×100 ETH txs at blocks 25369404-25369633) + 0.05 ETH to 0x2f205367f408... Per BlockTempo, attacker held ~870 ETH (~$1.52M) at reporting time.",
+  "lessons": [
+    "Never commit private keys to public repositories. The enclave-key.pem file was the entire trust model for Taiko's SGX prover — its secrecy was the only thing preventing forgery of all chain state proofs. AI-assisted scanning of public repos at machine speed makes this a near-certain discovery vector. Pre-commit hooks that scan for .pem/.key files are mandatory, and secrets scanning (GitHub Secret Scanning, TruffleHog) should be enabled and enforced as a merge gate.",
+    "A multi-prover system's security is only as strong as its weakest prover's key management. Taiko's multi-prover stack (SGX, SGX, ZK) was marketed as defense-in-depth, but the SGX path required only one leaked RSA key to bypass. If any prover's trust model collapses (here: SGX via leaked signing key), the entire verification system is compromised unless the other provers are independently sufficient to reject fraudulent state.",
+    "SgxVerifier.registerInstance() accepted any enclave with a valid DCAP quote without restricting MrSigner to a whitelist of known-good enclave signers. Defense: registerInstance must enforce that the MrSigner in the quote matches a hardcoded/admin-governed whitelist of authorized enclave signers. A leaked key alone should not be sufficient — the MrSigner whitelist adds a second factor.",
+    "SgxVerifier.verifyProof() only checks that the signing instance is registered and the ECDSA signature matches — it does not re-verify the enclave's integrity or MrSigner at proof time. Defense: proof verification should include a freshness check against the current enclave measurement (MRENCLAVE) and the authorized MrSigner, not just the instance address registration.",
+    "The proveBlocks → processMessage → retryMessage path allows anyone to move L1 assets based on 'proven' L2 state, with no withdrawal delay or challenge period for SGX-proven blocks. Defense: a time-locked challenge window (e.g., 24h) for any state transition that releases L1 assets, during which other provers (ZK) can dispute the SGX proof. This would have given Taiko time to detect the fraudulent proofs before funds left.",
+    "Key management for SGX enclave signing should use HSM-backed keys or hardware-protected key stores, never files in a Git repo. The Docker build process that copies enclave-key.pem into the container should instead inject it at runtime from a secrets manager (Vault, AWS Secrets Manager, etc.). The .pem file in docker/ should be a placeholder or test-only key, never the production signing key.",
+    "All bridges deployed on Taiko were compromised because they rely on Taiko's chain state verification. L2 bridge security is only as strong as the L2's state verification mechanism — a single prover compromise invalidates all bridges built on that L2. Bridge operators should independently verify L2 state or require multiple prover attestations before releasing L1 assets."
+  ],
+  "transactions": [
+    {
+      "txHash": "0x02147c7bcea3a6bf93c9b231640a8bd6a7603efd6da34a2ee50696913fa70d89",
+      "blockchain": "ethereum",
+      "role": "funding",
+      "description": "Funding tx. EOA 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 sent 0.99387 ETH to attacker 0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a on 2026-06-17 19:18:35 UTC (block 25339312, verified). The funder EOA has only 1 outgoing tx, suggesting a burner address. 0.994 ETH covers gas for contract deployment, registerInstance, 8 proveBlocks calls, and 23+ processMessage calls over the ~7-hour attack window."
+    },
+    {
+      "txHash": "0x2c8160cdeb76873b872a1b9bbcfc526394440d922b3770dc2c6f7705995b17d7",
+      "blockchain": "ethereum",
+      "role": "setup",
+      "description": "Attacker deploys helper contract 0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a at block 25367938 (2026-06-21 19:03:59 UTC, verified). This contract wraps the registerInstance call to the SgxVerifier contracts. Contract is unverified on Etherscan. eth_getCode confirms 4234-byte bytecode (Contract)."
+    },
+    {
+      "txHash": "0x2f44dc1b883522a88f9b0cbbdfabf9ec33884b69dd4326600c3fab7fb2277260",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Critical exploit tx: registerInstance call via helper contract 0xe0df6fc36deb... to register attacker-controlled SGX instances on SgxVerifier 0x08568df2... (slot 5) and 0xa1018ba2... (slot 6) at block 25367938 (2026-06-21 19:03:59 UTC, verified). Selector 0x09c5eabe = registerInstance(V3Struct.ParsedV3QuoteStruct). Input length 67,018 bytes (large DCAP quote structure). 24 logs emitted: InstanceAdded events from both SgxVerifiers + BlockVerified events from TaikoL1. The DCAP quote passed verifyParsedQuote because the attacker's enclave was signed with the leaked enclave-key.pem (matching MrSigner). status=SUCCESS."
+    },
+    {
+      "txHash": "0x017292a7de5fef52a3274e37dda5ace4c4d0cdafe91b7b4ac9c700f02fae35ee",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "First forged proveBlocks call. Attacker calls proveBlocks() (selector 0x0432873c) on TaikoL1 (0xd60247c6848b...) at block 25368853 (2026-06-21 22:07:23 UTC, verified). Input length 1,930 bytes. 3 logs: USDC Transfer (649,761.24 from ERC20Vault to attacker), ERC20Vault MessageReceived, TaikoL1 BlockVerified. This forged proof for a fake L2 block state, verified by the attacker's registered SGX instance. status=SUCCESS. First asset release: 649,761 USDC + 156,832 crvUSD."
+    },
+    {
+      "txHash": "0xb8befb015a67de8f40890b1f8667c597c3b66a52b388ec1c6cd28637fd65dd13",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "First processMessage call draining ETH from Bridge. Attacker calls processMessage() (selector 0x2035065e) on TaikoL1 (0xd60247c6...) at block 25368908 (2026-06-21 22:18:23 UTC, verified). Input length 3,018 bytes. 2 logs from TaikoL1: BlockVerified + message processed. Internal call released 130 ETH from Bridge to 0xa98035081fb739... (exchange deposit). status=SUCCESS."
+    },
+    {
+      "txHash": "0x4986e4a4c8c541bc623bff9a6f1caa1795d92d0fcff8efef4d79d7ac4834ee61",
+      "blockchain": "ethereum",
+      "role": "exploit",
+      "description": "Second forged proveBlocks call in the same block as tx[3]. Attacker calls proveBlocks() (selector 0x0432873c) on TaikoL1 (0xd60247c6...) at block 25368853 (2026-06-21 22:07:23 UTC, verified). This tx proved a second fake L2 block state, resulting in 156,832 crvUSD being released from ERC20Vault to the attacker. status=SUCCESS. The attacker executed 8 proveBlocks calls across 4 blocks (25368853-25368856) in rapid succession (~36 seconds)."    },
+    {
+      "txHash": "0x1b6d504f2e35eabeda731bbbbda5f2a8acad2aea8e7eca1ebc701fd37f7dd26c",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Attacker swaps all stolen ERC-20 tokens via DEX router 0x9108828e30f2de407a8cb58a43d8e6b2488c7a35 at block 25368874 (2026-06-21 22:11:35 UTC, verified). Selector 0x35faa416. This single tx swapped USDC 649,761 + USDT 138,140 + CRV 126,161 + crvUSD 156,832 + WBTC 0.426 for ETH. Internal calls returned 579.54 ETH + 15.14 ETH to the attacker (verified via Etherscan internal txs). status=SUCCESS."
+    },
+    {
+      "txHash": "0x5d8127d07d0b94263c11be2a51f01b610f287580fb29ed3f4d35aa27359837d4",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "TAIKO token transfer to MEXC. 1,990,000 TAIKO (contract 0x10dea67478c5f8c5e2d90e5e9b26dbe60c54d800) sent from attacker 0x7506DeA0... to 0x5fbc60a12bc6635e7d587d8dac52e4b1388b4990 at block 25368959 (2026-06-21 22:28:59 UTC, verified). Selector 0xa9059cbb = transfer(address,uint256). status=SUCCESS. PeckShield reported this as MEXC deposit (~$189K)."
+    }
+  ],
+  "attackers": [
+    {
+      "address": "0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a",
+      "blockchain": "ethereum",
+      "role": "primary_attacker",
+      "description": "Primary attacker EOA. Funded 2026-06-17 19:18:35 UTC with 0.994 ETH from 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 (block 25339312, verified). Deployed helper contract 0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a at block 25367938. Called registerInstance on two SgxVerifier contracts (0x08568df2... slot 5, 0xa1018ba2... slot 6) using SGX enclave signed with leaked enclave-key.pem from public taikoxyz/raiko GitHub repo. Executed 8 proveBlocks calls (blocks 25368853-25368856) and 23+ processMessage calls (blocks 25368908-25370061) to drain ~$1.7M from Taiko L1 Bridge and ERC20Vault. Swapped all ERC-20 tokens via DEX router 0x9108828e30f2... for ETH. Sent 500 ETH to exchange deposit 0xa98035081fb739... and 1.99M TAIKO to MEXC deposit 0x5fbc60a12bc6.... Per BlockTempo, held ~870 ETH (~$1.52M) at reporting time. eth_getCode returns 0x → EOA (verified). Total tx count: 233+ across 3 Etherscan pages.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a",
+      "blockchain": "ethereum",
+      "role": "exploit_contract",
+      "description": "Attacker-deployed helper contract for wrapping registerInstance calls. Created at block 25367938 (tx 0x2c8160cd..., verified: contractCreator = 0x7506DeA0...). 4,234-byte bytecode, unverified source on Etherscan. The contract wraps the SgxVerifier.registerInstance(V3Struct.ParsedV3QuoteStruct) call, forwarding the large DCAP quote structure (67,018-byte input). Used in at least 2 registerInstance txs (0x2f44dc1b... and 0x5bddc627...). eth_getCode confirms 4,234 bytes → Contract (verified).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xad28bb1debcd7c024cec38d10a5c0d5495cbde74",
+      "blockchain": "ethereum",
+      "role": "gas_funder",
+      "description": "Gas funder EOA. Sent 0.99387 ETH to attacker 0x7506DeA0... on 2026-06-17 19:18:35 UTC (block 25339312, verified). The funder EOA has only 1 outgoing tx in Etherscan, suggesting a funded burner address or a fresh address pre-loaded for this operation. eth_getCode returns 0x → EOA (verified). The 4-day gap between funding and attack (Jun 17 → Jun 21) suggests preparation time for enclave compilation and DCAP quote generation.",
+      "accountType": "EOA"
+    },
+    {
+      "address": "0xa98035081fb739ebe9c8f80904668fb11438a846",
+      "blockchain": "ethereum",
+      "role": "consolidation",
+      "description": "Exchange deposit address. Received 267 ETH from Bridge internal calls + 500 ETH from attacker EOA (5×100 ETH txs at blocks 25369404-25369633). No contract source code (eth_getCode returns 0x → EOA). Total received from attack: ~767 ETH. Likely an exchange hot wallet or OTC desk deposit address. The attacker also sent 0.005 ETH to this address on Jun 18 (block 25342455) as a test transfer.",
+      "accountType": "Exchange"
+    }
+  ],
+  "victims": [
+    {
+      "address": "0xd60247c6848b7ca29eddf63aa924e53db6ddd8ec",
+      "blockchain": "ethereum",
+      "role": "vulnerable_contract",
+      "description": "Taiko L1 Bridge proxy (ERC1967Proxy). Implementation: 0x2705b12a971da766a3f9321a743d61cead67da2f (MainnetBridge, source verified). This contract holds ETH deposited by users bridging to Taiko L2. The attacker used forged proveBlocks() calls to trigger processMessage() which released 295.97 ETH via 26 internal calls (blocks 25368853-25370061). The Bridge's security assumption is that all proven L2 block states are valid — this assumption was broken by the SGX enclave key leak. eth_getCode confirms 342-byte proxy bytecode → Contract (verified).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x996282cA11E5DEb6B5D122CC3B9A1FcAAD4415Ab",
+      "blockchain": "ethereum",
+      "role": "vulnerable_contract",
+      "description": "Taiko ERC20Vault proxy (ERC1967Proxy). Implementation: 0xb20c8ffc2dd49596508d262b6e8b6817e9790e63 (MainnetERC20Vault, source verified, contains processMessage + retryMessage). This contract holds canonical L1 ERC-20 tokens bridged to Taiko L2. The attacker used forged L2 state proofs to trigger processMessage() which released 9 different ERC-20 tokens: USDC 675,761 + USDT 138,140 + WETH 20.705 + WBTC 0.426 + CRV 126,161 + crvUSD 156,832 + TAIKO 1,990,000 + iZi 2,140,403 + weETH 0.531 (all verified via Etherscan tokentx). eth_getCode confirms 342-byte proxy bytecode → Contract (verified).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0x08568df252ecf37d6c3efd24f6ca3688118697f1",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Taiko SgxVerifier contract (slot 5). Source verified on Etherscan (ContractName='SgxVerifier', 79,429 bytes). Contains registerInstance() which calls automataDcapAttestation.verifyParsedQuote() — performs DCAP verification (ECDSA + cert chain) but does NOT whitelist MrSigner values. Also contains verifyProof() which checks instance registration + ECDSA signature, but not MrSigner at proof time. The attacker registered malicious SGX instances on this contract using the leaked enclave-key.pem. This is the contract where the trust model was broken — not a victim of direct theft, but the verification gateway that was bypassed. eth_getCode confirms Contract (verified).",
+      "accountType": "Contract"
+    },
+    {
+      "address": "0xa1018ba2e22139076f91da2a856b2cab22d968f6",
+      "blockchain": "ethereum",
+      "role": "protocol_contract",
+      "description": "Taiko SgxVerifier contract (slot 6). Source verified (ContractName='SgxVerifier'). Second SgxVerifier instance the attacker registered on (via the same registerInstance tx 0x2f44dc1b...). The Taiko system uses multiple SgxVerifier contracts for different prover tiers/slots; the attacker registered on both (slot 5 and slot 6) to maximize the proof acceptance surface. eth_getCode confirms Contract (verified).",
+      "accountType": "Contract"
+    }
+  ],
+  "references": [
+    "https://x.com/taikoxyz/status/2068858818352865626",
+    "https://x.com/PeckShieldAlert/status/2068868035805638670",
+    "https://x.com/Phalcon_xyz/status/2068924424238321854",
+    "https://x.com/QuillAudits_AI/status/2069041275211530673",
+    "https://x.com/P3b7_/status/2069045986236695020",
+    "https://x.com/GoPlusZH/status/2069013778788999239",
+    "https://x.com/BlockTempo/status/2068909505849766119",
+    "https://x.com/Arisk_io/status/2068869101725049115",
+    "https://github.com/taikoxyz/raiko/blob/main/docker/enclave-key.pem"
+  ],
+  "locales": {
+    "zh-TW": {
+      "title": "Taiko 橋接 SGX 飛地密鑰洩漏攻擊事件",
+      "protocol": "Taiko",
+      "description": "2026-06-21 19:03 UTC 至 2026-06-22 02:10 UTC 期間，Taiko 在 Ethereum 上的 L1 Bridge 及 ERC20Vault 遭攻擊，損失約 $1.7M（PeckShield/BlockTempo 標題；鏈上驗證約 $1.86M，含代幣估價）。根因為一把 RSA 私鑰（enclave-key.pem）被提交至公開的 taikoxyz/raiko GitHub 儲存庫。此密鑰用於簽署 Taiko 所有 SGX 飛地——它是 Taiko SGX 證明驗證的整個信任模型。\n\n攻擊者從洩漏的 RSA 公鑰推導出 MrSigner 雜湊，用洩漏的私鑰簽署自己的惡意 SGX 飛地，並透過 SgxVerifier.registerInstance() 注冊攻擊者控制的 SGX 實例。SgxVerifier 合約（0x08568df2... 及 0xa1018ba2...）驗證了 DCAP quote（ECDSA 簽章 + 憑證鏈），但未限制接受的 MrSigner 值——任何有有效 DCAP quote 的飛地皆可通過。由於攻擊者的飛地以與 Taiko 合法飛地相同的 RSA 密鑰簽署，MrSigner 匹配。\n\n注冊後，攻擊者的 SGX 實例可簽署被 Taiko 證明驗證器接受的證明公開輸入。攻擊者偽造 SGX 證明於假 L2 區塊狀態，呼叫 TaikoL1（0xd60247c6...）的 proveBlocks() 將詐欺 L2 區塊標記為已證明，再以 processMessage() 及 retryMessage() 使 ERC20Vault（0x996282cA...）釋放 L1 資產（USDC、USDT、WETH、WBTC、CRV、crvUSD、TAIKO、iZi、weETH），並使 Bridge 釋放 ETH。\n\nTaiko 官方確認：「我們已確認 Taiko 的鏈狀態驗證機制遭攻陷。因此，所有部署在 Taiko 上的橋接之安全假設不再可信。」團隊暫停區塊生產、聯繫交易所（MEXC）暫停 TAIKO 存款，並呼籲所有用戶立即從所有部署在 Taiko 上的橋接撤資。\n\n攻擊者透過 DEX swap（0x9108828e30f2...）將所有被盜 ERC-20 代幣兌換為 ETH，再將 500 ETH 發至 0xa98035081fb739...（交易所存款）及 1.99M TAIKO（約 $189K）發至 0x5fbc60a12bc6...（MEXC）。依 BlockTempo 報導，攻擊者於報導時仍持有約 870 ETH（約 $1.52M）。\n\n無私鑰竊取。無社交工程。無 SGX 硬體漏洞。僅是一個 .pem 檔案放在公開 GitHub repo——整個系統的安全性僅取決於一把 RSA 密鑰的保密性。",
+      "rootCause": "一把 RSA 私鑰檔案（enclave-key.pem，2392 bytes，39 行 RSA 私鑰）被提交至公開 taikoxyz/raiko GitHub 儲存庫的路徑 docker/enclave-key.pem（最新 commit f9f37cad9b87b3ab56ffc2fbdbc78b8354dcf364，2026-04-10）。此密鑰由 Raiko SGX prover 用於簽署所有 SGX 飛地——MrSigner（飛地 RSA 公鑰的 SHA-256 雜湊）是 Taiko SgxVerifier 合約信任的身份。SgxVerifier.registerInstance() 函式（源碼已驗證於 0x08568df2...）呼叫 IAttestation(automataDcapAttestation).verifyParsedQuote() 執行 DCAP 驗證（ECDSA 簽章 + 憑證鏈），但未將 MrSigner 限制為白名單——任何有有效 DCAP quote 的飛地皆通過注冊。由於攻擊者持有相同 RSA 私鑰，可簽署自己的惡意飛地、產生匹配 MrSigner 的有效 DCAP quote，並注冊為受信任的 SGX prover 實例。注冊後，verifyProof() 僅檢查（1）實例已注冊且有效，（2）證明中的 ECDSA 簽章匹配注冊的實例地址——兩者攻擊者控制的實例皆滿足。此讓攻擊者偽造任意 L2 區塊狀態的證明公開輸入，繞過 Taiko 整個鏈狀態驗證機制。架構教訓：多證明器系統的安全性僅取決於其最弱證明器的密鑰管理——一把洩漏的 .pem 檔案使整個 SGX 信任模型失效。",
+      "attackVector": "1. **密鑰洩漏（既存）**：RSA 私鑰 enclave-key.pem 被提交至公開 taikoxyz/raiko GitHub repo 的 docker/enclave-key.pem。此密鑰簽署所有 SGX 飛地；其公鑰雜湊（MrSigner）為 SgxVerifier 信任的身份。\n\n2. **注資（2026-06-17 19:18 UTC，區塊 25339312）**：EOA 0xad28bb1debcd... 送出 0.994 ETH 至攻擊者 EOA 0x7506DeA0...（已驗證）。Funder EOA 僅 1 筆 tx，可能為 burner address。\n\n3. **SGX 實例注冊（2026-06-21 19:03 UTC，區塊 25367938）**：攻擊者部署 helper 合約 0xe0df6fc36deb... 並對兩個 SgxVerifier 合約呼叫 registerInstance：0x08568df2...（slot 5）及 0xa1018ba2...（slot 6）。registerInstance 呼叫（selector 0x09c5eabe）通過 DCAP 驗證，因攻擊者飛地以洩漏 RSA 密鑰簽署（MrSigner 匹配）。24 個 log 事件發出。\n\n4. **偽造 proveBlocks（2026-06-21 22:07 UTC，區塊 25368853-25368856）**：8 次 proveBlocks() 呼叫（selector 0x0432873c）至 TaikoL1（0xd60247c6...），36 秒內完成。每次呼叫偽造假 L2 區塊狀態的證明。ERC20Vault 釋放 9 種代幣：USDC 649,761 + crvUSD 156,832（區塊 25368853）、USDT 138,140 + WETH 20.705（區塊 25368854）、WBTC 0.426 + CRV 126,161（區塊 25368855）、iZi 2,140,403 + weETH 0.531（區塊 25368856）。\n\n5. **processMessage / ETH drain（2026-06-21 22:18 至 2026-06-22 02:10 UTC，區塊 25368908-25370061）**：攻擊者重複呼叫 processMessage()（selector 0x2035065e）至 TaikoL1。每次呼叫使用偽造 L2 狀態從 Bridge 釋放 ETH。合計 295.97 ETH 跨 26 筆內部 tx drain 至 0xa98035081fb739...（267 ETH）及 0xe08d97e151473...（18 ETH）。\n\n6. **TAIKO drain（2026-06-21 22:28 UTC，區塊 25368955）**：1,990,000 TAIKO 從 ERC20Vault 轉至攻擊者。\n\n7. **整合與洗錢（2026-06-21 22:11 至 2026-06-22 06:07 UTC）**：攻擊者將所有 ERC-20 代幣透過 DEX router 0x9108828e30f2... 兌換為 ETH。WETH 解包為 ETH（20.7 ETH）。TAIKO 1.99M 發至 MEXC 存款地址 0x5fbc60a12bc6...。500 ETH 發至交易所存款 0xa98035081fb739...。依 BlockTempo，攻擊者持有約 870 ETH（約 $1.52M）。",
+      "lessons": [
+        "絕不可將私鑰提交至公開儲存庫。enclave-key.pem 是 Taiko SGX prover 的整個信任模型——其保密性是唯一防止偽造所有鏈狀態證明的事物。AI 以機器速度掃描公開 repo 使此成為近乎必然的發現向量。Pre-commit hook 掃描 .pem/.key 檔案為必要，且 secrets scanning（GitHub Secret Scanning、TruffleHog）應啟用並強制為 merge gate。",
+        "多證明器系統的安全性僅取決於其最弱證明器的密鑰管理。Taiko 的多證明器堆疊（SGX、SGX、ZK）被宣傳為纵深防禦，但 SGX 路徑僅需一把洩漏的 RSA 密鑰即可繞過。若任何證明器的信任模型崩潰（此處：SGX 因簽署密鑰洩漏），整個驗證系統即被攻陷，除非其他證明器能獨立拒絕詐欺狀態。",
+        "SgxVerifier.registerInstance() 接受任何有有效 DCAP quote 的飛地，未將 MrSigner 限制為已知良好飛地簽署者的白名單。防禦：registerInstance 必須強制 quote 中的 MrSigner 匹配硬編碼/治理管理的授權飛地簽署者白名單。僅洩漏密鑰不應足夠——MrSigner 白名單增加第二因子。",
+        "SgxVerifier.verifyProof() 僅檢查簽署實例已注冊且 ECDSA 簽章匹配——未在證明時重新驗證飛地完整性或 MrSigner。防禦：證明驗證應包含針對當前飛地測量值（MRENCLAVE）及授權 MrSigner 的新鮮度檢查，而非僅實例地址注冊。",
+        "proveBlocks → processMessage → retryMessage 路徑允許任何人基於「已證明」L2 狀態移動 L1 資產，對 SGX 證明區塊無提款延遲或挑戰期。防禦：對任何釋放 L1 資產的狀態轉換設時間鎖挑戰窗口（如 24 小時），期間其他證明器（ZK）可爭議 SGX 證明。這將給 Taiko 時間在資金離開前偵測詐欺證明。",
+        "SGX 飛地簽署的密鑰管理應使用 HSM 支援的密鑰或硬體保護的金鑰庫，絕非 Git repo 中的檔案。將 enclave-key.pem 複製到容器的 Docker 建置流程應改為執行時從 secrets manager（Vault、AWS Secrets Manager 等）注入。docker/ 中的 .pem 檔案應為佔位符或僅測試密鑰，絕非生產簽署密鑰。",
+        "所有部署在 Taiko 上的橋接皆被攻陷，因它們依賴 Taiko 的鏈狀態驗證。L2 橋接安全性僅取決於 L2 的狀態驗證機制——單一證明器攻陷使該 L2 上的所有橋接失效。橋接操作者應獨立驗證 L2 狀態或在釋放 L1 資產前要求多證明器證明。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x02147c7bcea3a6bf93c9b231640a8bd6a7603efd6da34a2ee50696913fa70d89",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "注資 tx。EOA 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 於 2026-06-17 19:18:35 UTC（區塊 25339312，已驗證）送出 0.99387 ETH 至攻擊者 0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a。Funder EOA 僅 1 筆外發 tx，可能為 burner address。0.994 ETH 支付合約部署、registerInstance、8 次 proveBlocks 呼叫及 23+ 次 processMessage 呼叫之 gas。"
+        },
+        {
+          "txHash": "0x2c8160cdeb76873b872a1b9bbcfc526394440d922b3770dc2c6f7705995b17d7",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻擊者於區塊 25367938（2026-06-21 19:03:59 UTC，已驗證）部署 helper 合約 0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a。此合約包裝對 SgxVerifier 合約的 registerInstance 呼叫。Etherscan 上源碼未驗證。eth_getCode 確認 4234-byte bytecode（Contract）。"
+        },
+        {
+          "txHash": "0x2f44dc1b883522a88f9b0cbbdfabf9ec33884b69dd4326600c3fab7fb2277260",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "關鍵攻擊 tx：透過 helper 合約 0xe0df6fc36deb... 呼叫 registerInstance，在 SgxVerifier 0x08568df2...（slot 5）及 0xa1018ba2...（slot 6）上注冊攻擊者控制的 SGX 實例（區塊 25367938，2026-06-21 19:03:59 UTC，已驗證）。Selector 0x09c5eabe = registerInstance(V3Struct.ParsedV3QuoteStruct)。Input 長度 67,018 bytes（大型 DCAP quote 結構）。24 個 log 事件。DCAP quote 通過 verifyParsedQuote 因攻擊者飛地以洩漏的 enclave-key.pem 簽署（MrSigner 匹配）。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x017292a7de5fef52a3274e37dda5ace4c4d0cdafe91b7b4ac9c700f02fae35ee",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "首次偽造 proveBlocks 呼叫。攻擊者於區塊 25368853（2026-06-21 22:07:23 UTC，已驗證）呼叫 TaikoL1（0xd60247c6848b...）的 proveBlocks()（selector 0x0432873c）。Input 長度 1,930 bytes。3 個 log：USDC Transfer（649,761.24 從 ERC20Vault 至攻擊者）、ERC20Vault MessageReceived、TaikoL1 BlockVerified。此偽造證明通過攻擊者注冊的 SGX 實例驗證。status=SUCCESS。首次資產釋放：649,761 USDC + 156,832 crvUSD。"
+        },
+        {
+          "txHash": "0xb8befb015a67de8f40890b1f8667c597c3b66a52b388ec1c6cd28637fd65dd13",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "首次 processMessage 呼叫從 Bridge drain ETH。攻擊者於區塊 25368908（2026-06-21 22:18:23 UTC，已驗證）呼叫 TaikoL1（0xd60247c6...）的 processMessage()（selector 0x2035065e）。Input 長度 3,018 bytes。2 個 TaikoL1 log。內部呼叫從 Bridge 釋放 130 ETH 至 0xa98035081fb739...（交易所存款）。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x4986e4a4c8c541bc623bff9a6f1caa1795d92d0fcff8efef4d79d7ac4834ee61",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "同區塊第二次偽造 proveBlocks 呼叫。攻擊者於區塊 25368853（2026-06-21 22:07:23 UTC，已驗證）呼叫 TaikoL1（0xd60247c6...）的 proveBlocks()（selector 0x0432873c）。此 tx 證明第二個假 L2 區塊狀態，導致 156,832 crvUSD 從 ERC20Vault 釋放至攻擊者。status=SUCCESS。攻擊者於 4 個區塊（25368853-25368856）內快速執行 8 次 proveBlocks 呼叫（約 36 秒）。"
+        },
+        {
+          "txHash": "0x1b6d504f2e35eabeda731bbbbda5f2a8acad2aea8e7eca1ebc701fd37f7dd26c",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "攻擊者於區塊 25368874（2026-06-21 22:11:35 UTC，已驗證）透過 DEX router 0x9108828e30f2de407a8cb58a43d8e6b2488c7a35 兌換所有被盜 ERC-20 代幣。Selector 0x35faa416。此 tx 將 USDC 649,761 + USDT 138,140 + CRV 126,161 + crvUSD 156,832 + WBTC 0.426 兌換為 ETH。內部呼叫回傳 579.54 ETH + 15.14 ETH 至攻擊者。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x5d8127d07d0b94263c11be2a51f01b610f287580fb29ed3f4d35aa27359837d4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "TAIKO 代幣轉至 MEXC。1,990,000 TAIKO（合約 0x10dea67478c5f8c5e2d90e5e9b26dbe60c54d800）於區塊 25368959（2026-06-21 22:28:59 UTC，Etherscan tokentx 驗證）從攻擊者 0x7506DeA0... 發至 0x5fbc60a12bc6635e7d587d8dac52e4b1388b4990。PeckShield 報導此為 MEXC 存款（約 $189K）。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻擊者 EOA。2026-06-17 19:18:35 UTC 由 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 注資 0.994 ETH（區塊 25339312，已驗證）。於區塊 25367938 部署 helper 合約 0xe0df6fc36deb...。使用以洩漏 enclave-key.pem（來自公開 taikoxyz/raiko GitHub repo）簽署的 SGX 飛地，對兩個 SgxVerifier 合約（0x08568df2... slot 5、0xa1018ba2... slot 6）呼叫 registerInstance。執行 8 次 proveBlocks（區塊 25368853-25368856）及 23+ 次 processMessage（區塊 25368908-25370061）從 Taiko L1 Bridge 及 ERC20Vault drain 約 $1.7M。透過 DEX router 0x9108828e30f2... 將所有 ERC-20 代幣兌換為 ETH。發送 500 ETH 至交易所存款 0xa98035081fb739... 及 1.99M TAIKO 至 MEXC 存款 0x5fbc60a12bc6...。依 BlockTempo，報導時持有約 870 ETH（約 $1.52M）。eth_getCode 為 0x → EOA（已驗證）。總 tx 數：233+。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻擊者部署的 helper 合約，用於包裝 registerInstance 呼叫。於區塊 25367938 建立（tx 0x2c8160cd...，已驗證：contractCreator = 0x7506DeA0...）。4,234-byte bytecode，Etherscan 上源碼未驗證。合約包裝 SgxVerifier.registerInstance(V3Struct.ParsedV3QuoteStruct) 呼叫，轉發大型 DCAP quote 結構（67,018-byte input）。至少用於 2 筆 registerInstance tx。eth_getCode 確認 4,234 bytes → Contract（已驗證）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xad28bb1debcd7c024cec38d10a5c0d5495cbde74",
+          "blockchain": "ethereum",
+          "role": "gas_funder",
+          "description": "Gas funder EOA。2026-06-17 19:18:35 UTC 送出 0.99387 ETH 至攻擊者 0x7506DeA0...（區塊 25339312，已驗證）。Funder EOA 在 Etherscan 僅 1 筆外發 tx，可能為預載的 burner address。eth_getCode 為 0x → EOA（已驗證）。注資與攻擊間 4 天間隔（6/17 → 6/21）暗示飛地編譯及 DCAP quote 產生的準備時間。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xa98035081fb739ebe9c8f80904668fb11438a846",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "交易所存款地址。從 Bridge 內部呼叫收到 267 ETH + 從攻擊者 EOA 收到 500 ETH（5×100 ETH tx，區塊 25369404-25369633）。無合約源碼（eth_getCode 為 0x → EOA）。從攻擊中合計收到約 767 ETH。可能為交易所熱錢包或 OTC 櫃檯存款地址。攻擊者亦於 6/18（區塊 25342455）發送 0.005 ETH 測試。",
+          "accountType": "Exchange"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xd60247c6848b7ca29eddf63aa924e53db6ddd8ec",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Taiko L1 Bridge proxy（ERC1967Proxy）。Implementation：0x2705b12a971da766a3f9321a743d61cead67da2f（MainnetBridge，源碼已驗證）。此合約持有用戶橋接至 Taiko L2 的 ETH。攻擊者使用偽造 proveBlocks() 呼叫觸發 processMessage()，透過 26 筆內部呼叫釋放 295.97 ETH（區塊 25368853-25370061）。Bridge 的安全假設為所有已證明 L2 區塊狀態有效——此假設被 SGX 飛地密鑰洩漏打破。eth_getCode 確認 342-byte proxy bytecode → Contract（已驗證）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x996282cA11E5DEb6B5D122CC3B9A1FcAAD4415Ab",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Taiko ERC20Vault proxy（ERC1967Proxy）。Implementation：0xb20c8ffc2dd49596508d262b6e8b6817e9790e63（MainnetERC20Vault，源碼已驗證，含 processMessage + retryMessage）。此合約持有橋接至 Taiko L2 的 L1 ERC-20 代幣。攻擊者使用偽造 L2 狀態證明觸發 processMessage() 釋放 9 種 ERC-20 代幣：USDC 675,761 + USDT 138,140 + WETH 20.705 + WBTC 0.426 + CRV 126,161 + crvUSD 156,832 + TAIKO 1,990,000 + iZi 2,140,403 + weETH 0.531（Etherscan tokentx 驗證）。eth_getCode 確認 342-byte proxy bytecode → Contract（已驗證）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x08568df252ecf37d6c3efd24f6ca3688118697f1",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Taiko SgxVerifier 合約（slot 5）。Etherscan 源碼已驗證（ContractName='SgxVerifier'，79,429 bytes）。含 registerInstance() 呼叫 automataDcapAttestation.verifyParsedQuote()——執行 DCAP 驗證（ECDSA + 憑證鏈）但未將 MrSigner 設白名單。亦含 verifyProof() 檢查實例注冊 + ECDSA 簽章，但證明時不檢查 MrSigner。攻擊者使用洩漏的 enclave-key.pem 在此合約注冊惡意 SGX 實例。此為信任模型被打破之處。eth_getCode 確認 Contract（已驗證）。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa1018ba2e22139076f91da2a856b2cab22d968f6",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Taiko SgxVerifier 合約（slot 6）。Etherscan 源碼已驗證（ContractName='SgxVerifier'）。攻擊者注冊的第二個 SgxVerifier 實例（同一 registerInstance tx 0x2f44dc1b...）。Taiko 系統使用多個 SgxVerifier 合約對不同 prover 層級/slot；攻擊者在 slot 5 及 slot 6 皆注冊以最大化證明接受面。eth_getCode 確認 Contract（已驗證）。",
+          "accountType": "Contract"
+        }
+      ]
+    },
+    "ja": {
+      "title": "Taiko ブリッジ SGX エンクレーブ鍵漏洩エクスプロイト",
+      "protocol": "Taiko",
+      "description": "2026-06-21 19:03 UTC から 2026-06-22 02:10 UTC の間、Ethereum 上の Taiko の L1 Bridge および ERC20Vault が攻撃を受け、約 $1.7M の損失（PeckShield/BlockTempo 見出し；オンチェーン検証約 $1.86M、トークン見積価格含む）。根本原因は RSA 秘密鍵（enclave-key.pem）が公開 taikoxyz/raiko GitHub リポジトリにコミットされていたこと。この鍵は Taiko のすべての SGX エンクレーブの署名に使用される——Taiko の SGX ベースの証明検証の信頼モデル全体である。\n\n攻撃者は漏洩した RSA 公開鍵から MrSigner ハッシュを導出し、漏洩した秘密鍵で自身の悪意ある SGX エンクレーブに署名し、SgxVerifier.registerInstance() で攻撃者制御の SGX インスタンスを登録した。SgxVerifier コントラクト（0x08568df2... および 0xa1018ba2...）は DCAP quote（ECDSA 署名 + 証明書チェーン）を検証したが、受け入れる MrSigner 値を制限しなかった——有効な DCAP quote を持つエンクレーブはすべて登録を通過する。攻撃者のエンクレーブは Taiko の正規エンクレーブと同じ RSA 鍵で署名されていたため、MrSigner が一致した。\n\n登録後、攻撃者の SGX インスタンスは Taiko の証明検証器が受け入れる証明公開入力に署名できた。攻撃者は偽の L2 ブロック状態に対する SGX 構証明を偽造し、TaikoL1（0xd60247c6...）の proveBlocks() を呼び出して詐欺 L2 ブロックを証明済みとしてマークし、processMessage() と retryMessage() を使用して ERC20Vault（0x996282cA...）から正規 L1 資産（USDC、USDT、WETH、WBTC、CRV、crvUSD、TAIKO、iZi、weETH）を、Bridge から ETH を放出させた。\n\nTaiko は公式に確認：「Taiko のチェーン状態検証メカニズムの侵害を確認しました。その結果、Taiko にデプロイされたすべてのブリッジのセキュリティ前提はもはや信頼できません。」チームはブロック生産を一時停止し、取引所（MEXC）に TAIKO 入金の一時停止を依頼し、すべてのユーザーに Taiko にデプロイされたすべてのブリッジから即座に資金を引き出すよう勧告した。\n\n攻撃者はすべての盗難 ERC-20 トークンを DEX スワップ（0x9108828e30f2...）で ETH に交換し、500 ETH を 0xa98035081fb739...（取引所入金）に、1.99M TAIKO（約 $189K）を 0x5fbc60a12bc6...（MEXC）に送金した。BlockTempo によれば、攻撃者は報告時点で約 870 ETH（約 $1.52M）を保有していた。\n\n秘密鍵の盗難なし。ソーシャルエンジニアリングなし。SGX ハードウェアエクスプロイトなし。公開 GitHub リポジトリに置かれた一つの .pem ファイルのみ——システム全体の強度は一つの RSA 鍵の秘密性のみに依存していた。",
+      "rootCause": "RSA 秘密鍵ファイル（enclave-key.pem、2392 バイト、39 行の RSA 秘密鍵）が公開 taikoxyz/raiko GitHub リポジトリのパス docker/enclave-key.pem にコミットされていた（最新コミット f9f37cad9b87b3ab56ffc2fbdbc78b8354dcf364、2026-04-10）。この鍵は Raiko SGX prover がすべての SGX エンクレーブの署名に使用する——MrSigner（エンクレーブの RSA 公開鍵の SHA-256 ハッシュ）が Taiko の SgxVerifier コントラクトが信頼するアイデンティティである。SgxVerifier.registerInstance() 関数（ソースは 0x08568df2... で検証済み）は IAttestation(automataDcapAttestation).verifyParsedQuote() を呼び出し DCAP 検証（ECDSA 署名 + 証明書チェーン）を実行するが、MrSigner 値をホワイトリストに制限しない——有効な DCAP quote を持つエンクレーブはすべて登録を通過する。攻撃者は同じ RSA 秘密鍵を保有していたため、自身の悪意あるエンクレーブに署名し、一致する MrSigner で有効な DCAP quote を生成し、信頼された SGX prover インスタンスとして登録できた。登録後、verifyProof() は（1）インスタンスが登録済みで有効、（2）証明の ECDSA 署名が登録インスタンスアドレスに一致——のみをチェックし、両方とも攻撃者制御インスタンスが満たす。これにより攻撃者は任意の L2 ブロック状態の証明公開入力を偽造でき、Taiko のチェーン状態検証メカニズム全体をバイパスした。アーキテクチャの教訓：マルチプルーバーシステムのセキュリティは最弱プルーバーの鍵管理のみに依存する——一つの漏洩した .pem ファイルが SGX 信頼モデル全体を無効化した。",
+      "attackVector": "1. **鍵漏洩（既存）**：RSA 秘密鍵 enclave-key.pem が公開 taikoxyz/raiko GitHub リポジトリの docker/enclave-key.pem にコミットされていた。この鍵はすべての SGX エンクレーブに署名し、その公開鍵ハッシュ（MrSigner）が SgxVerifier が信頼するアイデンティティ。\n\n2. **プレファンド（2026-06-17 19:18 UTC、ブロック 25339312）**：EOA 0xad28bb1debcd... が攻撃者 EOA 0x7506DeA0... に 0.994 ETH を送金（検証済み）。Funder EOA は 1 tx のみでバーナーアドレスの可能性。\n\n3. **SGX インスタンス登録（2026-06-21 19:03 UTC、ブロック 25367938）**：攻撃者はヘルパーコントラクト 0xe0df6fc36deb... をデプロイし、2 つの SgxVerifier コントラクト 0x08568df2...（slot 5）と 0xa1018ba2...（slot 6）に registerInstance を呼び出した。DCAP 検証は攻撃者エンクレーブが漏洩 RSA 鍵で署名されていたため通過（MrSigner 一致）。24 イベントログ発生。\n\n4. **偽造 proveBlocks（2026-06-21 22:07 UTC、ブロック 25368853-25368856）**：8 回の proveBlocks() 呼び出し（selector 0x0432873c）を TaikoL1（0xd60247c6...）に 36 秒で実行。各呼び出しで偽 L2 ブロック状態の証明を偽造。ERC20Vault から 9 種のトークンを放出：USDC 649,761 + crvUSD 156,832、USDT 138,140 + WETH 20.705、WBTC 0.426 + CRV 126,161、iZi 2,140,403 + weETH 0.531。\n\n5. **processMessage / ETH ドレイン（2026-06-21 22:18 から 2026-06-22 02:10 UTC、ブロック 25368908-25370061）**：攻撃者は processMessage()（selector 0x2035065e）を TaikoL1 に繰り返し呼び出し、偽造 L2 状態で Bridge から ETH を放出。合計 295.97 ETH を 26 内部 tx で 0xa98035081fb739...（267 ETH）と 0xe08d97e151473...（18 ETH）にドレイン。\n\n6. **TAIKO ドレイン（2026-06-21 22:28 UTC、ブロック 25368955）**：1,990,000 TAIKO を ERC20Vault から攻撃者に転送。\n\n7. **統合と資金洗浄（2026-06-21 22:11 から 2026-06-22 06:07 UTC）**：攻撃者はすべての ERC-20 トークンを DEX router 0x9108828e30f2... で ETH にスワップ。WETH をアンラップ（20.7 ETH）。TAIKO 1.99M を MEXC 入金 0x5fbc60a12bc6... に送金。500 ETH を取引所入金 0xa98035081fb739... に送金。BlockTempo によれば攻撃者は約 870 ETH（約 $1.52M）を保有。",
+      "lessons": [
+        "秘密鍵を公開リポジトリにコミットしてはならない。enclave-key.pem は Taiko の SGX prover の信頼モデル全体——その秘密性がすべてのチェーン状態証明の偽造を防ぐ唯一のもの。機械速度での公開リポジトリの AI スキャンにより、これはほぼ確実な発見ベクトルとなる。.pem/.key ファイルをスキャンする pre-commit フックが必須、secrets scanning（GitHub Secret Scanning、TruffleHog）を有効化し merge gate として強制すべき。",
+        "マルチプルーバーシステムのセキュリティは最弱プルーバーの鍵管理のみに依存する。Taiko のマルチプルーバースタック（SGX、SGX、ZK）は縦深防御として宣伝されたが、SGX パスは漏洩した RSA 鍵一つでバイパス可能だった。いずれかのプルーバーの信頼モデルが崩壊した場合（ここでは SGX の署名鍵漏洩）、他のプルーバーが独立して詐欺状態を拒否できなければ、検証システム全体が侵害される。",
+        "SgxVerifier.registerInstance() は有効な DCAP quote を持つエンクレーブをすべて受け入れ、MrSigner を既知の正当なエンクレーブ署名者のホワイトリストに制限しなかった。防御：registerInstance は quote 内の MrSigner がハードコード/ガバナンス管理の承認署名者ホワイトリストに一致することを強制すべき。漏洩した鍵単独では不十分——MrSigner ホワイトリストが第二要素を追加する。",
+        "SgxVerifier.verifyProof() は署名インスタンスが登録済みで ECDSA 署名が一致することのみをチェックし、証明時にエンクレーブの完全性や MrSigner を再検証しない。防御：証明検証に現在のエンクレーブ測定値（MRENCLAVE）と承認 MrSigner に対する鮮度チェックを含めるべき。",
+        "proveBlocks → processMessage → retryMessage パスは SGX 証明ブロックに対する出金遅延やチャレンジ期間なしに、誰もが「証明済み」L2 状態に基づき L1 資産を移動できる。防御：L1 資産を放出する状態遷移に時限ロックチャレンジウィンドウ（例：24 時間）を設け、期間中に他のプルーバー（ZK）が SGX 証明を異議申し立てできるようにする。",
+        "SGX エンクレーブ署名の鍵管理は HSM バックアップ鍵またはハードウェア保護キーストアを使用すべきであり、Git リポジトリ内のファイルは決して使用すべきでない。enclave-key.pem をコンテナにコピーする Docker ビルドプロセスは代わりにランタイムでシークレットマネージャー（Vault、AWS Secrets Manager 等）から注入すべき。",
+        "Taiko にデプロイされたすべてのブリッジが Taiko のチェーン状態検証に依存するため侵害された。L2 ブリッジセキュリティは L2 の状態検証メカニズムのみに依存——単一プルーバーの侵害がその L2 上のすべてのブリッジを無効化する。ブリッジオペレーターは L1 資産を放出する前に L2 状態を独立して検証すべき。"
+      ],
+      "transactions": [
+        {
+          "txHash": "0x02147c7bcea3a6bf93c9b231640a8bd6a7603efd6da34a2ee50696913fa70d89",
+          "blockchain": "ethereum",
+          "role": "funding",
+          "description": "プレファンド tx。EOA 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 が 2026-06-17 19:18:35 UTC（ブロック 25339312、検証済み）に攻撃者 0x7506DeA0... に 0.99387 ETH を送金。Funder EOA は 1 送信 tx のみでバーナーアドレスの可能性。0.994 ETH はコントラクトデプロイ、registerInstance、8 回の proveBlocks、23+ 回の processMessage 呼び出しの gas をカバー。"
+        },
+        {
+          "txHash": "0x2c8160cdeb76873b872a1b9bbcfc526394440d922b3770dc2c6f7705995b17d7",
+          "blockchain": "ethereum",
+          "role": "setup",
+          "description": "攻撃者がブロック 25367938（2026-06-21 19:03:59 UTC、検証済み）でヘルパーコントラクト 0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a をデプロイ。SgxVerifier への registerInstance 呼び出しをラップするコントラクト。Etherscan でソース未検証。eth_getCode で 4234 バイト bytecode（Contract）を確認。"
+        },
+        {
+          "txHash": "0x2f44dc1b883522a88f9b0cbbdfabf9ec33884b69dd4326600c3fab7fb2277260",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "重要なエクスプロイト tx：ヘルパーコントラクト 0xe0df6fc36deb... 経由で SgxVerifier 0x08568df2...（slot 5）と 0xa1018ba2...（slot 6）に攻撃者制御の SGX インスタンスを登録（ブロック 25367938、2026-06-21 19:03:59 UTC、検証済み）。Selector 0x09c5eabe = registerInstance(V3Struct.ParsedV3QuoteStruct)。Input 長 67,018 バイト。24 イベントログ。DCAP quote は攻撃者エンクレーブが漏洩した enclave-key.pem で署名されていたため verifyParsedQuote を通過（MrSigner 一致）。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x017292a7de5fef52a3274e37dda5ace4c4d0cdafe91b7b4ac9c700f02fae35ee",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "最初の偽造 proveBlocks 呼び出し。攻撃者がブロック 25368853（2026-06-21 22:07:23 UTC、検証済み）で TaikoL1（0xd60247c6848b...）の proveBlocks()（selector 0x0432873c）を呼び出し。Input 長 1,930 バイト。3 ログ：USDC Transfer（649,761.24 が ERC20Vault から攻撃者へ）、ERC20Vault MessageReceived、TaikoL1 BlockVerified。攻撃者登録 SGX インスタンスで検証された偽造証明。status=SUCCESS。初回資産放出：649,761 USDC + 156,832 crvUSD。"
+        },
+        {
+          "txHash": "0xb8befb015a67de8f40890b1f8667c597c3b66a52b388ec1c6cd28637fd65dd13",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "最初の processMessage 呼び出しで Bridge から ETH をドレイン。攻撃者がブロック 25368908（2026-06-21 22:18:23 UTC、検証済み）で TaikoL1（0xd60247c6...）の processMessage()（selector 0x2035065e）を呼び出し。Input 長 3,018 バイト。2 TaikoL1 ログ。内部呼び出しで Bridge から 0xa98035081fb739...（取引所入金）に 130 ETH を放出。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x4986e4a4c8c541bc623bff9a6f1caa1795d92d0fcff8efef4d79d7ac4834ee61",
+          "blockchain": "ethereum",
+          "role": "exploit",
+          "description": "同じブロックの 2 番目の偽造 proveBlocks 呼び出し。攻撃者がブロック 25368853（2026-06-21 22:07:23 UTC、検証済み）で TaikoL1（0xd60247c6...）の proveBlocks()（selector 0x0432873c）を呼び出し。この tx は 2 番目の偽 L2 ブロック状態を証明し、156,832 crvUSD が ERC20Vault から攻撃者に放出された。status=SUCCESS。攻撃者は 4 ブロック（25368853-25368856）にわたり 8 回の proveBlocks 呼び出しを急速（約 36 秒）に実行。"
+        },
+        {
+          "txHash": "0x1b6d504f2e35eabeda731bbbbda5f2a8acad2aea8e7eca1ebc701fd37f7dd26c",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "攻撃者がブロック 25368874（2026-06-21 22:11:35 UTC、検証済み）で DEX router 0x9108828e30f2... 経由で盗難 ERC-20 トークンをスワップ。Selector 0x35faa416。USDC 649,761 + USDT 138,140 + CRV 126,161 + crvUSD 156,832 + WBTC 0.426 を ETH に交換。内部呼び出しで 579.54 ETH + 15.14 ETH を攻撃者に返却。status=SUCCESS。"
+        },
+        {
+          "txHash": "0x5d8127d07d0b94263c11be2a51f01b610f287580fb29ed3f4d35aa27359837d4",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "TAIKO トークンの MEXC への転送。1,990,000 TAIKO（コントラクト 0x10dea67478c5f8c5e2d90e5e9b26dbe60c54d800）がブロック 25368959（2026-06-21 22:28:59 UTC、Etherscan tokentx 検証済み）で攻撃者 0x7506DeA0... から 0x5fbc60a12bc6635e7d587d8dac52e4b1388b4990 に送金。PeckShield は MEXC 入金（約 $189K）と報告。"
+        }
+      ],
+      "attackers": [
+        {
+          "address": "0x7506DeA0c38ca0B55364B22424374c5A1ae1B76a",
+          "blockchain": "ethereum",
+          "role": "primary_attacker",
+          "description": "主要攻撃者 EOA。2026-06-17 19:18:35 UTC に 0xad28bb1debcd7c024cec38d10a5c0d5495cbde74 から 0.994 ETH のプレファンド（ブロック 25339312、検証済み）。ブロック 25367938 でヘルパーコントラクト 0xe0df6fc36deb... をデプロイ。漏洩した enclave-key.pem（公開 taikoxyz/raiko GitHub リポジトリから）で署名された SGX エンクレーブを使用し、2 つの SgxVerifier コントラクト（0x08568df2... slot 5、0xa1018ba2... slot 6）に registerInstance を呼び出し。8 回の proveBlocks（ブロック 25368853-25368856）と 23+ 回の processMessage（ブロック 25368908-25370061）を実行し、Taiko L1 Bridge と ERC20Vault から約 $1.7M をドレイン。DEX router 0x9108828e30f2... で ERC-20 トークンを ETH にスワップ。500 ETH を取引所入金 0xa98035081fb739... に、1.99M TAIKO を MEXC 入金 0x5fbc60a12bc6... に送金。BlockTempo によれば報告時点で約 870 ETH（約 $1.52M）を保有。eth_getCode は 0x → EOA（検証済み）。総 tx 数：233+。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xe0df6fc36deb38dd11dc53d327475c2b2b0ab98a",
+          "blockchain": "ethereum",
+          "role": "exploit_contract",
+          "description": "攻撃者デプロイのヘルパーコントラクト。registerInstance 呼び出しをラップ。ブロック 25367938 で作成（tx 0x2c8160cd...、検証済み：contractCreator = 0x7506DeA0...）。4,234 バイト bytecode、Etherscan でソース未検証。SgxVerifier.registerInstance(V3Struct.ParsedV3QuoteStruct) 呼び出しをラップし、大型 DCAP quote 構造（67,018 バイト input）を転送。少なくとも 2 回の registerInstance tx で使用。eth_getCode で 4,234 バイト → Contract（検証済み）を確認。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xad28bb1debcd7c024cec38d10a5c0d5495cbde74",
+          "blockchain": "ethereum",
+          "role": "gas_funder",
+          "description": "ガスファンダー EOA。2026-06-17 19:18:35 UTC に攻撃者 0x7506DeA0... に 0.99387 ETH を送金（ブロック 25339312、検証済み）。Funder EOA は Etherscan で 1 送信 tx のみでバーナーアドレスの可能性。eth_getCode は 0x → EOA（検証済み）。プレファンドから攻撃まで 4 日の間隔（6/17 → 6/21）はエンクレーブコンパイルと DCAP quote 生成の準備時間を示唆。",
+          "accountType": "EOA"
+        },
+        {
+          "address": "0xa98035081fb739ebe9c8f80904668fb11438a846",
+          "blockchain": "ethereum",
+          "role": "consolidation",
+          "description": "取引所入金アドレス。Bridge 内部呼び出しから 267 ETH + 攻撃者 EOA から 500 ETH（5×100 ETH tx、ブロック 25369404-25369633）を受信。コントラクトソースなし（eth_getCode は 0x → EOA）。攻撃から合計約 767 ETH 受信。取引所ホットウォレットまたは OTC デスク入金アドレスの可能性。攻撃者は 6/18（ブロック 25342455）にも 0.005 ETH をテスト送金。",
+          "accountType": "Exchange"
+        }
+      ],
+      "victims": [
+        {
+          "address": "0xd60247c6848b7ca29eddf63aa924e53db6ddd8ec",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Taiko L1 Bridge プロキシ（ERC1967Proxy）。Implementation：0x2705b12a971da766a3f9321a743d61cead67da2f（MainnetBridge、ソース検証済み）。ユーザーが Taiko L2 にブリッジする ETH を保有。攻撃者は偽造 proveBlocks() 呼び出しで processMessage() をトリガーし、26 内部呼び出しで 295.97 ETH を放出（ブロック 25368853-25370061）。Bridge のセキュリティ前提はすべての証明済み L2 ブロック状態が有効であること——この前提は SGX エンクレーブ鍵漏洩により破られた。eth_getCode で 342 バイト proxy bytecode → Contract（検証済み）を確認。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x996282cA11E5DEb6B5D122CC3B9A1FcAAD4415Ab",
+          "blockchain": "ethereum",
+          "role": "vulnerable_contract",
+          "description": "Taiko ERC20Vault プロキシ（ERC1967Proxy）。Implementation：0xb20c8ffc2dd49596508d262b6e8b6817e9790e63（MainnetERC20Vault、ソース検証済み、processMessage + retryMessage 含む）。Taiko L2 にブリッジされた L1 ERC-20 トークンを保有。攻撃者は偽造 L2 状態証明で processMessage() をトリガーし、9 種の ERC-20 トークンを放出：USDC 675,761 + USDT 138,140 + WETH 20.705 + WBTC 0.426 + CRV 126,161 + crvUSD 156,832 + TAIKO 1,990,000 + iZi 2,140,403 + weETH 0.531（Etherscan tokentx 検証済み）。eth_getCode で 342 バイト → Contract（検証済み）を確認。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0x08568df252ecf37d6c3efd24f6ca3688118697f1",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Taiko SgxVerifier コントラクト（slot 5）。Etherscan でソース検証済み（ContractName='SgxVerifier'、79,429 バイト）。registerInstance() は automataDcapAttestation.verifyParsedQuote() を呼び出し DCAP 検証を実行するが MrSigner をホワイトリストに制限しない。verifyProof() はインスタンス登録 + ECDSA 署名をチェックするが証明時に MrSigner をチェックしない。攻撃者は漏洩した enclave-key.pem でこのコントラクトに悪意ある SGX インスタンスを登録。信頼モデルが破られた場所。eth_getCode で Contract（検証済み）を確認。",
+          "accountType": "Contract"
+        },
+        {
+          "address": "0xa1018ba2e22139076f91da2a856b2cab22d968f6",
+          "blockchain": "ethereum",
+          "role": "protocol_contract",
+          "description": "Taiko SgxVerifier コントラクト（slot 6）。Etherscan でソース検証済み（ContractName='SgxVerifier'）。攻撃者が登録した 2 番目の SgxVerifier インスタンス（同じ registerInstance tx 0x2f44dc1b...）。Taiko システムは異なる prover ティア/slot に複数の SgxVerifier コントラクトを使用；攻撃者は slot 5 と slot 6 の両方に登録し証明受け入れ面を最大化。eth_getCode で Contract（検証済み）を確認。",
+          "accountType": "Contract"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "dateAdded": "2026-06-23",
+    "lastUpdated": "2026-06-23",
+    "human_verified": false,
+    "models": [
+      "glm-5.2"
+    ]
+  }
+}
