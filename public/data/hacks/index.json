@@ -2,7 +2,7 @@
   "metadata": {
     "title": "DeFi Hack History",
     "description": "Historical record of major DeFi security incidents",
-    "lastUpdated": "2026-06-19"
+    "lastUpdated": "2026-06-23"
   },
   "files": [
     {
@@ -142,6 +142,12 @@
       "date": "2026-05-30",
       "protocol": "Gravity Bridge",
       "file": "20260530-GravityBridge.json"
+    },
+    {
+      "id": "Taiko-20260622",
+      "date": "2026-06-22",
+      "protocol": "Taiko",
+      "file": "20260622-Taiko.json"
     }
   ]
 }
