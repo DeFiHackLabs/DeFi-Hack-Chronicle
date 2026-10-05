@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2026-10-04T03:20:25.703Z",
+    "last_updated": "2026-10-05T02:57:07.281Z",
     "source": "CryptoCompare",
     "currency": "USD"
   },
@@ -15056,6 +15056,10 @@
         {
           "date": "2026-10-03",
           "price": 2667.95
+        },
+        {
+          "date": "2026-10-04",
+          "price": 2686.89
         }
       ]
     },
